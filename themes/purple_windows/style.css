@@ -1,0 +1,669 @@
+/*--------------------------------------*/
+/*            DEFAULT TAGS              */
+/*--------------------------------------*/
+
+BODY {
+	background-image:url('images/bg.jpg');
+	margin: 0px;
+	padding: 0px;
+	background-position: right top;
+	background-repeat: no-repeat;
+	background-color: white;
+}
+
+INPUT[type="submit"] {
+	background-image: url('images/bt.png');
+	border: 1px solid #ac939d;
+	height: 27px;
+}
+
+INPUT[type="text"], INPUT[type="password"], SELECT { 
+	padding: 5px;
+	background-color: #FFFFFF;
+}
+
+/*--------------------------------------*/
+/*            WCCHAT                    */
+/*--------------------------------------*/
+
+#wcchat {
+	font-family: verdana;
+	margin-top: 270px;
+	width: 100%;
+	height: 100%;
+	border: 0;
+	border-spacing: 0px;
+	border-collapse: separate;
+}
+
+#wcchat td {
+	padding: 0;
+}
+
+#wcchat .wc_left_col {
+	padding-bottom: 50px;
+	padding-left: 50px;
+	vertical-align: top;
+}
+
+#wcchat .wc_left_col .wc_static_msg {
+	text-align: center;
+	font-style: italic;
+	padding: 5px;
+	background-color: rgba(255, 255, 255, 0.6);
+}
+
+#wcchat .wc_right_col {
+	padding-bottom: 50px;
+	padding-right: 30px;
+	width:251px;
+	vertical-align: top;
+	padding: 5px;
+	overflow: auto;
+}
+
+#wcchat .wc_right_col .wc_separator {
+	border-bottom: 1px dotted #795e71;
+	margin-top: 10px;
+	font-size: 9px;
+	text-align: right;
+}
+
+.wc_critical_error {
+	border: 2px solid #AAAAAA;
+	margin: 20px;
+	padding: 20px;
+	background-color: white;
+}
+
+/*--------------------------------------*/
+/*            CHAT TOPIC                */
+/*--------------------------------------*/
+
+#wc_topic {
+	background-color:rgba(201, 160, 200, 0.9);
+	font-size: 12px;
+	border: 1px solid #7b5f6a;
+	color: #4c3649;
+	line-height: 1.5em;
+	margin: 0;
+}
+
+#wc_topic legend {
+	background-color: #c9a0c8;
+	border: 1px solid #895988;
+	padding: 5px;
+	font-weight: bold;
+}
+
+#wc_topic_con .wc_edit_bt_off {
+	display: none;
+}
+
+#wc_topic_con a.edit {
+	font-size: 10px;
+}
+
+#wc_topic_con a.edit, #wc_topic_con a.less, #wc_topic_con a.more {
+	font-size: 10px;
+}
+
+
+#wc_topic_editbox {
+	padding: 10px;
+}
+
+#wc_topic_editbox TEXTAREA {
+	padding: 5px;
+	margin-top: 2px;
+}
+
+#wc_topic_editbox #bbcode {
+	background-color: transparent;
+}
+
+#wc_topic_editbox #bbcode a {
+	color: #72598e;
+	text-decoration: none
+}
+
+#wc_topic_editbox .info {
+	padding: 10px;
+	font-size: 10px;
+}
+
+/*--------------------------------------*/
+/*      CHAT MESSAGES CONTAINER         */
+/*--------------------------------------*/
+
+#wc_msg_container {
+	height: 400px;
+	border: 1px dotted #a28299;
+	overflow: auto;
+	font-size: 12px;
+	padding: 5px;
+	background-color: rgba(234, 220, 235, 0.6);
+}
+
+#wc_msg_container .wc_msg {
+	padding: 5px;
+	border-top: 1px dotted #a28299;
+}
+
+#wc_msg_container .wc_msg_first {
+	padding: 5px;
+}
+
+#wc_msg_container .wc_msg_pm {
+	padding: 5px;
+	border-top: 1px solid #b78f9f;
+	background-color: rgba(221, 198, 207, 0.6);
+}
+
+#wc_msg_container .wc_msg .avatar_container,
+#wc_msg_container .wc_msg_pm .avatar_container {
+	padding: 5px 10px 0 10px;
+	vertical-align: top;
+}
+
+#wc_msg_container .wc_msg_pm .wc_private {
+	float: right;
+	font-style: italic;
+	font-size: 7pt;
+	font-family: tahoma;
+	margin: 0 0 3px 3px;
+	color: #9a6d7f;
+}
+
+#wc_msg_container .wc_msg .wc_timestamp,
+#wc_msg_container .wc_msg_pm .wc_timestamp {
+
+	font-size: 7pt;
+	font-family: tahoma;
+	color: #795e71
+}
+
+#wc_msg_container .wc_msg .wc_user,
+#wc_msg_container .wc_msg_pm .wc_user {
+	font-size: 10px;
+	font-family: verdana;
+	color: #6335bf;
+	font-weight: bold
+}
+
+#wc_msg_container .wc_msg .wc_user a,
+#wc_msg_container .wc_msg_pm .wc_user a {
+	text-decoration: none;
+}
+
+#wc_msg_container .wc_msg .wc_user a:hover,
+#wc_msg_container .wc_msg_pm .wc_user a:hover {
+	color: #9469ea !important;
+}
+
+#wc_msg_container .wc_msg .wc_user a:visited,
+#wc_msg_container .wc_msg_pm .wc_user a:visited {
+	color: #6335bf;
+}
+
+#wc_msg_container .wc_msg img.wc_thumb,
+#wc_msg_container .wc_msg_pm img.wc_thumb {
+	padding: 1px;
+	border: 1px solid #7b5f6a
+}
+
+#wc_msg_container .wc_msg iframe,
+#wc_msg_container .wc_msg_pm iframe {
+	margin: 10px;
+	display: block;
+	padding: 1px;
+	border: 1px solid #7b5f6a
+}
+
+#wc_msg_container .wc_msg .msg_body,
+#wc_msg_container .wc_msg_pm .msg_body {
+	margin-top: 5px;
+}
+
+#wc_msg_container #wc_load_older {
+	padding:5px;
+	text-align: center
+}
+
+#wc_msg_container #wc_void {
+	margin: 20px;
+	font-size: 25px;
+	text-align: center;
+	vertical-align: middle;
+}
+
+#wc_msg_container .wc_new_msg {
+	margin: 5px;
+	text-align: center;
+}
+
+#wc_msg_container .wc_new_msg img {
+	width: 300px;
+}
+
+#wc_msg_container .wc_hide_icon_off {
+	display: none;
+}
+
+/*--------------------------------------*/
+/*            GLOBAL SETTINGS           */
+/*--------------------------------------*/
+
+#wc_global_settings {
+	height: 400px;
+	border: 1px dotted #a28299;
+	overflow: auto;
+	font-size: 12px;
+	padding: 15px;
+	background-color: rgba(234, 220, 235, 0.6);
+}
+
+#wc_global_settings .header {
+	text-align: center;
+	font-size: 20px;
+	margin: 10px;
+}
+
+
+#wc_global_settings div {
+	margin: 10px;
+}
+
+#wc_global_settings span {
+	font-size: 9px;
+	color:#795e71
+}
+
+#wc_global_settings fieldset {
+	font-size: 12px;
+	margin: 5px;
+	padding: 10px;
+	border: 1px dashed #795e71;
+}
+
+#wc_global_settings fieldset legend {
+	font-weight: bold;
+}
+
+#wc_global_settings table th {
+	padding: 10px;
+}
+
+#wc_global_settings table th.first_col {
+	width: 150px;
+}
+
+#wc_global_settings table td.check {
+	text-align: center;
+}
+
+#wc_global_settings table th span {
+	font-weight: normal;
+	font-size: 9px;
+}
+
+#wc_global_settings .separator {
+	border-bottom: 1px dotted #795e71;
+}
+
+#wc_global_settings input
+{
+	width: 50px;
+}
+
+#wc_global_settings input[id="gs_include_dir"],
+#wc_global_settings input[id="gs_default_avatar"],
+#wc_global_settings input[id="gs_default_room"],
+#wc_global_settings input[id="gs_default_theme"],
+#wc_global_settings input[id="gs_invite_link_code"],
+#wc_global_settings input[id="gs_acc_rec_email"],
+#wc_global_settings input[type="submit"] {
+	width: 150px;
+}
+
+#wc_global_settings input[id="gs_title"],
+#wc_global_settings input[id="gs_attachment_types"] {
+	width: 300px;
+}
+
+#wc_global_settings input[name="cancel"] {
+	width: 100px;
+	float: right;
+}
+
+/*--------------------------------------*/
+/*            USER LIST                 */
+/*--------------------------------------*/
+
+
+#wc_ulist {
+	padding: 5px;
+	overflow: auto;
+	background-color: rgba(234, 220, 235, 0.7);
+}
+
+
+#wc_ulist td, #wc_ulist div {
+	font-size: 12px;
+	margin: 3px;
+}
+
+#wc_ulist td.avatar {
+	padding-right: 5px;
+}
+
+#wc_ulist td img {
+	padding: 1px;
+	border: 1px solid #7b5f6a;
+}
+
+#wc_ulist td img.joined_on {
+	padding: 1px;
+	border: 1px solid #7f8cac;
+	border-top: 2px solid #08a52a;
+}
+
+#wc_ulist td img.joined_idle {
+	padding: 1px;
+	border: 1px solid #7f8cac;
+	border-top: 2px solid #f28900;
+}
+
+#wc_ulist td img.joined_na {
+	padding: 1px;
+	border: 1px solid #7f8cac;
+	border-top: 2px solid #c10707;
+}
+
+#wc_ulist td img.wc_web,
+#wc_ulist td img.wc_edit_bt {
+	padding: 1px;
+	border: 0;
+}
+
+#wc_ulist td img.wc_edit_bt_off { 
+	padding: 1px;
+	border: 0;
+	display: none;
+}
+
+#wc_ulist .wc_guest {
+	color: #7b5f6a;
+}
+
+#wc_ulist .wc_guest img {
+	width: 12px;
+}
+
+#wc_ulist span {
+	font-family: tahoma;
+	font-size:7pt;
+	color:#795e71
+}
+
+#wc_ulist .wc_moderator_icon, #wc_ulist .wc_muted_icon {
+	width: 10px;
+	border: 0;
+}
+
+#wc_ulist .wc_form_box {
+	padding: 5px;
+}
+
+#wc_ulist .wc_form_box div {
+	margin: 10px;
+}
+
+#wc_ulist .wc_form_box input[name="banned_time"],
+#wc_ulist .wc_form_box input[name="muted_time"] {
+	width: 25px;
+}
+
+/*--------------------------------------*/
+/*            ROOM LIST                 */
+/*--------------------------------------*/
+
+#wc_rooms {
+	padding: 5px;
+	background-color: rgba(234, 220, 235, 0.7);
+}
+
+#wc_rooms .wc_current {
+	font-weight: bold;
+}
+
+#wc_rooms wc_croom_box {
+	padding: 5px;
+}
+
+#wc_rooms #wc_room_list #wc_room_item {
+	padding: 2px;
+	font-size: 14px;
+}
+
+#wc_rooms #wc_room_list #wc_room_item .wc_edit_bt_off,
+#wc_rooms #wc_room_list .wc_create_link_off {
+	display: none;
+}
+
+#wc_rooms #wc_room_list #wc_room_item span {
+	padding: 0 3px 0 3px;
+	border-radius: 10px;
+	background-color: #edda95;
+	border: 1px solid #ad953e;
+	font-size: 9px;
+	font-family: verdana
+}
+
+#wc_rooms #wc_room_list #wc_room_item a {
+	text-decoration: none;
+}
+
+#wc_rooms #wc_room_list #wc_room_item a:hover {
+	text-decoration: underline;
+}
+
+#wc_rooms #wc_room_create {
+	font-size: 10px;
+}
+
+#wc_rooms #wc_form_box input[id="wc_room_name"] {
+	width: 150px;
+}
+
+#wc_rooms .wc_form_box div {
+	margin: 5px;
+}
+
+/*--------------------------------------*/
+/*            TOOLBAR                   */
+/*--------------------------------------*/
+
+#wc_toolbar {
+	background-color: #925291;
+	color: white;
+	padding: 5px;
+	font-size: 12px;
+}
+
+#wc_toolbar a {
+	color: #ced9ea;
+	text-decoration: none
+}
+
+#wc_toolbar a.underline {
+	text-decoration: underline;
+}
+
+#wc_toolbar .joined_status {
+	width: 10px;
+	margin-left: 5px;
+}
+
+#wc_toolbar #wc_settings_icon {
+	margin-left: 10px;
+}
+
+#wc_toolbar #wc_settings_icon img { 
+	width: 13px;
+}
+
+#wc_toolbar #wc_commands {
+	float: right;
+	font-size: 10px;
+	margin-left: 15px;
+}
+
+#wc_toobar #wc_post_loader,
+#attachment_upl_icon {
+	width: 16px;
+}
+
+/*--------------------------------------*/
+/*            INPUT                     */
+/*--------------------------------------*/
+
+#wc_text_input_field {
+	width: 97%;
+	background-color: #FFFFFF;
+}
+
+#wc_submit {
+	padding: 5px;
+}
+
+.wc_form_box, .wc_form_box_inner {
+	font-size: 12px;
+	margin: 5px;
+	padding: 10px;
+	border: 1px dashed #9d9c7b;
+	background-color: rgba(232, 231, 215, 0.6);
+}
+
+/*--------------------------------------*/
+/*            SETTINGS                  */
+/*--------------------------------------*/
+
+#wc_settings_input {
+	padding: 10px;
+	margin: 10px;
+	border: 1px dashed #9d9c7b;
+	background-color: rgba(232, 231, 215, 0.6);
+}
+
+
+#wc_settings_input legend {
+	background-color: #d6d4b6;
+	border: 1px solid #7b5f6a;
+	padding: 10px;
+}
+
+#wc_settings_input span {
+	font-size: 9px;
+}
+
+#wc_settings_input div { 
+	margin: 10px;
+}
+
+#wc_settings_input input[id="avatar"],
+#wc_settings_input input[id="web"] {
+	width: 250px;
+}
+
+/*--------------------------------------*/
+/*            JOIN                      */
+/*--------------------------------------*/
+
+#wc_join {
+	text-align: center;
+	padding: 20px;
+	background-color: rgba(234, 220, 235, 0.6);
+}
+
+#wc_join a {
+	font-size: 9px;
+}
+
+#wc_pass_req {
+	margin: 5px;
+}
+
+/*--------------------------------------*/
+/*            AVATARS                   */
+/*--------------------------------------*/
+
+#wc_avatar_form {
+	border: 1px dotted #AAAAAA;
+	padding: 10px;
+}
+
+#wc_avatar_form a {
+	font-size: 10px;
+	margin-left: 10px;
+}
+
+/*--------------------------------------*/
+/*            ERROR MESSAGES            */
+/*--------------------------------------*/
+
+.wc_error_msg {
+	color: #FF0000;
+	margin: 5px;
+}
+
+/*--------------------------------------*/
+/*            LOGIN SCREEN              */
+/*--------------------------------------*/
+
+#wc_login_screen {
+	border: 1px dashed #AAAAAA;
+}
+
+#wc_login_screen FORM {
+	text-align: center;
+	margin: 5px
+}
+
+#wc_login_screen INPUT {
+	padding: 5px;
+}
+
+#wc_login_screen .wc_note {
+	font-size: 9px;
+	text-align: center;
+}
+
+/*--------------------------------------*/
+/*            VISIBILITY                */
+/*--------------------------------------*/
+
+.closed {
+	display: none;
+}
+
+/*--------------------------------------*/
+/*            THEMES                    */
+/*--------------------------------------*/
+
+.themes {
+	padding-top: 20px;
+	padding-bottom: 10px;
+	text-align: center;
+	background-color: rgba(234, 220, 235, 0.7);
+}
+
+/*--------------------------------------*/
+/*            COPYRIGHT                 */
+/*--------------------------------------*/
+.copyright_note {
+	padding-bottom: 10px;
+	font-size: 9px;
+	text-align: center;
+	background-color: rgba(234, 220, 235, 0.7);
+}
