@@ -312,7 +312,7 @@ class WcChat {
      * Initializes Includes / Paths
      * 
      * @since 1.4
-     * @return bool|string directory list
+     * @return void
      */
     private function initIncPath() {
 
@@ -335,7 +335,7 @@ class WcChat {
      * Initializes User's variables
      * 
      * @since 1.4
-     * @return bool|string directory list
+     * @return void
      */
     private function initUser() {
 
@@ -434,7 +434,7 @@ class WcChat {
      * Initializes Data Files
      * 
      * @since 1.2
-     * @return void
+     * @return void|string Html template
      */
     private function initDataFiles() {
 
@@ -598,7 +598,7 @@ class WcChat {
      * @return int
      */
     private function userLAct($forced_name = NULL) {
-           $time2 = 0;
+        $time2 = 0;
 
         if($forced_name != NULL) {
             list($name, $data, $time, $time2, $status) = $this->userMatch($forced_name, NULL, '1');
@@ -725,7 +725,7 @@ class WcChat {
      * @since 1.1
      * @param string $omode
      * @param string $target User Name
-     * @return void
+     * @return void|string Html template
      */
     private function writeEvent($omode, $target, $return_raw_line = NULL) {
 
@@ -808,7 +808,7 @@ class WcChat {
      * 
      * @since 1.4
      * @param string $original_image Image URL Address
-     * @return string|bool
+     * @return resource|bool
      */
     private function initImg($original_image) {
 
@@ -847,7 +847,7 @@ class WcChat {
      * Corverts simple BBCODE image tags to enhanced tags with the image details, generates thumbnails if necessary/possible
      * 
      * @since 1.1
-     * @param string $s String From User Post
+     * @param string $s User Post
      * @param string|null $attach Specifies If It Must Be Treated As An Attachment
      * @return string
      */
@@ -907,7 +907,7 @@ class WcChat {
      * @param int $h Image Height
      * @param string $target_file
      * @param int $thumbsize
-     * @return string
+     * @return bool
      */
     private function thumbnailCreateMed ($original_image, $source_image, $w, $h, $target_image, $thumbsize)
     {
@@ -948,7 +948,7 @@ class WcChat {
      * @param string $original_image Path
      * @param string $target_file
      * @param int $thumbsize
-     * @return string
+     * @return bool
      */
     private function thumbnailCreateCr ($original_image, $target_image, $thumbsize) {
 
@@ -1008,7 +1008,7 @@ class WcChat {
      * Handles main form requests
      * 
      * @since 1.4
-     * @return bool|string directory list
+     * @return void
      */
     private function handleMainForm() {
 
@@ -1292,12 +1292,12 @@ class WcChat {
      * @since 1.1
      * @param string $mode
      * @param string|null $sufix Tied to the current room if not specified
-     * @return array
+     * @return void|int
      */
     private function handleLastRead($mode, $sufix = NULL) {
 
         $id = 'lastread'.($sufix !== NULL ? '_'.$sufix : '_'.$this->mySession('current_room'));
-            $enc =  str_replace('=', '_', base64_encode($id));
+        $enc =  str_replace('=', '_', base64_encode($id));
         switch($mode) {
             case 'store':
                 $_SESSION[$id] = time();
@@ -1383,7 +1383,7 @@ class WcChat {
      * Prints the populated index template
      * 
      * @since 1.1
-     * @return string Populated Html Template
+     * @return void
      */
     private function printIndex() {
 
@@ -1582,7 +1582,7 @@ class WcChat {
      * @param array|null $data
      * @param bool|null $cond Condition to display
      * @param string $no_cond_content Content to display if condition is not met
-     * @return string|void Populated Html Template
+     * @return string|void Html Template
      */
     private function popTemplate($model, $data = NULL, $cond = NULL, $no_cond_content = NULL)
     {
@@ -1629,7 +1629,7 @@ class WcChat {
      * 
      * @since 1.2
      * @param int|null $visit Specifies a new user visit (To update user status)
-     * @return string Populated Html Template
+     * @return string Html Template
      */
     private function parseUsers($visit = NULL) {
 
@@ -1934,7 +1934,7 @@ class WcChat {
      * Generates the room list
      * 
      * @since 1.2
-     * @return string Populated Html Template
+     * @return string Html Template
      */
     private function parseRooms() {
 
@@ -2069,7 +2069,7 @@ class WcChat {
      * Generates the theme List
      * 
      * @since 1.2
-     * @return string Populated Html Template
+     * @return string Html Template
      */
     private function parseThemes() {
         $options = '';
@@ -2094,7 +2094,7 @@ class WcChat {
      * 
      * @since 1.1
      * @param string|void $error
-     * @return string|void Populated Html Template
+     * @return string|void Html Template
      */
     private function parseError($error) {
         if($this->hasData($error)) {
@@ -2108,7 +2108,7 @@ class WcChat {
      * Parses The Topic Container Template/Contents
      * 
      * @since 1.2
-     * @return string Populated Html Template
+     * @return string Html Template
      */
     private function parseTopicContainer() {
         $this->topic = file_get_contents(TOPICL);
@@ -2302,7 +2302,7 @@ class WcChat {
      * @param string $lines
      * @param int $lastread
      * @param string $action Specifies if the user is sending or receiving messages
-     * @return string
+     * @return string|void Html template
      */
     private function parseMsgE($lines, $lastread, $action) {
         $output = '';
@@ -2348,7 +2348,7 @@ class WcChat {
      * 
      * @since 1.1
      * @param string $data
-     * @return string
+     * @return string Parsed Msg
      */
     private function parseBbcode($data) {
         $search =
@@ -2500,7 +2500,7 @@ class WcChat {
      * Checks if Topic has Changed, if yes, returns the populated html template (Ajax Component)
      * 
      * @since 1.2
-     * @return string|void Populated Html Template
+     * @return string|void Html Template
      */
     private function checkTopicChanges() {
         $lastmod_t = filemtime(TOPICL);
@@ -2518,7 +2518,7 @@ class WcChat {
      * Refresh Rooms if changes exist (Ajax Component)
      * 
      * @since 1.2
-     * @return string|void Populated Html Template
+     * @return string|void Html Template
      */
     private function refreshRooms() {
         $lastread = $this->handleLastRead('read', 'rooms_lastread');
@@ -2545,7 +2545,7 @@ class WcChat {
      * Parses Event Messages (Ajax Component)
      * 
      * @since 1.2
-     * @return string|void Populated Html Template
+     * @return string|void Html Template
      */
     private function updateMsgOnceE() {
         if(!$this->hasPermission('READ_MSG', 'skip_msg')) { return 'Can\'t display messages.'; }
@@ -2576,7 +2576,7 @@ class WcChat {
      * 
      * @since 1.1
      * @param string $mode
-     * @return string|void
+     * @return void
      */
     private function ajax($mode) {
 
@@ -2962,7 +2962,7 @@ class WcChat {
             case 'reset_av':
                 $efile = '';
                 if($this->uAvatar) { list($efile, $_time) = explode('?', $this->uAvatar); }
-                if(file_exists($efile)) {
+                if(file_exists(__DIR__ . '/files/avatars/' . $efile)) {
                     $nstring = '|'.base64_encode($this->uEmail).'|'.base64_encode($this->uWeb).'|'.$this->uTimezone.'|'.$this->uHourFormat.'|'.$this->uPass;
                     $towrite = preg_replace(
                         '/('.base64_encode($this->name).')\|(.*?)\|/', 
@@ -2972,7 +2972,7 @@ class WcChat {
 
                     $this->writeFile(USERL, $towrite, 'w');
                     echo 'Avatar successfully reset!';
-                    unlink($efile);
+                    unlink(__DIR__ . '/files/avatars/' . $efile);
                 } else {
                     echo 'No Avatar to reset!';
                 }
@@ -2981,7 +2981,10 @@ class WcChat {
             case 'upl_avatar':
                 if(isset($_FILES['avatar']['tmp_name'])) {
 
-                    if(!preg_match('#/jpeg|/png|/gif#i', $_FILES['avatar']['type'])) {
+                    $type = $this->getFileExt($_FILES['avatar']['name']);
+                    $allowed_types = array('jpeg', 'jpg', 'gif', 'png');
+
+                    if(!in_array($type, $allowed_types)) {
                         echo 'Invalid Image Type (Jpg/Gif/Png only)';
                     } else {
                         if(!AVATAR_SIZE) { $tn_size = 25; } else { $tn_size = AVATAR_SIZE; }
@@ -3340,7 +3343,7 @@ class WcChat {
      * 
      * @since 1.2
      * @param string $n Length
-     * @return bool
+     * @return string
      */
     private function randNumb($n) {
         $output = '';

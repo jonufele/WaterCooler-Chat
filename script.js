@@ -443,7 +443,7 @@ function wc_upl_avatar(c, event)
 	var obj = document.getElementById('wc_avatar_form');
 	var tmp = obj.innerHTML;
 	var formData = new FormData();
-	formData.append('avatar', document.getElementById('wc_avatar').files[0], 'file.jpg');
+	formData.append('avatar', document.getElementById('wc_avatar').files[0], document.getElementById('wc_avatar').files[0].value);
  	var http = getHTTPObject();
 	http.open("POST", c+"mode=upl_avatar", true);
 	obj.innerHTML = 'Please wait...';
