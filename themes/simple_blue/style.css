@@ -517,8 +517,8 @@ INPUT[type="text"], INPUT[type="password"], SELECT {
 	margin-left: 15px;
 }
 
-#wc_toobar #wc_post_loader,
-#attachment_upl_icon {
+#wc_toolbar #wc_post_loader,
+#wc_toolbar #attachment_upl_icon {
 	width: 16px;
 }
 
