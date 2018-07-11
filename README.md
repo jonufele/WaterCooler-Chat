@@ -45,16 +45,17 @@ Some of its features:
 - **themes** - *Themes*
 	- ***"theme_name"***
 		- **images** - *Theme images (templates, bbcode, smilies)*
-		- *style.css* - Styles
-		- *templates.php* - *Templates*
-- *ajax.php* - *Ajax Caller*
-- *index.embedded.php* - *Embedded chat example*
-- *index.php* - *Chat Index*
-- *LICENSE* - *License terms*
-- *README.txt* - *This file*
-- *script.js* - *Javascript / Ajax*
-- *settings.php* - *Raw Settings*
-- *wcchat.class.php* - *Chat Class*
+		- style.css - *Styles*
+		- templates.php - *Templates*
+- ajax.php - *Ajax Caller*
+- index.embedded.php - *Embedded chat example*
+- index.php - *Chat Index*
+- LICENSE - *License terms*
+- README.md - *This file*
+- README.txt - *Readme (plain text)*
+- script.js - *Javascript / Ajax*
+- settings.php - *Raw Settings*
+- wcchat.class.php - *Chat Class*
 
 
 ## Relevant Notes
@@ -72,3 +73,7 @@ If you like this project, consider making a donation:
 https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=9ZHN6EUXWLAQG
 
 Thank you for choosing WaterCooler Chat.
+
+## Preview
+
+![Preview](https://github.com/jonufele/WaterCooler-Chat/blob/master/preview.jpg)

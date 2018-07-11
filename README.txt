@@ -10,6 +10,30 @@
 ----------------------------------------------
 **********************************************
 
+============================================================================
+		       WHAT IS WATERCOOLER CHAT
+============================================================================
+
+   WaterCooler chat is a flat file database php/ajax chat system.
+   Some of its features:
+
+    - Multi Topic rooms
+    - Private Rooms
+    - multi user
+    - password protected profiles
+    - smilies/BBcode
+    - open chat interface
+    - Easy to customize themes (100% Html/Css)
+    - private messages
+    - moderator tools
+    - Independent display and store buffers
+    - Invite link
+    - Start chat with previous conversations listed
+    - Anti-Spam feature
+    - Account Recovery via E-mail
+    - Generate image thumbnails for faster loading
+    - Attachment uploads
+
 
 ===========================================================================
                        INSTALATION
@@ -17,19 +41,14 @@
 
    1 - Copy package contents to your webserver
 
-   3 - Define INCLUDE_DIR constant in "settings.php" - relative path to chat directory from caller page, in case it's on the same directory set it as empty)
+   2 - Define INCLUDE_DIR constant in "settings.php" - relative path to chat directory from caller page, in case it's on the same directory set it as empty)
 
-   4 - Load the chat on a browser and login, set-up a password in your profile options in order to be assigned as the first moderator.
+   3 - Load the chat on a browser and login, set-up a password in your profile options in order to be assigned as the first moderator.
 
-   5 - Customize master settings and themes to match your preferences.
+   4 - Customize master settings and themes to match your preferences.
 
-   6 - Use index.embedded.php as reference if you want to embbed chat on another page.
+   5 - Use index.embedded.php as reference if you want to embbed chat on another page.
 
-============================================================================
-		       WHAT IS WATERCOOLER CHAT
-============================================================================
-
-   WaterCooler chat is a flat file database php/ajax chat system.
 
 ============================================================================
                        REQUIREMENTS
@@ -59,6 +78,7 @@
    |- index.embedded.php   - Embedded chat example
    |- index.php            - Chat Index
    |- LICENSE.TXT          - License
+   |- README.md            - Markdown Readme
    |- README.txt           - This file
    |- script.js            - Javascript / Ajax
    |- settings.php         - Raw settings file
