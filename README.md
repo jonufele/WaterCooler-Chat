@@ -3,7 +3,7 @@
 WaterCooler chat is a flat file database php/ajax chat system.
 Some of its features: 
 - *Multi Topic rooms*
-- *Private Rooms*
+- *Private/Read-Only Rooms*
 - *multi user*
 - *password protected profiles*
 - *smilies/BBcode*

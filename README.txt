@@ -18,7 +18,7 @@
    Some of its features:
 
     - Multi Topic rooms
-    - Private Rooms
+    - Private/Read-Only Rooms
     - multi user
     - password protected profiles
     - smilies/BBcode
