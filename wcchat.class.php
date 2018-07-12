@@ -2816,7 +2816,7 @@ class WcChat {
                     // Halt, file does not meet requirements
                     } else {
                         if(!file_exists($dest)) {
-                            echo 'Error: Invalid file (Allowed: Jpg/Gif/Png/Txt/Zip/Pdf up to 1024KB)';
+                            echo 'Error: Invalid file (Allowed: '.trim(implode(', ', $allowed_types), ' ').' up to 1024KB)';
                         } else {
                             echo 'Error: File already exists!';
                         }
@@ -3083,7 +3083,7 @@ class WcChat {
 
                     // Halt if type is not among allowed types
                     if(!in_array($type, $allowed_types)) {
-                        echo 'Invalid Image Type (Jpg/Gif/Png only)';
+                        echo 'Invalid Image Type (allowed: '.trim(implode(', ', $allowed_types), ' ').')';
                     } else {
                         // Set avatar size to 25px if not set
                         if(!AVATAR_SIZE) { $tn_size = 25; } else { $tn_size = AVATAR_SIZE; }

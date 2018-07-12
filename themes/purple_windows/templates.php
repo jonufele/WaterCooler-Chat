@@ -49,7 +49,7 @@ $templates['wcchat'] = '
 			{USER_LIST}
 			{THEMES}
 			<div class="copyright_note">
-				Powered by: <a href="https://github.com/jonufele/WaterCooler-Chat" target="_blank">WaterCooler Chat 1.3</a>
+				Powered by: <a href="https://github.com/jonufele/WaterCooler-Chat" target="_blank">WaterCooler Chat 1.4</a>
 			</div>
 		</td>
 		<td style="width: 30px">
