@@ -11,6 +11,14 @@
 class WcChat {
 
     /**
+     * Logged In State, only specifies the user has chosen a name to use in chat, may or may not have access to the profile
+     *
+     * @since 1.4
+     * @var bool
+     */
+    private $isLoggedIn = FALSE;
+
+    /**
      * User Name
      *
      * @since 1.2
@@ -262,14 +270,14 @@ class WcChat {
         // Initialize Includes / Paths
         $this->initIncPath();
 
+        // Initialize Current Room
+        $this->initCurrRoom();
+
         // Initialize Data files, print stop message if non writable folders exist
         $this->initDataFiles();
 
         // Handles main form requests
         $this->handleMainForm();
-
-        // Initialize Current Room
-        $this->initCurrRoom();
 
         // Initializes user variables
         $this->initUser();
@@ -339,12 +347,16 @@ class WcChat {
      */
     private function initUser() {
 
-        $this->name = ($this->myPost('cname') ? trim($this->myPost('cname'), ' ') : $this->myCookie('cname'));
+        if($this->myCookie('cname')) {
+            $_SESSION['cname'] = $this->name = $this->myCookie('cname');
+            $this->isLoggedIn = TRUE;
+        }
 
-        if(!$this->name && $this->mySession('cname')) {
+        if(!$this->name && $this->isLoggedIn) {
             $this->name = $this->mySession('cname');
         }
-        if(!$this->name && !$this->mySession('cname')) {
+
+        if(!$this->name && !$this->isLoggedIn) {
             $this->name = 'Guest';
         }
 
@@ -375,7 +387,7 @@ class WcChat {
             $this->isCertifiedUser = TRUE;
         }
 
-        if($this->mySession('cname') && ($this->isCertifiedUser || !$this->uPass)) {
+        if($this->isLoggedIn && ($this->isCertifiedUser || !$this->uPass)) {
             $this->hasProfileAccess = TRUE;
         }
 
@@ -480,6 +492,13 @@ class WcChat {
         $this->topic = file_get_contents(TOPICL);
         $this->bannedList = file_get_contents(BANNEDL);
         $this->eventList = file_get_contents(EVENTL);
+
+       // Write the first message to the room (creation note) if no messages exist
+        if($this->mySession('current_room') == DEFAULT_ROOM && strlen($this->msgList) == 0) {
+            $towrite = time().'|*'.base64_encode('room').'|has been created.'."\n";
+            $this->writeFile(MESSAGES_LOC, $towrite, 'w');
+            $this->msgList = file_get_contents(MESSAGES_LOC);
+        }
     }
 
     /**
@@ -497,13 +516,6 @@ class WcChat {
             $_SESSION['current_room'] = DEFAULT_ROOM;
             $_SESSION['reset_msg'] = '1';
             setcookie('current_room', DEFAULT_ROOM, time()+(86400*365), '/');
-        }
-
-        // Write the first message to the room (creation note) if no messages exist
-        if($this->mySession('current_room') == DEFAULT_ROOM && strlen($this->msgList) == 0) {
-            $towrite = time().'|*'.base64_encode('room').'|has been created.'."\n";
-            $this->writeFile(MESSAGES_LOC, $towrite, 'w');
-            $this->msgList = file_get_contents(MESSAGES_LOC);
         }
     }
 
@@ -628,14 +640,16 @@ class WcChat {
         $tags = array();
 
         // Attribute a tag to the user
-        if($this->isMasterMod === TRUE) {
-            $level = 'MMOD';
-        } elseif($this->isMod === TRUE) {
-            $level = 'MOD';
-        } elseif($this->mySession('cname') && $this->isCertifiedUser) {
-            $level = 'CUSER';
-        } elseif($this->mySession('cname') && !$this->uPass) {
-            $level = 'USER';
+        if($this->isLoggedIn) {
+            if($this->isMasterMod === TRUE) {
+                $level = 'MMOD';
+            } elseif($this->isMod === TRUE) {
+                $level = 'MOD';
+            } elseif($this->isCertifiedUser) {
+                $level = 'CUSER';
+            } elseif(!$this->uPass) {
+                $level = 'USER';
+            }
         } else {
             $level = 'GUEST';
         }
@@ -669,16 +683,16 @@ class WcChat {
         $target = (($mode == 'W') ? $perm : $t1);
         switch($target) {
             case '1':
-                if($this->isMasterMod === TRUE) { $permission = TRUE; }
+                if($this->isLoggedIn && $this->isMasterMod === TRUE) { $permission = TRUE; }
             break;
             case '2':
-                if($this->isMod === TRUE) { $permission = TRUE; }
+                if($this->isLoggedIn && $this->isMod === TRUE) { $permission = TRUE; }
             break;
             case '3':
-                if($this->mySession('cname') && $this->isCertifiedUser === TRUE) { $permission = TRUE; }
+                if($this->isLoggedIn && $this->isCertifiedUser === TRUE) { $permission = TRUE; }
             break;
             case '4':
-                if($this->mySession('cname') && !$this->uPass) {
+                if($this->isLoggedIn && !$this->uPass) {
                     $permission = TRUE;
                 }
             break;
@@ -1075,7 +1089,7 @@ class WcChat {
             }
             $last_seen = $this->getPing($this->myPost('cname'));
 
-            if(!$this->mySession('cname') && ((time()-$last_seen) < OFFLINE_PING)) {
+            if(!$this->isLoggedIn && ((time()-$last_seen) < OFFLINE_PING)) {
                 $tmp = $this->userData($this->myPost('cname'));
                 if($this->myCookie('chatpass') == $tmp[4] && $this->hasData($tmp[4]) && $this->hasData($this->myCookie('chatpass'))) { $passok = TRUE; } else { $passok = FALSE; }
                 if($passok === FALSE) {
@@ -1085,7 +1099,8 @@ class WcChat {
             }
             setcookie('cname', trim($this->myPost('cname'), ' '), time()+(86400*365), '/');
             $_SESSION['cname'] = trim($this->myPost('cname'), ' ');
-            header('location: '.$this->myServer('REQUEST_URI').'#wc_join'); die();
+            header('location: '.$this->myServer('REQUEST_URI').'#wc_join');
+		die();
         }
     }
 
@@ -1389,10 +1404,7 @@ class WcChat {
 
         $onload = $contents = '';
 
-        if($this->myCookie('cname') && $this->isCertifiedUser)
-            $_SESSION['cname'] = $this->myCookie('cname');
-
-        if($this->mySession('cname')) {
+        if($this->isLoggedIn) {
             $JOIN = $this->popTemplate(
                 'wcchat.join.inner',
                 array(
@@ -1437,7 +1449,7 @@ class WcChat {
 
         }
 
-        $BBCODE = ((!$this->mySession('cname') && $this->myCookie('cname') && !$this->uPass) ? 
+        $BBCODE = ((!$this->isLoggedIn && $this->myCookie('cname') && !$this->uPass) ? 
             '<i>Hint: Set-up a password in settings to skip the login screen on your next visit.</i>' :
             $this->popTemplate(
                 'wcchat.toolbar.bbcode',
@@ -1452,7 +1464,7 @@ class WcChat {
                         ATTACHMENT_UPLOADS && $this->hasPermission('ATTACH_UPL', 'skip_msg')
                     )
                 ),
-                $this->mySession('cname')
+                $this->isLoggedIn
             )
         );
 
@@ -1486,7 +1498,7 @@ class WcChat {
             array(
                 'TITLE' => TITLE,
                 'TOPIC' => $this->popTemplate('wcchat.topic', array('TOPIC' => $this->parseTopicContainer())),
-                'STATIC_MSG' => (!$this->mySession('cname') ? $this->popTemplate('wcchat.static_msg') : ''),
+                'STATIC_MSG' => (!$this->isLoggedIn ? $this->popTemplate('wcchat.static_msg') : ''),
                 'POSTS' => $this->popTemplate('wcchat.posts'),
                 'GSETTINGS' => ($this->hasPermission('GSETTINGS', 'skip_msg') ? 
                     $this->popTemplate(
@@ -1550,7 +1562,7 @@ class WcChat {
             )
         );
 
-        $onload = ($this->mySession('cname') ? $this->popTemplate('wcchat.toolbar.onload', array('CHAT_DSP_BUFFER' => CHAT_DSP_BUFFER, 'EDIT_BT_STATUS' => intval($this->myCookie('hide_edit')))) : $this->popTemplate('wcchat.toolbar.onload_once', array('CHAT_DSP_BUFFER' => CHAT_DSP_BUFFER)));
+        $onload = ($this->isLoggedIn ? $this->popTemplate('wcchat.toolbar.onload', array('CHAT_DSP_BUFFER' => CHAT_DSP_BUFFER, 'EDIT_BT_STATUS' => intval($this->myCookie('hide_edit')))) : $this->popTemplate('wcchat.toolbar.onload_once', array('CHAT_DSP_BUFFER' => CHAT_DSP_BUFFER)));
 
         // Set a ban tag
         $tag = '';
@@ -1657,7 +1669,7 @@ class WcChat {
                 $changes = TRUE;
             }
 
-            if($this->mySession('cname') && (LIST_GUESTS === TRUE || (LIST_GUESTS === FALSE && $this->uData[6] != '0'))) {
+            if($this->isLoggedIn && (LIST_GUESTS === TRUE || (LIST_GUESTS === FALSE && $this->uData[6] != '0'))) {
                 if($this->userMatch($this->name) === FALSE) {
                     $contents .= "\n".base64_encode($this->name).'|'.$this->userDataString.'|0|'.time().'|0';
                 } else {
