@@ -2508,7 +2508,7 @@ class WcChat {
             $str .= " ".$month.'M';
         if($days > 0)
             $str .= " ".$days.'d';
-        if($hours > 0 && !$days)
+        if($hours > 0 && !$month)
             $str .= " ".$hours.'h';
         if($minutes > 0 && !$days)
             $str .= " ".$minutes.'m';
