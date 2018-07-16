@@ -334,13 +334,14 @@ class WcChat {
      */
     private function initUser() {
 
-        if($this->myCookie('cname')) {
-            $_SESSION['cname'] = $this->name = $this->myCookie('cname');
-            $this->isLoggedIn = TRUE;
-        }
-
-        if(!$this->name && $this->isLoggedIn) {
+        if(!$this->mySession('cname')) {
+            if($this->myCookie('cname')) {
+                $_SESSION['cname'] = $this->name = $this->myCookie('cname');
+                $this->isLoggedIn = TRUE;
+            }
+        } else {
             $this->name = $this->mySession('cname');
+            $this->isLoggedIn = TRUE;
         }
 
         if(!$this->name && !$this->isLoggedIn) {
@@ -1658,6 +1659,9 @@ class WcChat {
                 $changes = TRUE;
             }
 
+            // If LIST_GUESTS is disabled, only process user if he/she joined the chat at least once in the past
+            // Note: A user is not considered part of the guest group if he/she is logged to an unprotected name, but
+            // to be listed, needs to join the chat (unless LIST_GUESTS is enabled)
             if($this->isLoggedIn && (LIST_GUESTS === TRUE || (LIST_GUESTS === FALSE && $this->uData[6] != '0'))) {
                 if($this->userMatch($this->name) === FALSE) {
                     $contents .= "\n".base64_encode($this->name).'|'.$this->userDataString.'|0|'.time().'|0';
@@ -2200,11 +2204,14 @@ class WcChat {
             die();
         }
 
-        // Scan the available post lines and populates the respective templates    
+        // Scan the available post lines and populates the respective templates
+
+        // Invert order in order to scan the newest first    
         krsort($lines);
         foreach($lines as $k => $v) {
             list($time, $user, $msg) = explode('|', trim($v), 3);
             $pm_target = FALSE;
+            // Check if user contains a target parameter (Private Message)
             if(strpos($user, '-') !== FALSE) { list($pm_target, $nuser) = explode('-', $user); $user = $nuser; }
 
             $self = FALSE; $hidden = FALSE;
@@ -2214,7 +2221,7 @@ class WcChat {
             if(preg_match('/^\*/', $user)) { $self = TRUE; $user = trim($user, '*'); }
             $time_date = gmdate('d-M', $time+($this->uTimezone * 3600));
 
-            // Halt scan if no batch retrieval nor new messages
+            // Halt scan if no batch retrieval and current message is no longer new
             if($this->myGet('all') != 'ALL' && $time <= $lastread && !$older_index) { break; }
 
             // Retrieve messages within the display buffer or older message batch limits
@@ -2491,16 +2498,28 @@ class WcChat {
         if($minutes >= 1)
             $timesec = $timesec%60;
 
-        if($year > 0)
+        $par_count = 0;
+
+        if($year > 0) {
             $str = $year.'Y';
-        if($month > 0)
+            $par_count++;
+        }
+        if($month > 0) {
             $str .= " ".$month.'M';
-        if($days > 0)
+            $par_count++;
+        }
+        if($days > 0 && $par_count < 2) {
             $str .= " ".$days.'d';
-        if($hours > 0 && !$month)
+            $par_count++;
+        }
+        if($hours > 0 && $par_count < 2) {
             $str .= " ".$hours.'h';
-        if($minutes > 0 && !$days)
+            $par_count++;
+        }
+        if($minutes > 0 && $par_count < 2) {
             $str .= " ".$minutes.'m';
+            $par_count++;
+        }
         if($it < 60)
             $str = $it."s";
 
