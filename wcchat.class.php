@@ -636,6 +636,8 @@ class WcChat {
                 $level = 'CUSER';
             } elseif(!$this->uPass) {
                 $level = 'USER';
+            } else {
+                $level = 'GUEST';
             }
         } else {
             $level = 'GUEST';
