@@ -203,14 +203,6 @@ class WcChat {
     private $isBanned = FALSE;
 
     /**
-     * Embedded Status
-     *
-     * @since 1.1
-     * @var bool
-     */
-    private $embedded;
-
-    /**
      * Certified User Status
      *
      * @since 1.1
@@ -253,11 +245,8 @@ class WcChat {
     /**
      * Construct
      * 
-     * @param bool|null embedded
      */
-    public function __construct($embedded = NULL) {
-
-        $this->embedded = $embedded;
+    public function __construct() {
 
         // Halt if user is automated
         if(preg_match(
@@ -265,7 +254,7 @@ class WcChat {
             $this->myServer('HTTP_USER_AGENT')
         )) { die(); }
 
-        session_start();
+        if(session_id() == '') { session_start(); }
 
         // Initialize Includes / Paths
         $this->initIncPath();
@@ -285,8 +274,6 @@ class WcChat {
         // Print Index / Process Ajax
         if($this->myGet('mode')) {
             $this->ajax($this->myGet('mode'));
-        } else {
-            echo $this->printIndex();
         }
     }
 
@@ -1400,7 +1387,7 @@ class WcChat {
      * @since 1.1
      * @return void
      */
-    private function printIndex() {
+    public function printIndex($embedded = NULL) {
 
         $onload = $contents = '';
 
@@ -1571,8 +1558,8 @@ class WcChat {
         }
 
         // Output the index template
-        echo $this->popTemplate(
-            ($this->embedded !== TRUE ? 'index' : 'index_embedded'),
+        return $this->popTemplate(
+            ($embedded === NULL ? 'index' : 'index_embedded'),
             array(
                 'TITLE' => TITLE,
                 'CONTENTS' => ($this->isBanned !== FALSE ? $this->popTemplate('index.critical_error', array('TITLE' => TITLE, 'ERROR' => 'You are banned!'.$tag)) : ($this->stopMsg ? $this->popTemplate('index.critical_error', array('TITLE' => TITLE, 'ERROR' => $this->stopMsg)) : $contents)),

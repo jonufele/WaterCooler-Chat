@@ -12,8 +12,8 @@
 		<?php
 
 			include 'wcchat.class.php';    # Change this to match your server's path to "wcchat.class.php" file
-			$chat = new WcChat(TRUE);
-
+			$chat = new WcChat();
+                  echo $chat->printIndex('EMBED');
 		?>	
 	</body>
 </html>
