@@ -1320,51 +1320,55 @@ class WcChat {
      * 
      * @since 1.1
      * @param string $contents Raw User List
-     * @param string|null $mode
+     * @param string $mode
      * @param string|null $value Only Applies To "update_status" Mode
      * @return string
      */
-    private function updateUser($contents, $mode = NULL, $value = NULL) {
+    private function updateUser($user_row, $mode, $value = NULL) {
+    
+        // If user row not provided, get row from users list
+        $list_replace = FALSE;
+        if($user_row === NULL) {
+            $user_row = $original_row = $this->userMatch($this->name, NULL, 'RETURN_MATCH');
+            $list_replace = TRUE;
+        }
 
-        $match = $this->userMatch($this->name, NULL, 'RETURN_MATCH');
-        if($match !== FALSE && $this->name) {
-            if(isset($mode)) {
-                $usr = $match[0];
-                $udata = $match[1];
-                $f = $match[2];
-                $l = $match[3];
-                $s = $match[4];
-                $row = $usr.'|'.$udata.'|'.$f.'|'.$l.'|'.$s;
-            }
+        // Update user parameters according to request
+        if($user_row !== FALSE && $this->name) {
+            
+            $f = $user_row[2];
+    
             switch($mode) {
                 case 'update_status':                            
-                    $contents = str_replace(trim($row), $usr.'|'.$udata.'|'.$f.'|'.$l.'|'.$value, $contents);
+                    $user_row[4] = $value;
                 break;
                 case 'user_join':                            
-                    $contents = str_replace(
-                        trim($row),
-                        $usr.'|'.$udata.'|'.(($f == '0') ? time() : $f).'|'.time().'|1',
-                        $contents
-                    );
+                    $user_row[2] = (($f == '0') ? time() : $f);
+                    $user_row[3] = time();
+                    $user_row[4] = 1;
                 break;
                 case 'new_message':
-                    $contents = str_replace(
-                        trim($row),
-                            $usr.'|'.
-                            $udata.'|'.
-                            $f.'|'.
-                            time().'|'.
-                            $s, 
-                        $contents);
+                    $user_row[3] = time();
                 break;
                 case 'user_visit':
                     if($f == '0' || ($f != '0' && $this->hasProfileAccess)) {
-                        $contents = str_replace(trim($row), $usr.'|'.$udata.'|'.$f.'|'.time().'|'.$s, $contents);
+                        $user_row[3] = time();
                     }
                 break;
             }
         }
-        return $contents;
+        
+        if($list_replace === FALSE) {
+            // Return the updated row
+            return $user_row;
+        } elseif($user_row !== FALSE) {
+            // Return the updated list
+            return str_replace(
+                trim(implode('|', $original_row)),
+                trim(implode('|', $user_row)),
+                $this->userList
+            );
+        }
     }
 
       /*===========================================
@@ -1650,12 +1654,13 @@ class WcChat {
         $uid = $this->name;
 
         $contents = $this->userList;
+        $user_row = $original_row = $this->userMatch($this->name, NULL, 'RETURN_MATCH');
         $changes = FALSE;
 
         // Reset user status on a new visit or update guest user listing if enabled
         if($visit != NULL) {
             if($this->hasProfileAccess) {
-                $contents = $this->updateUser($contents, 'update_status', 0);
+                $user_row = $this->updateUser($user_row, 'update_status', 0);
                 $changes = TRUE;
             }
 
@@ -1666,7 +1671,7 @@ class WcChat {
                 if($this->userMatch($this->name) === FALSE) {
                     $contents .= "\n".base64_encode($this->name).'|'.$this->userDataString.'|0|'.time().'|0';
                 } else {
-                    $contents = $this->updateUser($contents, 'user_visit');
+                    $user_row = $this->updateUser($user_row, 'user_visit');
                 }
                 $changes = TRUE;
             }
@@ -1675,22 +1680,29 @@ class WcChat {
         // Creates New User/Update user last activity on join, also update status 
         if($this->myGet('join') == '1') {
             if($this->userMatch($uid) === FALSE) {
-                $contents .= "\n".base64_encode($uid).'|'.$this->userDataString.'|'.time().'|'.time().'|0';
+                $contents .= "\n".base64_encode($uid).'|'.$this->userDataString.'|'.time().'|'.time().'|1';
             } else {
-                $contents = $this->updateUser($contents, 'user_join');
+                $user_row = $this->updateUser($user_row, 'user_join');
             }
-            $contents = $this->updateUser($contents, 'update_status', 1);
+            $user_row = $this->updateUser($user_row, 'update_status', 1);
             $changes = TRUE;
         }
 
         // Update user last activity on new message
         if($this->myGet('new') == '1') {
-            $contents = $this->updateUser($contents, 'new_message');
+            $user_row = $this->updateUser($user_row, 'new_message');
             $changes = TRUE;
         }
 
         // Write changes
         if($changes) {
+            if($user_row !== FALSE) {
+                $contents = str_replace(
+                    trim(implode('|', $original_row)),
+                    trim(implode('|', $user_row)),
+                    trim($contents)
+                );
+            }
             $this->writeFile(USERL, trim($contents), 'w');
         }
 
@@ -2799,11 +2811,11 @@ class WcChat {
                 $current = $this->uData[8];
 
                 if($current == 1) {
-                    $this->writeFile(USERL, $this->updateUser($this->userList, 'update_status', 2), 'w');
+                    $this->writeFile(USERL, $this->updateUser(NULL, 'update_status', 2), 'w');
                     echo 'Your status has been changed to: Do Not Disturb!';
                 }
                 if($current == 2) {
-                    $this->writeFile(USERL, $this->updateUser($this->userList, 'update_status', 1), 'w');
+                    $this->writeFile(USERL, $this->updateUser(NULL, 'update_status', 1), 'w');
                     echo 'You status has been changed to: Available!';
                 }
             break;
@@ -2985,6 +2997,9 @@ class WcChat {
                     rename($this->roomDir . $enc.'.txt', $this->roomDir . base64_encode($nname).'.txt');
                     rename($this->roomDir . 'def_'.$enc.'.txt', $this->roomDir . 'def_'.base64_encode($nname).'.txt');
                     rename($this->roomDir . 'topic_'.$enc.'.txt', $this->roomDir . 'topic_'.base64_encode($nname).'.txt');
+                    if(file_exists($this->roomDir . 'hidden_'.$enc.'.txt')) {
+                        rename($this->roomDir . 'hidden_'.$enc.'.txt', $this->roomDir . 'hidden_'.base64_encode($nname).'.txt');
+                    }
                     
                     // If the renamed room is the default, rename in settings as well
                     if(trim($oname) == trim(DEFAULT_ROOM)) {
@@ -3029,6 +3044,9 @@ class WcChat {
                     unlink($this->roomDir . $enc.'.txt');
                     unlink($this->roomDir . 'def_'.$enc.'.txt');
                     unlink($this->roomDir . 'topic_'.$enc.'.txt');
+                    if(file_exists($this->roomDir . 'hidden_'.$enc.'.txt')) {
+                        unlink($this->roomDir . 'hidden_'.$enc.'.txt');
+                    }
                     // If deleted room is current room, move user to the default room
                     if($this->mySession('current_room') == $oname) {
                         $_SESSION['current_room'] = DEFAULT_ROOM;
@@ -3313,6 +3331,7 @@ class WcChat {
                             $towrite = time().'|'.$name_prefix.base64_encode($this->name).'|'.strip_tags($text)."\n";
                             $this->writeFile(MESSAGES_LOC, $source.$towrite, 'w');
                             touch(ROOMS_LASTMOD);
+                            $this->handleLastRead('store');
                             list($output, $index) = $this->parseMsg(array(trim($towrite)), 0, 'SEND');
                             $_SESSION['lastpost'] = time();
                             echo $this->parseBbcode($output);
