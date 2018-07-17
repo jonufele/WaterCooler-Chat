@@ -335,13 +335,21 @@ class WcChat {
     private function initUser() {
 
         if(!$this->mySession('cname')) {
+            // Try use cookie value to resume session
             if($this->myCookie('cname')) {
-                $_SESSION['cname'] = $this->name = $this->myCookie('cname');
-                $this->isLoggedIn = TRUE;
+                if($this->userMatch($this->myCookie('cname')) !== FALSE) {
+                    $_SESSION['cname'] = $this->name = $this->myCookie('cname');
+                    $this->isLoggedIn = TRUE;
+                } else {
+                    // Cookie user does not exist / outdated, fail to resume session
+                    // Inform user via login error message
+                    $_SESSION['login_err'] = 'Username <i>'.$this->myCookie('cname').'</i> does not exist, cannot be resumed!<br>(Maybe it was renamed by a moderator?)';
+                    setcookie('cname', '', time()-3600, '/');
+                }
             }
         } else {
-            $this->name = $this->mySession('cname');
-            $this->isLoggedIn = TRUE;
+                $this->name = $this->mySession('cname');
+                $this->isLoggedIn = TRUE;
         }
 
         if(!$this->name && !$this->isLoggedIn) {
@@ -353,6 +361,18 @@ class WcChat {
         }
 
         $this->uData = $this->userData();
+        
+        // Check if user credentials are outdated, issue an alert message to inform user
+        if(($this->uData[7] == 0 || ($this->myCookie('chatpass') != $this->uData[5] && $this->uData[5])) && $this->mySession('cname') && $this->myGet('mode')) {
+            unset($_SESSION['cname']);     
+            setcookie('cname', '', time()-3600, '/');
+            setcookie('chatpass', '', time()-3600, '/');
+            $this->isLoggedIn = FALSE;
+            $_SESSION['alert_msg'] = 
+              'Your login credentials are outdated!'."\n".
+              'Refresh page (or use the form below) and login again!'."\n".
+              '(Possible cause: You (or a moderator) edited your profile.)';
+        }
 
         $this->uAvatar = $this->uData[0];
         $this->uEmail = $this->uData[1];
@@ -371,22 +391,26 @@ class WcChat {
             $this->uPass
         );
     
+        // Set certified User status
         if($this->hasData($this->uPass) && $this->myCookie('chatpass') && $this->myCookie('chatpass') == $this->uPass) {
             $this->isCertifiedUser = TRUE;
         }
 
+        // Set has perofile access status
         if($this->isLoggedIn && ($this->isCertifiedUser || !$this->uPass)) {
             $this->hasProfileAccess = TRUE;
         }
 
+        // Assign the first moderator if does not exist and current user is certified
         if(strlen(trim($this->modList)) == 0 && $this->isCertifiedUser) {
             $this->writeFile(MODL, "\n".base64_encode($this->name), 'w');
             touch(ROOMS_LASTMOD);
             $_SESSION['alert_msg'] = 'You have been assigned Master Moderator, reload page in order to get all moderator tools.';
         }
 
+        // Set Master Moderator and Moderator status
         if($this->name && $this->isCertifiedUser) {
-            if(strpos($this->modList, base64_encode($this->name)) !== FALSE) { $this->isMod = TRUE; }
+            if($this->getMod($this->name) !== FALSE) { $this->isMod = TRUE; }
             $mods = explode("\n", trim($this->modList));
             if($mods[0] == base64_encode($this->name)) {
                 $this->isMasterMod = TRUE;
@@ -536,7 +560,7 @@ class WcChat {
             }
         } else {
             // Row has not been supplied, try to find a match on the raw user list
-            if(strpos(trim($this->userList), base64_encode($name)) !== FALSE) {
+            if(strpos(trim($this->userList), base64_encode($name).'|') !== FALSE) {
                 if($return_match !== NULL) {
                     list($tmp, $v2) = explode(base64_encode($name).'|', trim($this->userList), 2);
                     if(strpos($v2, "\n") !== FALSE) {
@@ -1090,7 +1114,7 @@ class WcChat {
             setcookie('cname', trim($this->myPost('cname'), ' '), time()+(86400*365), '/');
             $_SESSION['cname'] = trim($this->myPost('cname'), ' ');
             header('location: '.$this->myServer('REQUEST_URI').'#wc_join');
-		die();
+            die();
         }
     }
 
@@ -1284,7 +1308,7 @@ class WcChat {
      * @return bool
      */    
     private function getMod($name) {
-        preg_match_all('/^('.base64_encode($name).')/im', $this->modList, $matches);
+        preg_match_all('/^('.base64_encode($name).')$/im', $this->modList, $matches);
         if(isset($matches[1][0]) && $this->hasData(trim($name)))
             return TRUE;
         else
@@ -1569,7 +1593,7 @@ class WcChat {
             ($embedded === NULL ? 'index' : 'index_embedded'),
             array(
                 'TITLE' => TITLE,
-                'CONTENTS' => ($this->isBanned !== FALSE ? $this->popTemplate('index.critical_error', array('TITLE' => TITLE, 'ERROR' => 'You are banned!'.$tag)) : ($this->stopMsg ? $this->popTemplate('index.critical_error', array('TITLE' => TITLE, 'ERROR' => $this->stopMsg)) : $contents)),
+                'CONTENTS' => (($this->isBanned !== FALSE) ? $this->popTemplate('index.critical_error', array('TITLE' => TITLE, 'ERROR' => 'You are banned!'.$tag)) : ($this->stopMsg ? $this->popTemplate('index.critical_error', array('TITLE' => TITLE, 'ERROR' => $this->stopMsg)) : $contents)),
                 'ONLOAD' => (($this->isBanned !== FALSE || $this->stopMsg) ? '' : $onload),
                 'REFRESH_DELAY' => REFRESH_DELAY,
                 'STYLE_LASTMOD' => filemtime(__DIR__.'/themes/'.THEME.'/style.css'),
@@ -1781,7 +1805,7 @@ class WcChat {
                             // Yes, it's an online user 
 
                             // Style for current user
-                            if(strpos($v, base64_encode($uid)) === FALSE) { $boldi = $bolde = ''; } else { $boldi = '<b>'; $bolde = '</b>'; }
+                            if(strpos($v, base64_encode($uid).'|') === FALSE) { $boldi = $bolde = ''; } else { $boldi = '<b>'; $bolde = '</b>'; }
 
                             // Parse Joined Status class
                             $joined_status_class = 'joined_on';
@@ -2287,7 +2311,7 @@ class WcChat {
                                     'MSG' => $this->popTemplate('wcchat.posts.hidden', '', $hidden, $msg),
                                     'ID' => $unique_id,
                                     'HIDE_ICON' => $this->popTemplate('wcchat.posts.hide_icon', array('REVERSE' => ($hidden ? '_r' : ''), 'ID' => $unique_id, 'OFF' => ($this->myCookie('hide_edit') == 1 ? '_off' : '')), $this->hasPermission(($hidden ? 'MSG_UNHIDE' : 'MSG_HIDE'), 'skip_msg')),
-                                    'AVATAR' => ($avatar_array[base64_decode($user)] ? $this->includeDir . 'files/avatars/'.$avatar_array[base64_decode($user)] : INCLUDE_DIR_THEME . DEFAULT_AVATAR ),
+                                    'AVATAR' => (isset($avatar_array[base64_decode($user)]) ? ($this->hasData($avatar_array[base64_decode($user)]) ? $this->includeDir . 'files/avatars/'.$avatar_array[base64_decode($user)] : INCLUDE_DIR_THEME . DEFAULT_AVATAR ) : INCLUDE_DIR_THEME . DEFAULT_AVATAR ),
                                     'WIDTH' => $this->popTemplate('wcchat.posts.normal.width', array('WIDTH' => $this->uAvatarW))
                                 )
                             ).$new.$output;
