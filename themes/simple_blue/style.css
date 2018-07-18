@@ -56,7 +56,8 @@ INPUT[type="text"], INPUT[type="password"], SELECT {
 	vertical-align: top;
 	padding: 5px;
 	overflow: auto;
-	background-color: #ced9ea;
+	background-image: url('images/bgrcol.jpg');
+	background-repeat: repeat-x;
 }
 
 #wcchat .wc_right_col .wc_separator {
@@ -337,6 +338,7 @@ INPUT[type="text"], INPUT[type="password"], SELECT {
 
 #wc_ulist {
 	padding: 5px;
+	height: 400px;
 	overflow: auto;
 }
 

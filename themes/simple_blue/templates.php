@@ -45,6 +45,7 @@ $templates['wcchat'] = '
 			{SETTINGS}
 			{JOIN}			
 		</td>
+		<td style="width: 5px"></td>
 		<td class="wc_right_col">
 			{ROOM_LIST}
 			{USER_LIST}

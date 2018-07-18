@@ -343,6 +343,7 @@ INPUT[type="text"], INPUT[type="password"], SELECT {
 
 #wc_ulist {
 	padding: 5px;
+	height: 400px;
 	overflow: auto;
 	background-color: rgba(234, 220, 235, 0.7);
 }
