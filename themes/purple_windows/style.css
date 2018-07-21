@@ -65,6 +65,7 @@ H1 {
 	text-align: center;
 	font-style: italic;
 	padding: 5px;
+	font-size: 16px;
 	background-color: rgba(255, 255, 255, 0.6);
 }
 
@@ -77,8 +78,6 @@ H1 {
 	vertical-align: top;
 	padding: 5px;
 	overflow: auto;
-	background-image: url('images/bgrcol.jpg');
-	background-repeat: repeat-x;
 	float: right;
 }
 
@@ -371,7 +370,7 @@ H1 {
 
 #wcchat #wc_ulist {
 	padding: 5px;
-	margin-bottom: 10px;
+	padding-bottom: 10px;
 	height: 400px;
 	overflow: auto;
 	background-color: rgba(234, 220, 235, 0.7);
