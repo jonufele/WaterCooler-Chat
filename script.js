@@ -131,7 +131,7 @@ function wc_pop_vid(id, w, h) {
 
 function wc_showcom() {
 
-	alert("/me <message> - self message\n/ignore <user> - Ignores a user\n/unignore <user> - Unignores user\n/pm <user> <message> - Sends a private message to user\n\nINPUT TRIGGERS\n\nTAB - Hit tab while writing a user name to auto-complete\nPM - Click a user name in posts to auto complete the private message command\n\n(Replace \"<user>\" by the name of the user; [..] denotes an optional parameter.)");
+	alert("/COMMANDS\n\nme <message> - self message\n/ignore <user> - Ignores a user\n/unignore <user> - Unignores user\n/pm <user> <message> - Sends a private message to user\n\nINPUT AUTO-COMPLETERS\n\nTAB - Hit tab while writing a user name to auto-complete\nPM - Click a user name in posts to auto complete the private message command\n\n(Replace \"<user>\" by the name of the user; [..] denotes an optional parameter.)");
 }
 
 function wc_toggle_status(c) {
