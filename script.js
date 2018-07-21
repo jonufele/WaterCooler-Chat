@@ -72,7 +72,7 @@ function wc_attach_upl(c, event, incdir)
 {
 	event.preventDefault();
 
-	var icon = document.getElementById('attachment_upl_icon');
+	var icon = document.getElementById('wc_attachment_upl_icon');
 	var tmp = icon.src;
 	icon.src = incdir + 'images/loader.gif';
 	var formData = new FormData();
@@ -108,17 +108,30 @@ function apply_theme(v) {
 function wc_post(e, c, r, lim)
 {
 	if(e.which == 13 || e.keyCode == 13) { wc_smsg(c, r, lim); }
+	if(e.which == 9 || e.keyCode == 9) {
+		e.preventDefault();
+		var text_input = document.getElementById('wc_text_input_field');
+		var http = getHTTPObject();
+		http.open("GET", c+"mode=name_autocomplete&hint="+text_input.value, true);
+		http.onreadystatechange=function(){if(http.readyState==4){
+			if(http.responseText.length > 0) {
+				text_input.value = text_input.value + http.responseText;
+			}
+			text_input.focus();
+		}}
+ 		http.send(null);
+	}
 }
 
 function wc_pop_vid(id, w, h) {
-	document.getElementById('video_'+id).innerHTML = '<iframe width="'+w+'" height="'+h+'" src="https://www.youtube.com/embed/'+id+'" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>';
+	document.getElementById('wc_video_'+id).innerHTML = '<iframe width="'+w+'" height="'+h+'" src="https://www.youtube.com/embed/'+id+'" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>';
 	wc_toggle('im_'+id);
 	wc_toggle('video_'+id);
 }
 
 function wc_showcom() {
 
-	alert("/me <message> - self message\n/ignore <user> - Ignores a user\n/unignore <user> - Unignores user\n/pm <user> <message> - Sends a private message to user\n\n(Replace \"<user>\" by the name of the user; [..] denotes an optional parameter.)");
+	alert("/me <message> - self message\n/ignore <user> - Ignores a user\n/unignore <user> - Unignores user\n/pm <user> <message> - Sends a private message to user\n\nINPUT TRIGGERS\n\nTAB - Hit tab while writing a user name to auto-complete\nPM - Click a user name in posts to auto complete the private message command\n\n(Replace \"<user>\" by the name of the user; [..] denotes an optional parameter.)");
 }
 
 function wc_toggle_status(c) {
@@ -151,12 +164,22 @@ function wc_acc_rec(c) {
  	http.send(null);
 }
 
-function wc_clear_screen(c) {
+function wc_clear_screen(c, incdir) {
 
 	var http = getHTTPObject();
 	http.open("GET", c+"mode=new_start_point", true);
 	http.onreadystatechange=function(){if(http.readyState==4){
-		document.getElementById('wc_msg_container').innerHTML = '';
+		wc_updmsg_once(c, 'ALL', 0, incdir);
+	}}
+ 	http.send(null);
+}
+
+function wc_undo_clear_screen(c, incdir) {
+
+	var http = getHTTPObject();
+	http.open("GET", c+"mode=undo_start_point", true);
+	http.onreadystatechange=function(){if(http.readyState==4){
+		wc_updmsg_once(c, 'ALL', 0, incdir);
 	}}
  	http.send(null);
 }
@@ -231,10 +254,18 @@ function wc_delete_rname(c, par, incdir) {
 		var http = getHTTPObject();
 		http.open("GET", c+"mode=delete_rname&oname="+oname, true);
 		http.onreadystatechange=function(){if(http.readyState==4){
-			if(http.responseText.length > 0) { alert(http.responseText); }
+			if(http.responseText.length > 0) {
+				if(http.responseText.search('RMV') != -1) {
+					alert(http.responseText.replace('RMV', ''));
+				} else {
+					alert(http.responseText);
+				}
+			}
 			wc_refreshrooms(c, 'forced');
-			wc_refreshtopic(c);
-			wc_updmsg_once(c, 'ALL', 0, incdir);
+			if(http.responseText.search('RMV') != -1) {
+				wc_refreshtopic(c);
+				wc_updmsg_once(c, 'ALL', 0, incdir);
+			}
 		}}
  		http.send(null);
 	}
@@ -261,9 +292,9 @@ function wc_bbcode(myField, myValue, myValue2) {
 		var endPos=myField.selectionEnd;
 		myField.value=myField.value.substring(0,startPos)+myValue+myField.value.substring(startPos,endPos)+myValue2+myField.value.substring(endPos,myField.value.length);
 		myField.scrollTop = currentScroll;
-		myField.selectionStart=startPos+myValue.length;
-		myField.selectionEnd=endPos+myValue.length;      
-myField.focus();
+		//myField.selectionStart=startPos+myValue.length;
+		myField.selectionEnd=endPos+myValue.length;
+		myField.focus();
 	} else {
 		myField.value+=myValue;
 	}
@@ -309,11 +340,11 @@ function wc_refreshrooms(c, forced)
 {
 	var open = 0;
 	if(forced != 'forced') {
-		var croom = document.getElementById('croom_box');
+		var croom = document.getElementById('wc_croom_box');
  		if(croom != null) {
 			if(croom.className != 'closed') { open = 1; }
 		}
-		var elems = document.getElementsByClassName('wc_form_box');
+		var elems = document.getElementsByClassName('form_box');
 		for(i = 0 ; i < elems.length ; i++) {
 			if(elems[i].parentNode.className != 'closed') { open = 1; }
 		}
@@ -483,8 +514,12 @@ function wc_upd_user(c, id, event)
 			var s = http.responseText;
 			if(http.responseText.search('MOD_OFF') != -1) {
 				s = s.replace('MOD_OFF', '');
-				document.getElementById('mod_' + id).checked = false;	
+				document.getElementById('wc_mod_' + id).checked = false;	
 			}
+			if(s.search('Successfully') != -1) {
+				wc_toggle('wc_uedt_'+id);
+			}
+			wc_updu(0, c, 0, 0, 'ignore_lastmod');
 			alert(s);
 		}
 	}}
@@ -633,7 +668,7 @@ function wc_trim_chat(lim)
 		if(older_container.innerHTML.length > 0) { skip = 1; }
 	}
 	if(skip == 0) {
-		msg = document.getElementsByClassName('wc_msg_item');
+		msg = document.getElementsByClassName('msg_item');
 		n = msg.length;
 		if(n >= lim) {
 			for(i = 0 ; i < (n-lim); i++) {
@@ -651,7 +686,7 @@ function wc_update_components(c) {
 		arr = http.responseText.split("[$]");
 
 		var open = 0;
-		var elems = document.getElementsByClassName('wc_form_box');
+		var elems = document.getElementsByClassName('form_box');
 		for(i = 0 ; i < elems.length ; i++) {
 			if(elems[i].parentNode.className != 'closed') { open = 1; }
 		}
@@ -665,7 +700,7 @@ function wc_update_components(c) {
 		}
 
 
-		var croom = document.getElementById('croom_box');
+		var croom = document.getElementById('wc_croom_box');
  		if(croom != null) {
 			if(croom.className != 'closed') { open = 1; }
 		}
@@ -676,11 +711,13 @@ function wc_update_components(c) {
 			var arr2 = arr[3].split(" ");
 			for(i = 0 ; i < arr2.length ; i++) {
 				msg = document.getElementById(arr2[i]);
-				icon = document.getElementById('wc_icon_' + arr2[i]);
-				if(msg.innerHTML.search("hidden") == -1) {
-					msg.innerHTML = '<i>This message is hidden.</i>';
-					if(icon != null) {
-						icon.src = icon.src.replace("arrow", "arrow_r");
+				if(msg != null) {
+					icon = document.getElementById('wc_icon_' + arr2[i]);
+					if(msg.innerHTML.search("hidden") == -1) {
+						msg.innerHTML = '<i>This message is hidden.</i>';
+						if(icon != null) {
+							icon.src = icon.src.replace("arrow", "arrow_r");
+						}
 					}
 				}
 			}
@@ -716,6 +753,8 @@ function wc_updmsg(c, all, refresh_delay, lim, incdir)
 		if(http.responseText.length > 0) {
 			document.getElementById('wc_msg_container').innerHTML = http.responseText;
 			objDiv.scrollTop = objDiv.scrollHeight;
+		} else {
+			objDiv.innerHTML = '';
 		}
 	}}
  	http.send(null);
@@ -737,6 +776,7 @@ function wc_updmsg(c, all, refresh_delay, lim, incdir)
 					} else {
 						alert('The room you were viewing was removed/renamed! We apologize for the inconvenience.');
 						document.getElementById('wc_msg_container').innerHTML = http.responseText.slice(5);
+						wc_refreshtopic(c);
 					}
 					wc_trim_chat(lim);
 					if(isScrolledToBottom) { objDiv.scrollTop = objDiv.scrollHeight; }
@@ -787,7 +827,7 @@ function wc_toggle_time(c)
 	var http = getHTTPObject();
 	http.open("GET", c+"mode=toggle_time", true);
 	http.onreadystatechange=function(){if(http.readyState==4){
-		wc_multi_toggle('wc_timestamp');
+		wc_multi_toggle('timestamp');
 	}}
  	http.send(null);
 }
@@ -797,30 +837,30 @@ function wc_toggle_edit(c)
 	var http = getHTTPObject();
 	http.open("GET", c+"mode=toggle_edit", true);
 	http.onreadystatechange=function(){if(http.readyState==4){
-		var boxes = document.getElementsByClassName('wc_edit_bt');
-		var class1 = 'wc_edit_bt_off';
+		var boxes = document.getElementsByClassName('edit_bt');
+		var class1 = 'edit_bt_off';
 		if(boxes.length == 0) {
-			var boxes = document.getElementsByClassName('wc_edit_bt_off');
-			var class1 = 'wc_edit_bt';
+			var boxes = document.getElementsByClassName('edit_bt_off');
+			var class1 = 'edit_bt';
 		}
 		var n = boxes.length;
 		for (var i = 0; i < n; i++){
 			boxes[0].className = class1;
 		}
-		var boxes2 = document.getElementsByClassName('wc_hide_icon');
-		var class2 = 'wc_hide_icon_off';
+		var boxes2 = document.getElementsByClassName('hide_icon');
+		var class2 = 'hide_icon_off';
 		if(boxes2.length == 0) {
-			var boxes2 = document.getElementsByClassName('wc_hide_icon_off');
-			var class2 = 'wc_hide_icon';
+			var boxes2 = document.getElementsByClassName('hide_icon_off');
+			var class2 = 'hide_icon';
 		}
 		var n2 = boxes2.length;
 		for (var i = 0; i < n2; i++){
 			boxes2[0].className = class2;
 		}
 		var create_room_link = document.getElementById('wc_create_link');
-		var class3 = 'wc_create_link_off';
-		if(create_room_link.className == 'wc_create_link_off') {
-			var class3 = 'wc_create_link';
+		var class3 = 'create_link_off';
+		if(create_room_link.className == 'create_link_off') {
+			var class3 = 'create_link';
 		}
 		create_room_link.className = class3;
 	}}
@@ -829,8 +869,14 @@ function wc_toggle_edit(c)
 
 function wc_show_older_msg(c, reset, incdir)
 {
-	var msg = document.getElementsByClassName('wc_msg_item');
+	var msg = document.getElementsByClassName('msg_item');
 	var n = msg.length;
+	var first_msg_id = '';
+	if(n > 0) {
+		first_msg_id = msg[0].id;
+	} else {
+		first_msg_id = 'beginning';
+	}
 	var older_container = document.getElementById('wc_older');
 	if(reset == '1') {
 		older_container.innerHTML = '';
@@ -838,7 +884,7 @@ function wc_show_older_msg(c, reset, incdir)
 		cont = older_container.innerHTML;
 		older_container.innerHTML = '<div style="text-align: center"><img src="'+incdir+'images/loader.gif"></div>' + cont;
 		var http = getHTTPObject();
-		http.open("GET", c+"mode=updmsg&n="+n, true);
+		http.open("GET", c+"mode=updmsg&n="+first_msg_id, true);
 		http.onreadystatechange=function(){if(http.readyState==4){ 
 			if(http.responseText.length > 0) {
 				older_container.innerHTML = http.responseText + cont;

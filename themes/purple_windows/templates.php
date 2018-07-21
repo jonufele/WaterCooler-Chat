@@ -20,12 +20,6 @@ $templates['index'] = '
 
 $templates['index_embedded'] = '{CONTENTS}';
 
-$templates['index.critical_error'] = '
-<div class="wc_critical_error">
-	<h2>{TITLE}</h2>
-	{ERROR}
-</div>';
-
 # ============================================================================
 #                  WCCHAT MODULES
 # ============================================================================
@@ -33,9 +27,16 @@ $templates['index.critical_error'] = '
 $templates['wcchat'] = '
 <noscript>-- Javascript must be enabled! --</noscript>
 <img src="{INCLUDE_DIR_THEME}images/loader.gif" class="closed">
-<table id="wcchat">
-	<tr>
-		<td class="wc_left_col">
+<div id="wcchat">
+		<div class="right_col">
+			{ROOM_LIST}
+			{USER_LIST}
+			{THEMES}
+			<div class="copyright_note">
+				Powered by: <a href="https://github.com/jonufele/WaterCooler-Chat" target="_blank">WaterCooler Chat 1.4</a>
+			</div>
+		</div>
+		<div class="left_col">
 			{TOPIC}
 			{STATIC_MSG}
 			{POSTS}{GSETTINGS}
@@ -43,19 +44,17 @@ $templates['wcchat'] = '
 			{TEXT_INPUT}
 			{SETTINGS}
 			{JOIN}			
-		</td>
-		<td class="wc_right_col">
-			{ROOM_LIST}
-			{USER_LIST}
-			{THEMES}
-			<div class="copyright_note">
-				Powered by: <a href="https://github.com/jonufele/WaterCooler-Chat" target="_blank">WaterCooler Chat 1.4</a>
-			</div>
-		</td>
-		<td style="width: 30px">
-		</td>
-	</tr>
-</table>';
+		</div>
+</div>';
+
+$templates['wcchat.critical_error'] = '
+<noscript>-- Javascript must be enabled! --</noscript>
+<div id="wcchat">
+	<fieldset class="critical_error">
+		<legend>Critical Error</legend>
+		{ERROR}
+	</fieldset>
+</div>';
 
 # ============================================================================
 #                  WCCHAT MODULES : TOPIC
@@ -89,13 +88,13 @@ $templates['wcchat.topic.box.partial'] = '
 	{TOPIC_FULL} <a href="#" onclick="wc_toggle(\'wc_topic_partial\'); wc_toggle(\'wc_topic_full\'); return false" class="less">[Show Less]</a>
 </div>';
 
-$templates['wcchat.topic.edit_bt'] = ' <a href="#" class="edit" onclick="wc_toggle(\'wc_topic_con\'); wc_toggle(\'wc_topic_editbox\'); return false;"><img src="{INCLUDE_DIR_THEME}images/edit.gif" class="wc_edit_bt{OFF}"></a>';
+$templates['wcchat.topic.edit_bt'] = ' <a href="#" class="edit" onclick="wc_toggle(\'wc_topic_con\'); wc_toggle(\'wc_topic_editbox\'); return false;"><img src="{INCLUDE_DIR_THEME}images/edit.gif" class="edit_bt{OFF}"></a>';
 
 # ============================================================================
 #                  WCCHAT MODULES : STATIC MSG
 # ============================================================================
 
-$templates['wcchat.static_msg'] = '<div class="wc_static_msg">You are seeing a static version of the chat contents, login for a dynamic version.</div>';
+$templates['wcchat.static_msg'] = '<div class="static_msg">You are seeing a static version of the chat contents, login for a dynamic version.</div>';
 
 # ============================================================================
 #                  WCCHAT MODULES : TOOLBAR
@@ -126,10 +125,10 @@ $templates['wcchat.toolbar.bbcode'] = '
 <span id="wc_smiley_icon{FIELD}"><a href="#" onclick="wc_toggle(\'wc_smiley_icon{FIELD}\'); wc_toggle(\'wc_smiley_box{FIELD}\'); return false;"><img src="{INCLUDE_DIR_THEME}images/smilies/sm1.gif"></a></span>
 <span id="wc_smiley_box{FIELD}" class="closed">{SMILIES}<a href="#" onclick="wc_toggle(\'wc_smiley_icon{FIELD}\'); wc_toggle(\'wc_smiley_box{FIELD}\'); return false">[x]</a></span>';
 
-$templates['wcchat.toolbar.bbcode.attachment_uploads'] = ' <a href="#" onclick="wc_attach_test({ATTACHMENT_MAX_POST_N}); return false"><img src="{INCLUDE_DIR_THEME}images/upl.png" id="attachment_upl_icon"  title="Upload Attachments"></a> 
+$templates['wcchat.toolbar.bbcode.attachment_uploads'] = ' <a href="#" onclick="wc_attach_test({ATTACHMENT_MAX_POST_N}); return false"><img src="{INCLUDE_DIR_THEME}images/upl.png" id="wc_attachment_upl_icon"  title="Upload Attachments"></a> 
 <span id="wc_attach_cont" class="closed"><input id="wc_attach" type="file" class="closed" onchange="wc_attach_upl(\'{CALLER}\', event, \'{INCLUDE_DIR_THEME}\')"></span>';
 
-$templates['wcchat.toolbar.commands'] = '<div id="wc_commands"><a href="#" onclick="wc_showcom(); return false" title="Commands">COM</a> | <a href="#" onclick="wc_clear_screen(\'{CALLER}\'); return false" title="Clear Screen">CLR</a> | <a href="#" onclick="wc_toggle_time(\'{CALLER}\'); return false" title="Toggle TimeStamps">TS</a>{GSETTINGS}{EDIT}</div>';
+$templates['wcchat.toolbar.commands'] = '<div id="wc_commands"><a href="#" onclick="wc_showcom(); return false" title="Commands">COM</a> | <a href="#" onclick="wc_clear_screen(\'{CALLER}\', \'{INCLUDE_DIR_THEME}\'); return false" title="Clear Screen">CLR</a> | <a href="#" onclick="wc_toggle_time(\'{CALLER}\'); return false" title="Toggle TimeStamps">TS</a>{GSETTINGS}{EDIT}</div>';
 
 $templates['wcchat.toolbar.commands.gsettings'] = ' | <a href="#" onclick="wc_toggle(\'wc_msg_container\'); wc_toggle(\'wc_global_settings\'); return false" title="Global Settings">GST</a>';
 
@@ -139,7 +138,7 @@ $templates['wcchat.toolbar.smiley.item'] = '<a href="#" OnClick="wc_bbcode(docum
 
 $templates['wcchat.toolbar.smiley.item.parsed'] = '<img src="{INCLUDE_DIR_THEME}images/smilies/sm{key}.gif">';
 
-$templates['wcchat.error_msg'] = '<div class="wc_error_msg">{ERR}</div>';
+$templates['wcchat.error_msg'] = '<div class="error_msg">{ERR}</div>';
 
 $templates['wcchat.toolbar.onload'] = 'onload="wc_updmsg(\'{CALLER}\', \'ALL\', {REFRESH_DELAY}, {CHAT_DSP_BUFFER}, \'{INCLUDE_DIR_THEME}\')"';
 
@@ -151,7 +150,7 @@ $templates['wcchat.toolbar.onload_once'] = 'onload="wc_updmsg_once(\'{CALLER}\',
 
 $templates['wcchat.text_input'] = '
 <div id="wc_text_input" class="closed">
-	<input type="text" id="wc_text_input_field" onkeypress="return wc_post(event, \'{CALLER}\', {REFRESH_DELAY}, {CHAT_DSP_BUFFER});" autocomplete="off">
+	<input type="text" id="wc_text_input_field" onkeydown="return wc_post(event, \'{CALLER}\', {REFRESH_DELAY}, {CHAT_DSP_BUFFER});" autocomplete="off">
 </div>';
 
 # ============================================================================
@@ -252,7 +251,7 @@ $templates['wcchat.join.cuser_link'] = '<div><a href="{CALLER}cuser=1&ret={RETUR
 
 $templates['wcchat.join.password_required'] = '
 <div id="wc_pass_req">
-	<div id="wc_pass_err" class="wc_error_msg"></div>
+	<div id="wc_pass_err" class="error_msg"></div>
 	<b>{USER_NAME}</b>: Password required: <input type="password" id="wc_login_pass" onkeypress="if(event.which == 13 || event.keyCode == 13) { document.getElementById(\'wc_join_bt\').click(); }">
 </div>';
 
@@ -270,7 +269,7 @@ $templates['wcchat.login_screen'] = '
 		Name: <input type="text" name="cname" value="{USER_NAME_COOKIE}"> 
 		<input type="submit" name="join" value="Login">
 	</form>
-	<div class="wc_note">(If you can\'t login, you\'ll have to enable cookies!)</div>
+	<div class="note">(If you can\'t login, you\'ll have to enable cookies!)</div>
 </fieldset>';
 
 # ============================================================================
@@ -283,52 +282,49 @@ $templates['wcchat.users'] = '
 </div>';
 
 $templates['wcchat.users.inner'] = '
-<div class="wc_separator">JOINED / ONLINE</div>
+<div class="separator">JOINED / ONLINE</div>
 {JOINED}
 {OFFLINE}
 {GUESTS}';
 
-$templates['wcchat.users.joined'] = '<table>{USERS}</table>';
+$templates['wcchat.users.joined'] = '{USERS}';
+
 
 $templates['wcchat.users.item'] = '
-<tr>
-	<td class="avatar">
+<div class="user_item" {NAME_STYLE} id="wc_user_{ID}">
 		<img src="{AVATAR}" {WIDTH} class="{JOINED_CLASS}" title="{STATUS_TITLE}">
-	</td>
-	<td {NAME_STYLE}>
-		{PREFIX}{LINK}{IDLE}{EDIT_BT}
-	</td>
-</tr>
+		{NAME}{MOD_ICON}{MUTED_ICON}{LINK}{IDLE}{EDIT_BT}
+</div>
 {EDIT_FORM}';
 
-$templates['wcchat.users.item.edit_bt'] = ' <a href="#" onclick="wc_toggle(\'wc_uedt_{ID}\'); return false;"><img src="{INCLUDE_DIR_THEME}images/edit.gif" class="wc_edit_bt{OFF}"></a>';
+$templates['wcchat.users.item.edit_bt'] = ' <a href="#wc_user_{ID}" onclick="wc_toggle(\'wc_uedt_{ID}\'); return false;"><img src="{INCLUDE_DIR_THEME}images/edit.gif" class="edit_bt{OFF}"></a>';
 
 $templates['wcchat.users.item.edit_form'] = '
-<tr id="wc_uedt_{ID}" class="closed">
-	<td class="wc_form_box" colspan="2">
-		<form action="?mode=upd_user" method="POST" onsubmit="wc_upd_user(\'{CALLER}\', \'{ID}\', event)">
-			<div id="wc_box1_{ID}">
-				<div><b>Moderation</b> | <a href="#" onclick="wc_toggle(\'wc_box1_{ID}\'); wc_toggle(\'wc_box2_{ID}\'); return false">Profile Data</a></div>
-				{MODERATOR}
-				{BANNED}
-				{MUTED}
-				{MOD_NOPERM}
-			</div>
-			<div id="wc_box2_{ID}" class="closed">
-				<div><a href="#" onclick="wc_toggle(\'wc_box1_{ID}\'); wc_toggle(\'wc_box2_{ID}\'); return false">Moderation</a> | Profile Data</div>
-				{PROFILE_DATA}
-			</div>
-			<div>
-				<input type="submit" value="Update">
-			</div>
-			<input type="hidden" name="oname" value="{NAME}" class="usett_{ID}">
-		</form>
-	</td>
-</tr>';
+<div id="wc_uedt_{ID}" class="closed">
+	<div class="form_box">
+	<form action="?mode=upd_user" method="POST" onsubmit="wc_upd_user(\'{CALLER}\', \'{ID}\', event)">
+		<div id="wc_box1_{ID}">
+			<div class="menu"><b>Moderation</b> | <a href="#" onclick="wc_toggle(\'wc_box1_{ID}\'); wc_toggle(\'wc_box2_{ID}\'); return false">Profile Data</a></div>
+			{MODERATOR}
+			{BANNED}
+			{MUTED}
+			{MOD_NOPERM}
+		</div>
+		<div id="wc_box2_{ID}" class="closed">
+			<div class="menu"><a href="#" onclick="wc_toggle(\'wc_box1_{ID}\'); wc_toggle(\'wc_box2_{ID}\'); return false">Moderation</a> | Profile Data</div>
+			{PROFILE_DATA}
+		</div>
+		<div>
+			<input type="submit" value="Update">
+		</div>
+		<input type="hidden" name="oname" value="{NAME}" class="usett_{ID}">
+	</form>
+	</div>
+</div>';
 
 $templates['wcchat.users.item.edit_form.moderator'] = '
 <div>
-	<input type="checkbox" value="1" name="moderator" id="mod_{ID}" class="usett_{ID}" {MOD_CHECKED}> Moderator
+	<input type="checkbox" value="1" name="moderator" id="wc_mod_{ID}" class="usett_{ID}" {MOD_CHECKED}> Moderator
 </div>';
 
 $templates['wcchat.users.item.edit_form.banned'] = '
@@ -361,15 +357,15 @@ $templates['wcchat.users.item.edit_form.profile_data'] = '
 	<input type="checkbox" value="1" name="regen_pass" class="usett_{ID}"> Re-generate password</li>
 </div>';
 
-$templates['wcchat.users.item.icon_moderator'] = ' <img src="{INCLUDE_DIR_THEME}images/mod.png" class="wc_moderator_icon" title="Certified Moderator">';
+$templates['wcchat.users.item.icon_moderator'] = ' <img src="{INCLUDE_DIR_THEME}images/mod.png" class="moderator_icon" title="Certified Moderator">';
 
-$templates['wcchat.users.item.icon_muted'] = ' <img src="{INCLUDE_DIR_THEME}images/muted.png" class="wc_muted_icon" title="Muted">';
+$templates['wcchat.users.item.icon_muted'] = ' <img src="{INCLUDE_DIR_THEME}images/muted.png" class="muted_icon" title="Muted">';
 
-$templates['wcchat.users.item.icon_ignored'] = ' <img src="{INCLUDE_DIR_THEME}images/ignored.png" class="wc_muted_icon" title="Ignored">';
+$templates['wcchat.users.item.icon_ignored'] = ' <img src="{INCLUDE_DIR_THEME}images/ignored.png" class="muted_icon" title="Ignored">';
 
-$templates['wcchat.users.item.width'] = 'style="width: {WIDTH}px"';
+$templates['wcchat.users.item.width'] = 'style="width: {WIDTH}px; vertical-align: middle"';
 
-$templates['wcchat.users.item.link'] = ' <a href="{LINK}" target="_blank"><img class="wc_web" src="{INCLUDE_DIR_THEME}images/web.png"></a>';
+$templates['wcchat.users.item.link'] = ' <a href="{LINK}" target="_blank"><img class="web" src="{INCLUDE_DIR_THEME}images/web.png"></a>';
 
 $templates['wcchat.users.item.idle'] = ' <span>(Idle)</span>';
 
@@ -377,11 +373,11 @@ $templates['wcchat.users.item.idle_var'] = ' <span>({IDLE})</span>';
 
 $templates['wcchat.users.joined.void'] = 'There are no joined users.';
 
-$templates['wcchat.users.offline'] = '<div class="wc_separator">OFFLINE</div><table>{USERS}</table>';
+$templates['wcchat.users.offline'] = '<div class="separator">OFFLINE</div>{USERS}';
 
-$templates['wcchat.users.guests'] = '<div class="wc_separator">GUESTS</div>{USERS}';
+$templates['wcchat.users.guests'] = '<div class="separator">GUESTS</div>{USERS}';
 
-$templates['wcchat.users.guests.item'] = '<div class="wc_guest"><img src="{INCLUDE_DIR_THEME}images/guest.png"> {USER} <span>({IDLE} ago)</span></div>';
+$templates['wcchat.users.guests.item'] = '<div class="guest"><img src="{INCLUDE_DIR_THEME}images/guest.png"> {USER} <span>({IDLE})</span></div>';
 
 # ============================================================================
 #                  POST MESSAGES
@@ -390,10 +386,10 @@ $templates['wcchat.users.guests.item'] = '<div class="wc_guest"><img src="{INCLU
 $templates['wcchat.posts'] = '<div id="wc_msg_container"></div>';
 
 $templates['wcchat.posts.self'] = '
-<div class="wc_msg_item">
-	<div class="wc_msg">
+<div class="msg_item{SKIP_ON_OLDER_LOAD}" id="js_{ID}">
+	<div class="msg">
 		{HIDE_ICON}
-		<span class="wc_timestamp" style="{STYLE}">
+		<span class="timestamp" style="{STYLE}">
 			{TIMESTAMP}
 		</span> 
 		<i><b>{USER}</b> <span id="{ID}">{MSG}</span></i>
@@ -402,30 +398,25 @@ $templates['wcchat.posts.self'] = '
 </div>';
 
 $templates['wcchat.posts.normal'] = '
-<div class="wc_msg_item">
-	<div class="wc_msg{PM_SUFIX}">
+<div class="msg_item" id="js_{ID}">
+	<div class="msg{PM_SUFIX}">
 		{PM_TAG}
-		<table>
-			<tr>
-				<td class="avatar_container">
-					<img src="{AVATAR}" class="wc_thumb" {WIDTH} onload="wc_doscroll()">
-				</td>
-				<td>
-					{HIDE_ICON}
-					[<span class="wc_user">{POPULATE_START}{USER}{POPULATE_END}{PM_TARGET}</span>]
-					<span class="wc_timestamp" style="{STYLE}">
-						{TIMESTAMP}
-					</span> 
-					<div id="{ID}" class="msg_body">{MSG}</div>
-				</td>
-			</tr>
-		</table>
+		<img src="{AVATAR}" class="thumb" {WIDTH} onload="wc_doscroll()">
+		<div class="msg_right_col">
+			{HIDE_ICON}
+			[<span class="user">{POPULATE_START}{USER}{POPULATE_END}{PM_TARGET}</span>]
+			<span class="timestamp" style="{STYLE}">
+				{TIMESTAMP}
+			</span> 
+			<div id="{ID}" class="msg_body">{MSG}</div>
+		</div>
+		<div style="clear: both"></div>
 	</div>
 </div>';
 
 $templates['wcchat.posts.normal.width'] = 'style="width: {WIDTH}px"';
 
-$templates['wcchat.posts.normal.pm_tag'] = '<span class="wc_private">private</span>';
+$templates['wcchat.posts.normal.pm_tag'] = '<span class="private">private</span>';
 
 $templates['wcchat.posts.normal.populate_start'] = '<a href="#wc_text_input" onclick="wc_pop_input(\'/pm \'+this.innerHTML+\' \'); return false;">';
 
@@ -435,13 +426,13 @@ $templates['wcchat.posts.normal.pm_target'] = ' <img src="{INCLUDE_DIR_THEME}ima
 
 $templates['wcchat.posts.normal.pm_target.self'] = ' <img src="{INCLUDE_DIR_THEME}images/arrow.png"> {TITLE}';
 
-$templates['wcchat.posts.hide_icon'] = '<a href="#" onclick="wc_toggle_msg(\'{CALLER}\', \'{ID}\'); return false;"><img src="{INCLUDE_DIR_THEME}images/arrow{REVERSE}.png" id="wc_icon_{ID}" title="Hide/Unhide Message" class="wc_hide_icon{OFF}"></a> ';
+$templates['wcchat.posts.hide_icon'] = '<a href="#" onclick="wc_toggle_msg(\'{CALLER}\', \'{ID}\'); return false;"><img src="{INCLUDE_DIR_THEME}images/arrow{REVERSE}.png" id="wc_icon_{ID}" title="Hide/Unhide Message" class="hide_icon{OFF}"></a> ';
 
 $templates['wcchat.posts.hidden'] = '<i>This message is hidden.</i>';
 
 $templates['wcchat.posts.event'] = '
-<div class="wc_msg">
-	<span class="wc_timestamp" style="{STYLE}">
+<div class="msg">
+	<span class="timestamp" style="{STYLE}">
 		{TIMESTAMP}
 	</span> 
 	<i>{MSG}</i>
@@ -449,13 +440,15 @@ $templates['wcchat.posts.event'] = '
 </div>';
 
 $templates['wcchat.posts.older'] = '
-<div id="wc_load_older">
+<div class="load_older_controls">
 	<a href="#" onclick="wc_show_older_msg(\'{CALLER}\', 0, \'{INCLUDE_DIR_THEME}\'); return false">Load Older</a> | 
 	<a href="#" onclick="wc_show_older_msg(\'{CALLER}\', 1, \'{INCLUDE_DIR_THEME}\'); return false">Reset</a>
 </div>
 <div id="wc_older"></div>';
 
-$templates['wcchat.posts.new_msg_separator'] = '<div class="wc_new_msg"><img src="{INCLUDE_DIR_THEME}images/new_msg_separator.png" onload="wc_doscroll()"></div>';
+$templates['wcchat.posts.new_msg_separator'] = '<div class="new_msg"><img src="{INCLUDE_DIR_THEME}images/new_msg_separator.png" onload="wc_doscroll()"></div>';
+
+$templates['wcchat.posts.undo_clear_screen'] = 'Screen cleanup (<a href="#" onclick="wc_undo_clear_screen(\'{CALLER}\', \'{INCLUDE_DIR_THEME}\'); return false;">Undo</a>)';
 
 # ============================================================================
 #                  CHAT ROOMS
@@ -463,7 +456,7 @@ $templates['wcchat.posts.new_msg_separator'] = '<div class="wc_new_msg"><img src
 
 $templates['wcchat.rooms'] = '
 <div id="wc_rooms">
-	<div class="wc_separator">ROOMS</div>
+	<div class="separator">ROOMS</div>
 	<div id="wc_room_list">
 		{RLIST}
 	</div>
@@ -473,22 +466,22 @@ $templates['wcchat.rooms.inner'] = '{ROOMS}{CREATE}';
 
 $templates['wcchat.rooms.create'] = '
 <div id="wc_room_create">
-	<a href="#" onclick="wc_toggle(\'wc_croom_box\'); return false;" class="wc_create_link{OFF}" id="wc_create_link">Create New Room</a>
+	<a href="#" onclick="wc_toggle(\'wc_croom_box\'); return false;" class="create_link{OFF}" id="wc_create_link">Create New Room</a>
 	<div id="wc_croom_box" class="closed">
-		<div class="wc_form_box">
+		<div class="form_box">
 			Room Name: <input type="text" id="wc_room_name" value=""> <input type="submit" value="create" onclick="wc_create_room(\'{CALLER}\')">
 		</div>
 	</div>
 </div>';
 
 $templates['wcchat.rooms.current_room'] = '
-<div id="wc_room_item" class="wc_current">
+<div class="current room_item">
 	{NEW_MSG} {TITLE}{EDIT_BT}
 </div>
 {FORM}';
 
 $templates['wcchat.rooms.room'] = '
-<div id="wc_room_item">
+<div class="room_item">
 	{NEW_MSG} <a href="#" onclick="wc_changeroom(\'{CALLER}\', this.innerHTML, \'{INCLUDE_DIR_THEME}\'); return false;">{TITLE}</a>
 	{EDIT_BT}
 </div>
@@ -500,7 +493,7 @@ $templates['wcchat.rooms.new_msg.off'] = '<img src="{INCLUDE_DIR_THEME}images/nm
 
 $templates['wcchat.rooms.edit_form'] = '
 <div id="wc_edt_{ID}" class="closed">
-	<div class="wc_form_box">
+	<div class="form_box">
 		<div>
 			Name:<br>
 			<input type="text" id="wc_nname_{ID}" value="{ROOM_NAME}">
@@ -531,7 +524,7 @@ $templates['wcchat.rooms.edit_form'] = '
 
 $templates['wcchat.rooms.edit_form.delete_bt'] = '<input type="submit" value="Delete" onclick="wc_delete_rname(\'{CALLER}\', \'{ID}\', \'{INCLUDE_DIR_THEME}\')">';
 
-$templates['wcchat.rooms.edit_form.edit_icon'] = ' <a href="#" onclick="wc_toggle(\'wc_edt_{ID}\'); return false;"><img src="{INCLUDE_DIR_THEME}images/edit.gif" class="wc_edit_bt{OFF}"></a>';
+$templates['wcchat.rooms.edit_form.edit_icon'] = ' <a href="#" onclick="wc_toggle(\'wc_edt_{ID}\'); return false;"><img src="{INCLUDE_DIR_THEME}images/edit.gif" class="edit_bt{OFF}"></a>';
 
 # ============================================================================
 #                  WCCHAT MODULES : THEMES
@@ -730,7 +723,20 @@ $templates['wcchat.global_settings'] = '
 					<td class="check"><input type="checkbox" value="1" id="user_user_e"{GS_USER_USER_E} class="gsett"></td>
 					<td class="check"><input type="checkbox" value="1" id="guest_user_e"{GS_GUEST_USER_E} class="gsett"></td>
 				</tr>
-				<tr class="l"><td colspan="6" class="separator"></td></tr>
+				<tr>
+					<th class="first_col"></td>
+					<th>Master<br>Moderator</td>
+					<th>Moderator</td>
+					<th>
+						Certified User<br>
+						<span>(Password Protected)</span>
+					</td>
+					<th>User</td>
+					<th>
+						Guest<br>
+						<span>(Not Logged-in)</span>
+					</td>
+				</tr>
 				<tr>
 					<td><img src="{INCLUDE_DIR_THEME}images/arrow.png"> Topic: Edit</td>
 					<td class="check"><input type="checkbox" value="1" id="mmod_topic_e"{GS_MMOD_TOPIC_E} class="gsett"></td>
@@ -787,7 +793,20 @@ $templates['wcchat.global_settings'] = '
 					<td class="check"><input type="checkbox" value="1" id="user_msg_unhide"{GS_USER_MSG_UNHIDE} class="gsett"></td>
 					<td class="check"><input type="checkbox" value="1" id="guest_msg_unhide"{GS_GUEST_MSG_UNHIDE} class="gsett"></td>
 				</tr>
-				<tr class="l"><td colspan="6" class="separator"></td></tr>
+				<tr>
+					<th class="first_col"></td>
+					<th>Master<br>Moderator</td>
+					<th>Moderator</td>
+					<th>
+						Certified User<br>
+						<span>(Password Protected)</span>
+					</td>
+					<th>User</td>
+					<th>
+						Guest<br>
+						<span>(Not Logged-in)</span>
+					</td>
+				</tr>
 				<tr>
 					<td><img src="{INCLUDE_DIR_THEME}images/arrow.png"> Posts: Add</td>
 					<td class="check"><input type="checkbox" value="1" id="mmod_post"{GS_MMOD_POST} class="gsett"></td>
@@ -836,7 +855,20 @@ $templates['wcchat.global_settings'] = '
 					<td class="check"><input type="checkbox" value="1" id="user_pm_send"{GS_USER_PM_SEND} class="gsett"></td>
 					<td class="check"><input type="checkbox" value="1" id="guest_pm_send"{GS_GUEST_PM_SEND} class="gsett"></td>
 				</tr>
-				<tr class="l"><td colspan="6" class="separator"></td></tr>
+				<tr>
+					<th class="first_col"></td>
+					<th>Master<br>Moderator</td>
+					<th>Moderator</td>
+					<th>
+						Certified User<br>
+						<span>(Password Protected)</span>
+					</td>
+					<th>User</td>
+					<th>
+						Guest<br>
+						<span>(Not Logged-in)</span>
+					</td>
+				</tr>
 				<tr>
 					<td><img src="{INCLUDE_DIR_THEME}images/arrow.png"> Login</td>
 					<td class="check"><input type="checkbox" value="1" id="mmod_login"{GS_MMOD_LOGIN} class="gsett"></td>

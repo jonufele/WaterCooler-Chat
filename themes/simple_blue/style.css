@@ -6,85 +6,102 @@ H1 {
 	text-align: center;
 }
 
-BODY {
-}
-
-INPUT[type="submit"] {
-	background-image: url('images/bt.png');
-	border: 1px solid #ac939d;
-	height: 27px;
-}
-
-INPUT[type="text"], INPUT[type="password"], SELECT { 
-	padding: 5px;
-}
-
 /*--------------------------------------*/
 /*            WCCHAT                    */
 /*--------------------------------------*/
 
 #wcchat {
 	font-family: verdana;
+	font-size: 14px;
 	width: 100%;
 	height: 100%;
+}
+
+#wcchat FORM,
+#wcchat div,
+#wcchat INPUT,
+#wcchat FIELDSET,
+#wcchat table td {
 	border: 0;
-	border-spacing: 0px;
-	border-collapse: separate;
-}
-
-#wcchat td {
+	border-radius: 0;
+	margin: 0;
 	padding: 0;
+	background-color: transparent;
 }
 
-#wcchat .wc_left_col {
-	padding-bottom: 50px;
-	padding-left: 50px;
+#wcchat INPUT[type="submit"] {
+	background-image: url('images/bt.png');
+	border: 1px solid #ac939d;
+	height: 27px;
+	padding: 5px;
+}
+
+#wcchat INPUT[type="text"],
+#wcchat INPUT[type="password"],
+#wcchat SELECT { 
+	padding: 5px;
+	border: 1px solid #aaaaaa;
+	background-color: white;
+}
+
+#wcchat .left_col {
+	margin-bottom: 50px;
+	margin-left: 50px;
 	vertical-align: top;
+	overflow: hidden;
 }
 
-#wcchat .wc_left_col .wc_static_msg {
+#wcchat .left_col .static_msg {
 	text-align: center;
 	font-style: italic;
 	padding: 5px;
 	background-color: #EEEEEE;
 }
 
-#wcchat .wc_right_col {
+#wcchat .right_col {
 	padding-bottom: 50px;
 	padding-right: 30px;
+	margin-right: 30px;
+	margin-left: 5px;
 	width:251px;
 	vertical-align: top;
 	padding: 5px;
 	overflow: auto;
 	background-image: url('images/bgrcol.jpg');
 	background-repeat: repeat-x;
+	float: right;
 }
 
-#wcchat .wc_right_col .wc_separator {
+#wcchat .right_col .separator {
 	border-bottom: 1px dotted #718099;
 	margin-top: 10px;
+	margin-bottom: 10px;
 	font-size: 9px;
 	text-align: right;
 }
 
-.wc_critical_error {
-	border: 2px solid #AAAAAA;
+#wcchat .critical_error {
+	border: 2px dashed #AAAAAA;
 	margin: 20px;
 	padding: 20px;
 	background-color: white;
+}
+
+#wcchat .critical_error legend { 
+	font-weight: bold;
 }
 
 /*--------------------------------------*/
 /*            CHAT TOPIC                */
 /*--------------------------------------*/
 
-#wc_topic {
+#wcchat #wc_topic {
 	background-color: #eae3f2;
 	font-size: 12px;
 	border: 1px solid #cdbedd;
 	color: #72598e;
 	line-height: 1.5em;
-	margin: 0;
+	padding: 5px 10px;
 }
 
 #wc_topic legend {
@@ -94,19 +111,21 @@ INPUT[type="text"], INPUT[type="password"], SELECT {
 	font-weight: bold;
 }
 
-#wc_topic_con .wc_edit_bt_off {
+#wc_topic .edit_bt_off {
 	display: none;
 }
 
-#wc_topic_con a.edit {
+#wc_topic a.edit {
 	font-size: 10px;
 }
 
-#wc_topic_con a.edit, #wc_topic_con a.less, #wc_topic_con a.more {
+#wc_topic a.edit,
+#wc_topic a.less,
+#wc_topic a.more {
 	font-size: 10px;
 }
 
-#wc_topic_editbox {
+#wc_topic #wc_topic_editbox {
 	padding: 10px;
 }
 
@@ -133,36 +152,38 @@ INPUT[type="text"], INPUT[type="password"], SELECT {
 /*      CHAT MESSAGES CONTAINER         */
 /*--------------------------------------*/
 
-#wc_msg_container {
+#wcchat #wc_msg_container {
 	height: 400px;
-	border-left: 1px dotted #5f6b8b;
+	border-left: 1px dotted #718099;
+	border-right: 1px dotted #718099;
 	overflow: auto;
 	font-size: 12px;
 	padding: 5px;
 }
 
-#wc_msg_container .wc_msg {
+#wc_msg_container .msg {
 	padding: 5px;
 	border-top: 1px dotted #e1ebef;
 }
 
-#wc_msg_container .wc_msg_first {
+#wc_msg_container .msg_first {
 	padding: 5px;
 }
 
-#wc_msg_container .wc_msg_pm {
+
+#wc_msg_container .msg_pm {
 	padding: 5px;
 	border-top: 1px solid #c5dfe2;
 	background-color: #e6f1f2;
 }
 
-#wc_msg_container .wc_msg .avatar_container,
-#wc_msg_container .wc_msg_pm .avatar_container {
-	padding: 5px 10px 0 10px;
-	vertical-align: top;
+
+#wc_msg_container .msg_right_col {
+	overflow: hidden;
+	padding: 5px;	
 }
 
-#wc_msg_container .wc_msg_pm .wc_private {
+#wc_msg_container .msg_pm .private {
 	float: right;
 	font-style: italic;
 	font-size: 7pt;
@@ -171,78 +192,73 @@ INPUT[type="text"], INPUT[type="password"], SELECT {
 	color: #77a0a5;
 }
 
-#wc_msg_container .wc_msg .wc_timestamp,
-#wc_msg_container .wc_msg_pm .wc_timestamp {
+#wc_msg_container .msg .timestamp,
+#wc_msg_container .msg_pm .timestamp {
 
 	font-size: 7pt;
 	font-family: tahoma;
 	color: #888888
 }
 
-#wc_msg_container .wc_msg .wc_user,
-#wc_msg_container .wc_msg_pm .wc_user {
+#wc_msg_container .msg .user,
+#wc_msg_container .msg_pm .user {
 	font-size: 10px;
 	font-family: verdana;
 	color: #6335bf;
 	font-weight: bold
 }
 
-#wc_msg_container .wc_msg .wc_user a,
-#wc_msg_container .wc_msg_pm .wc_user a {
+#wc_msg_container .msg .user a,
+#wc_msg_container .msg_pm .user a {
 	text-decoration: none;
 }
 
-#wc_msg_container .wc_msg .wc_user a:hover,
-#wc_msg_container .wc_msg_pm .wc_user a:hover {
+#wc_msg_container .msg .user a:hover,
+#wc_msg_container .msg_pm .user a:hover {
 	color: #9469ea !important;
 }
 
-#wc_msg_container .wc_msg .wc_user a:visited,
-#wc_msg_container .wc_msg_pm .wc_user a:visited {
+#wc_msg_container .msg .user a:visited,
+#wc_msg_container .msg_pm .user a:visited {
 	color: #6335bf;
 }
 
-#wc_msg_container .wc_msg img.wc_thumb,
-#wc_msg_container .wc_msg_pm img.wc_thumb {
+#wc_msg_container .msg img.thumb,
+#wc_msg_container .msg_pm img.thumb {
 	padding: 1px;
-	border: 1px solid #ced9ea
+	border: 1px solid #60779b;
+	margin: 5px 10px 0 10px;
+	float: left;
 }
 
-#wc_msg_container .wc_msg iframe,
-#wc_msg_container .wc_msg_pm iframe {
+#wc_msg_container .msg iframe,
+#wc_msg_container .msg_pm iframe {
 	margin: 10px;
 	display: block;
 	padding: 1px;
 	border: 1px solid #ced9ea
 }
 
-#wc_msg_container .wc_msg .msg_body,
-#wc_msg_container .wc_msg_pm .msg_body {
+#wc_msg_container .msg .msg_body,
+#wc_msg_container .msg_pm .msg_body {
 	margin-top: 5px;
 }
 
-#wc_msg_container #wc_load_older {
+#wc_msg_container .load_older_controls {
 	padding:5px;
 	text-align: center
 }
 
-#wc_msg_container #wc_void {
-	margin: 20px;
-	font-size: 25px;
-	text-align: center;
-	vertical-align: middle;
-}
-
-#wc_msg_container .wc_new_msg {
+#wc_msg_container .new_msg {
 	margin: 5px;
 	text-align: center;
 }
 
-#wc_msg_container .wc_new_msg img {
+#wc_msg_container .new_msg img {
 	width: 300px;
 }
 
-#wc_msg_container .wc_hide_icon_off {
+#wc_msg_container .hide_icon_off {
 	display: none;
 }
 
@@ -250,9 +266,10 @@ INPUT[type="text"], INPUT[type="password"], SELECT {
 /*            GLOBAL SETTINGS           */
 /*--------------------------------------*/
 
-#wc_global_settings {
+#wcchat #wc_global_settings {
 	height: 400px;
-	border: 1px dotted #a28299;
+	border-right: 1px dotted #a28299;
+	border-left: 1px dotted #a28299;
 	overflow: auto;
 	font-size: 12px;
 	padding: 15px;
@@ -276,9 +293,10 @@ INPUT[type="text"], INPUT[type="password"], SELECT {
 
 #wc_global_settings fieldset {
 	font-size: 12px;
-	margin: 5px;
+	margin: 10px;
 	padding: 10px;
-	border: 1px dashed #795e71;
+	border: 1px dashed #8091ab;
+	background-color: #e9edf4;
 }
 
 #wc_global_settings fieldset legend {
@@ -291,6 +309,10 @@ INPUT[type="text"], INPUT[type="password"], SELECT {
 
 #wc_global_settings table th.first_col {
 	width: 150px;
+}
+
+#wc_global_settings table td { 
+	padding: 2px;
 }
 
 #wc_global_settings table td.check {
@@ -336,67 +358,78 @@ INPUT[type="text"], INPUT[type="password"], SELECT {
 /*--------------------------------------*/
 
 
-#wc_ulist {
+#wcchat #wc_ulist {
 	padding: 5px;
+	margin-bottom: 10px;
 	height: 400px;
 	overflow: auto;
 }
 
 
-#wc_ulist td, #wc_ulist div {
+#wc_ulist .user_item {
 	font-size: 12px;
 	margin: 3px;
 }
 
-#wc_ulist td.avatar {
-	padding-right: 5px;
-}
 
-#wc_ulist td img {
+#wc_ulist .user_item img {
 	padding: 1px;
 	border: 1px solid #60779b;
+	margin-right: 5px;
 }
 
-#wc_ulist td img.joined_on {
+#wc_ulist .user_item img.joined_on {
 	padding: 1px;
 	border: 1px solid #7f8cac;
 	border-top: 2px solid #08a52a;
 }
 
-#wc_ulist td img.joined_idle {
+#wc_ulist .user_item img.joined_idle {
 	padding: 1px;
 	border: 1px solid #7f8cac;
 	border-top: 2px solid #f28900;
 }
 
-#wc_ulist td img.joined_na {
+#wc_ulist .user_item img.joined_na {
 	padding: 1px;
 	border: 1px solid #7f8cac;
 	border-top: 2px solid #c10707;
 }
 
-#wc_ulist td img.wc_web,
-#wc_ulist td img.wc_edit_bt {
+#wc_ulist .user_item img.web,
+#wc_ulist .user_item img.edit_bt {
 	padding: 1px;
 	border: 0;
+	vertical-align: middle;
 }
 
-#wc_ulist td img.wc_edit_bt_off { 
+#wc_ulist .user_item img.edit_bt_off { 
 	padding: 1px;
 	border: 0;
 	display: none;
 }
 
-#wc_ulist td img.joined_icon {
+#wc_ulist .user_item img.joined_icon {
 	width: 10px;
 	border: 0;
 }
 
-#wc_ulist .wc_guest {
-	color: #7b5f6a;
+
+#wc_ulist .user_item .moderator_icon,
+#wc_ulist .user_item .muted_icon {
+	vertical-align: middle;
+	width: 10px;
+	border: 0;
+	margin-right: 0px;	
 }
 
-#wc_ulist .wc_guest img {
+#wc_ulist .guest {
+	color: #7b5f6a;
+	padding-left: 5px;
+	font-size: 12px;
+}
+
+#wc_ulist .guest img {
 	width: 12px;
 }
 
@@ -406,21 +439,21 @@ INPUT[type="text"], INPUT[type="password"], SELECT {
 	color:#AAAAAA
 }
 
-#wc_ulist .wc_moderator_icon, #wc_ulist .wc_muted_icon {
-	width: 10px;
-	border: 0;
+#wc_ulist .form_box {
+	padding: 20px;
 }
 
-#wc_ulist .wc_form_box {
-	padding: 5px;
-}
-
-#wc_ulist .wc_form_box div {
+#wc_ulist .form_box div {
 	margin: 10px;
 }
 
-#wc_ulist .wc_form_box input[name="banned_time"],
-#wc_ulist .wc_form_box input[name="muted_time"] {
+#wc_ulist .form_box .menu {
+	margin: 0px;
+	margin-bottom: 20px;
+}
+
+#wc_ulist .form_box input[name="banned_time"],
+#wc_ulist .form_box input[name="muted_time"] {
 	width: 25px;
 }
 
@@ -429,29 +462,29 @@ INPUT[type="text"], INPUT[type="password"], SELECT {
 /*            ROOM LIST                 */
 /*--------------------------------------*/
 
-#wc_rooms {
+#wcchat #wc_rooms {
 	padding: 5px;
 }
 
-#wc_rooms .wc_current {
+#wc_rooms .current {
 	font-weight: bold;
 }
 
-#wc_rooms wc_croom_box {
+#wc_rooms #wc_croom_box {
 	padding: 5px;
 }
 
-#wc_rooms #wc_room_list #wc_room_item {
+#wc_rooms .room_item {
 	padding: 2px;
 	font-size: 14px;
 }
 
-#wc_rooms #wc_room_list #wc_room_item .wc_edit_bt_off,
-#wc_rooms #wc_room_list .wc_create_link_off {
+#wc_rooms .room_item .edit_bt_off,
+#wc_rooms .create_link_off {
 	display: none;
 }
 
-#wc_rooms #wc_room_list #wc_room_item span {
+#wc_rooms .room_item span {
 	padding: 0 3px 0 3px;
 	border-radius: 10px;
 	background-color: #edda95;
@@ -460,11 +493,11 @@ INPUT[type="text"], INPUT[type="password"], SELECT {
 	font-family: verdana
 }
 
-#wc_rooms #wc_room_list #wc_room_item a {
+#wc_rooms .room_item a {
 	text-decoration: none;
 }
 
-#wc_rooms #wc_room_list #wc_room_item a:hover {
+#wc_rooms .room_item a:hover {
 	text-decoration: underline;
 }
 
@@ -472,11 +505,11 @@ INPUT[type="text"], INPUT[type="password"], SELECT {
 	font-size: 10px;
 }
 
-#wc_rooms #wc_form_box input[id="wc_room_name"] {
+#wc_rooms .form_box input[id="wc_room_name"] {
 	width: 150px;
 }
 
-#wc_rooms .wc_form_box div {
+#wc_rooms .form_box div {
 	margin: 5px;
 }
 
@@ -484,7 +517,7 @@ INPUT[type="text"], INPUT[type="password"], SELECT {
 /*            TOOLBAR                   */
 /*--------------------------------------*/
 
-#wc_toolbar {
+#wcchat #wc_toolbar {
 	background-color: #667fa8;
 	color: white;
 	padding: 5px;
@@ -520,7 +553,7 @@ INPUT[type="text"], INPUT[type="password"], SELECT {
 }
 
 #wc_toolbar #wc_post_loader,
-#wc_toolbar #attachment_upl_icon {
+#wc_toolbar #wc_attachment_upl_icon {
 	width: 16px;
 }
 
@@ -528,15 +561,17 @@ INPUT[type="text"], INPUT[type="password"], SELECT {
 /*            INPUT                     */
 /*--------------------------------------*/
 
-#wc_text_input_field {
+#wcchat #wc_text_input_field {
 	width: 97%;
+	background-color: #FFFFFF;
 }
 
-#wc_submit {
+#wcchat #wc_submit {
 	padding: 5px;
 }
 
-.wc_form_box, .wc_form_box_inner {
+#wcchat .form_box, 
+#wcchat .form_box_inner {
 	font-size: 12px;
 	margin: 5px;
 	padding: 10px;
@@ -548,7 +583,7 @@ INPUT[type="text"], INPUT[type="password"], SELECT {
 /*            SETTINGS                  */
 /*--------------------------------------*/
 
-#wc_settings_input {
+#wcchat #wc_settings_input {
 	padding: 10px;
 	margin: 10px;
 	border: 1px dashed #8091ab;
@@ -558,6 +593,7 @@ INPUT[type="text"], INPUT[type="password"], SELECT {
 
 #wc_settings_input legend {
 	padding: 10px;
+	font-size: 16px;
 }
 
 #wc_settings_input span {
@@ -577,7 +613,7 @@ INPUT[type="text"], INPUT[type="password"], SELECT {
 /*            JOIN                      */
 /*--------------------------------------*/
 
-#wc_join {
+#wcchat #wc_join {
 	text-align: center;
 	padding: 20px;
 }
@@ -586,7 +622,7 @@ INPUT[type="text"], INPUT[type="password"], SELECT {
 	font-size: 9px;
 }
 
-#wc_pass_req {
+#wcchat #wc_pass_req {
 	margin: 5px;
 }
 
@@ -594,7 +630,7 @@ INPUT[type="text"], INPUT[type="password"], SELECT {
 /*            AVATARS                   */
 /*--------------------------------------*/
 
-#wc_avatar_form {
+#wcchat #wc_avatar_form {
 	border: 1px dotted #AAAAAA;
 	padding: 10px;
 }
@@ -608,7 +644,7 @@ INPUT[type="text"], INPUT[type="password"], SELECT {
 /*            ERROR MESSAGES            */
 /*--------------------------------------*/
 
-.wc_error_msg {
+#wcchat .error_msg {
 	color: #FF0000;
 	margin: 5px;
 }
@@ -617,8 +653,9 @@ INPUT[type="text"], INPUT[type="password"], SELECT {
 /*            LOGIN SCREEN              */
 /*--------------------------------------*/
 
-#wc_login_screen {
+#wcchat #wc_login_screen {
 	border: 1px dashed #AAAAAA;
+	padding: 15px;
 }
 
 #wc_login_screen FORM {
@@ -630,7 +667,7 @@ INPUT[type="text"], INPUT[type="password"], SELECT {
 	padding: 5px;
 }
 
-#wc_login_screen .wc_note {
+#wc_login_screen .note {
 	font-size: 9px;
 	text-align: center;
 }
@@ -647,7 +684,7 @@ INPUT[type="text"], INPUT[type="password"], SELECT {
 /*            THEMES                    */
 /*--------------------------------------*/
 
-.themes {
+#wcchat .themes {
 	padding-top: 20px;
 	padding-bottom: 10px;
 	text-align: center;
@@ -656,7 +693,7 @@ INPUT[type="text"], INPUT[type="password"], SELECT {
 /*--------------------------------------*/
 /*            COPYRIGHT                 */
 /*--------------------------------------*/
-.copyright_note {
+#wcchat .copyright_note {
 	padding-bottom: 10px;
 	font-size: 9px;
 	text-align: center;
