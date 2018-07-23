@@ -31,6 +31,7 @@ H1 {
 #wcchat div,
 #wcchat INPUT,
 #wcchat FIELDSET,
+#wcchat HR,
 #wcchat table td {
 	border: 0;
 	border-radius: 0;
@@ -256,6 +257,11 @@ H1 {
 #wc_msg_container .load_older_controls {
 	padding:5px;
 	text-align: center
+}
+
+#wc_msg_container #wc_older hr {
+	border-bottom: 1px dashed #795e71;
+	height: 1px;
 }
 
 #wc_msg_container .new_msg {

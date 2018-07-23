@@ -518,8 +518,8 @@ function wc_upd_user(c, id, event)
 			}
 			if(s.search('Successfully') != -1) {
 				wc_toggle('wc_uedt_'+id);
+				wc_updu(0, c, 0, 0, 'ignore_lastmod');
 			}
-			wc_updu(0, c, 0, 0, 'ignore_lastmod');
 			alert(s);
 		}
 	}}
@@ -761,7 +761,7 @@ function wc_updmsg(c, all, refresh_delay, lim, incdir)
 
 	(function wc_theLoop () {
   		setTimeout(function wc_() {
-			http.open("GET", c+"mode=updmsg&all=0", true);
+			http.open("GET", c+"mode=updmsg&all=0&loop=1", true);
 			http.onreadystatechange=function(){if(http.readyState==4){
 				if(http.responseText.length > 0) {
 					var isScrolledToBottom = objDiv.scrollHeight - objDiv.clientHeight <= objDiv.scrollTop + 1;
@@ -879,6 +879,11 @@ function wc_show_older_msg(c, reset, incdir)
 	}
 	var older_container = document.getElementById('wc_older');
 	if(reset == '1') {
+		var http = getHTTPObject();
+		http.open("GET", c+"mode=reset_archive", true);
+		http.onreadystatechange=function(){if(http.readyState==4){ 
+		}}
+ 		http.send(null);
 		older_container.innerHTML = '';
 	} else {
 		cont = older_container.innerHTML;

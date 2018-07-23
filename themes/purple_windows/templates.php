@@ -297,7 +297,7 @@ $templates['wcchat.users.item'] = '
 </div>
 {EDIT_FORM}';
 
-$templates['wcchat.users.item.edit_bt'] = ' <a href="#wc_user_{ID}" onclick="wc_toggle(\'wc_uedt_{ID}\'); return false;"><img src="{INCLUDE_DIR_THEME}images/edit.gif" class="edit_bt{OFF}"></a>';
+$templates['wcchat.users.item.edit_bt'] = ' <a href="#wc_user_{ID}" onclick="wc_toggle(\'wc_uedt_{ID}\');"><img src="{INCLUDE_DIR_THEME}images/edit.gif" class="edit_bt{OFF}"></a>';
 
 $templates['wcchat.users.item.edit_form'] = '
 <div id="wc_uedt_{ID}" class="closed">
@@ -446,9 +446,13 @@ $templates['wcchat.posts.older'] = '
 </div>
 <div id="wc_older"></div>';
 
+$templates['wcchat.posts.older.block_separator'] = '<hr>';
+
 $templates['wcchat.posts.new_msg_separator'] = '<div class="new_msg"><img src="{INCLUDE_DIR_THEME}images/new_msg_separator.png" onload="wc_doscroll()"></div>';
 
 $templates['wcchat.posts.undo_clear_screen'] = 'Screen cleanup (<a href="#" onclick="wc_undo_clear_screen(\'{CALLER}\', \'{INCLUDE_DIR_THEME}\'); return false;">Undo</a>)';
+
+$templates['wcchat.posts.global_clear_screen'] = 'New Chat Visit';
 
 # ============================================================================
 #                  CHAT ROOMS
@@ -585,6 +589,10 @@ $templates['wcchat.global_settings'] = '
 			<div>
 				Older Message load step: <input type="text" id="gs_chat_older_msg_step" value="{GS_CHAT_OLDER_MSG_STEP}" class="gsett"> posts<br>
 				<span>Maximum number of old chat lines to retrieve at once</span>
+			</div>
+			<div>
+				Archive messages: <input type="checkbox" id="gs_archive_msg" class="gsett" value="1"{GS_ARCHIVE_MSG}><br>
+				<span>Archive messages that drop from Store Buffer (available for users to load)</span>
 			</div>
 			<div>
 				List Guests: <input type="checkbox" id="gs_list_guests" class="gsett" value="1"{GS_LIST_GUESTS}><br>

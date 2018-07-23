@@ -38,6 +38,7 @@ define('CHAT_OLDER_MSG_STEP', 20); // Maximum number of old chat posts to retrie
 define('LIST_GUESTS', TRUE); // List guests (Users that never joined chat) on user list
 define('ANTI_SPAM', 3); // Minimum ammount of time (seconds) between one user's posted messages (seconds, 0 = disabled)
 define('ACC_REC_EMAIL', ''); // Account recovey sender email; default = no-reply@<server_address>; The email account must exist in the webserver.
+define('ARCHIVE_MSG', TRUE); // Archive messages that drop from Store Buffer (system will keep packing the messages in files the same size as the store buffer, available for users to load)
 
 
 # ============================================================================
