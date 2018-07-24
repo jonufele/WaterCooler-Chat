@@ -18,11 +18,13 @@ Some of its features:
 - *Account Recovery via E-mail*
 - *Generate image thumbnails for faster loading*
 - *Attachment uploads*
+- *Smart archive system*
+- *Shared Chat Across the websites hosted on the same server*
 
 ## Instalation
 
  1. Copy package contents to your webserver
- 2. Define *INCLUDE_DIR* constant in "*settings.php*" - relative path to chat directory from caller page, in case it's on the same directory set it as empty)
+ 2. Define *INCLUDE_DIR* constant in "*settings.php*" - relative path to chat directory from web root
  3. Load the chat on a browser and login, set-up a password in your profile options in order to be assigned as the first moderator.
  4. Customize master settings and themes to match your preferences.
  5. Use *index.embedded.php* as reference if you want to embbed chat on another page.
