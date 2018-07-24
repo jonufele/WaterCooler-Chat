@@ -2477,7 +2477,7 @@ class WcChat {
                                             $this->popTemplate('wcchat.posts.normal.pm_target', array('TITLE' => base64_decode($pm_target)), $pm_target !== FALSE) :
                                             $this->popTemplate('wcchat.posts.normal.pm_target.self', array('TITLE' => base64_decode($pm_target)), $pm_target !== FALSE)
                                         ),
-                                    'MSG' => $this->popTemplate('wcchat.posts.hidden', '', $hidden, $msg),
+                                    'MSG' => $this->popTemplate('wcchat.posts.hidden', '', $hidden, $this->parseBbcode($msg)),
                                     'ID' => $unique_id,
                                     'HIDE_ICON' => $this->popTemplate('wcchat.posts.hide_icon', array('REVERSE' => ($hidden ? '_r' : ''), 'ID' => $unique_id, 'OFF' => ($this->myCookie('hide_edit') == 1 ? '_off' : '')), $this->hasPermission(($hidden ? 'MSG_UNHIDE' : 'MSG_HIDE'), 'skip_msg')),
                                     'AVATAR' => (isset($avatar_array[base64_decode($user)]) ? ($this->hasData($avatar_array[base64_decode($user)]) ? $this->includeDir . 'files/avatars/'.$avatar_array[base64_decode($user)] : INCLUDE_DIR_THEME . DEFAULT_AVATAR ) : INCLUDE_DIR_THEME . DEFAULT_AVATAR ),
@@ -2500,7 +2500,7 @@ class WcChat {
                                     ).
                                     ($time_date != $today_date ? ' '.$time_date : ''),
                                 'USER' => base64_decode($user),
-                                'MSG' => $this->popTemplate('wcchat.posts.hidden', '', $hidden, $msg),
+                                'MSG' => $this->popTemplate('wcchat.posts.hidden', '', $hidden, $this->parseBbcode($msg)),
                                 'ID' => $unique_id,
                                 'HIDE_ICON' => $this->popTemplate('wcchat.posts.hide_icon', array('REVERSE' => ($hidden ? '_r' : ''), 'ID' => $unique_id, 'OFF' => ($this->myCookie('hide_edit') == 1 ? '_off' : '')), $this->hasPermission(($hidden ? 'MSG_UNHIDE' : 'MSG_HIDE'), 'skip_msg'))
                             )
@@ -2569,7 +2569,7 @@ class WcChat {
                                     $time + ($this->uTimezone * 3600)
                                 ).
                                 ($time_date != $today_date ? ' '.$time_date : ''),
-                            'MSG' => $msg
+                            'MSG' => $this->parseBbcode($msg)
                         )
                     ).$output;
                 }
@@ -2827,7 +2827,7 @@ class WcChat {
                 $output_e = $this->parseMsgE($lines, $lastread, 'RECEIVE');
             }
         }
-        if($output_e) return $this->parseBbcode($output_e);
+        if($output_e) return $output_e;
     }
 
       /*===========================================
@@ -3633,7 +3633,7 @@ class WcChat {
                             $this->handleLastRead('store');
                             list($output, $index, $first_elem) = $this->parseMsg(array(trim($towrite)), 0, 'SEND');
                             $_SESSION['lastpost'] = time();
-                            echo $this->parseBbcode($output);
+                            echo $output;
                         } else {
                             echo ($banned_msg ? $banned_msg : $muted_msg);
                         }
@@ -3691,7 +3691,7 @@ class WcChat {
                 if($this->myGet('t')) {
                     $towrite = $this->writeEvent($this->myGet('t'), '', 'RETURN_RAW_LINE');
                     $output = $this->parseMsgE(array(trim($towrite)), 0, 'SEND');
-                    if($output) { echo $this->parseBbcode($output); }
+                    if($output) { echo $output; }
                 }
             break;
             // Retrieves User List
@@ -3796,8 +3796,8 @@ class WcChat {
                     echo $older_controls.
                     (
                         ($older_index !== NULL) ? 
-                        str_replace('wc_doscroll()', '', $this->parseBbcode($output).$this->popTemplate('wcchat.posts.older.block_separator')) : 
-                        $this->parseBbcode($output)
+                        str_replace('wc_doscroll()', '', $output.$this->popTemplate('wcchat.posts.older.block_separator')) : 
+                        $output
                     );
                 }
 
