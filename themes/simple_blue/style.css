@@ -13,8 +13,8 @@ H1 {
 #wcchat {
 	font-family: verdana;
 	font-size: 14px;
-	width: 100%;
-	height: 100%;
+	background-color: white;
+	color: black;
 }
 
 #wcchat FORM,

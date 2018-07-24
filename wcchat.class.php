@@ -1158,7 +1158,7 @@ class WcChat {
             }
             setcookie('cname', trim($this->myPost('cname'), ' '), time()+(86400*365), '/');
             $_SESSION['cname'] = trim($this->myPost('cname'), ' ');
-            header('location: '.$this->myServer('REQUEST_URI').'#wc_join');
+            header('location: '.$this->myServer('REQUEST_URI').'#wc_topic');
             die();
         }
     }
