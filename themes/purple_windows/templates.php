@@ -557,7 +557,7 @@ $templates['wcchat.global_settings'] = '
 			<legend>INCLUDE DIRECTORY</legend>
 			<div>
 				<input type="text" id="gs_include_dir" value="{GS_INCLUDE_DIR}" class="gsett"><br>
-				<span>Relative Path from caller page to include directory (Empty if on the same directory)</span>
+				<span>Relative Path from caller page to root directory (Empty if on the root)</span>
 			</div>
 		</fieldset>
 		<fieldset>

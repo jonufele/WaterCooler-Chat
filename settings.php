@@ -22,7 +22,7 @@ define('TITLE', 'My Chat'); // Main chat title
 #                  INCLUDE DIRECTORY
 # ============================================================================
 
-define('INCLUDE_DIR', ''); // Relative Path from caller page to chat directory (Empty if on the same directory)
+define('INCLUDE_DIR', ''); // Relative Path from caller page to web root (Empty if on the root)
 
 # ============================================================================
 #                  CHAT SETTINGS
