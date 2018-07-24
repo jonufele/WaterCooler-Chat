@@ -2962,7 +2962,7 @@ class WcChat {
                         // all ok, name will be renamed when the file is written
                         } else {
                             $changes = 1;
-                            $output .= '- Name Renamed Successfuly!'."\n";
+                            $output .= '- Name Renamed Successfully!'."\n";
                         }
                     }
                     
@@ -2992,14 +2992,14 @@ class WcChat {
                     if($this->myPost('reset_avatar') && $udata[0]) {
                         $udata[0] = '';
                         $changes = 1;
-                        $output .= '- Avatar Successfuly Reset!'."\n";
+                        $output .= '- Avatar Successfully Reset!'."\n";
                     }
 
                     // Process reset password request
                     if($this->myPost('reset_pass') && $udata[5]) {
                         $udata[5] = '';
                         $changes = 1;
-                        $output .= '- Password Successfuly Reset!'."\n";
+                        $output .= '- Password Successfully Reset!'."\n";
                     }
 
                     // Process password regenerate request
@@ -3007,7 +3007,7 @@ class WcChat {
                         $npass = $this->randNumb(8);
                         $udata[5] = md5(md5($npass));
                         $changes = 1;
-                        $output .= '- Password Successfuly Re-generated: '.$npass."\n";
+                        $output .= '- Password Successfully Re-generated: '.$npass."\n";
                     }
 
                     if($changes) {
