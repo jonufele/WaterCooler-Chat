@@ -116,6 +116,7 @@ function wc_post(e, c, r, lim)
 		http.onreadystatechange=function(){if(http.readyState==4){
 			if(http.responseText.length > 0) {
 				text_input.value = text_input.value + http.responseText;
+				text_input.scrollLeft = text_input.scrollWidth;
 			}
 			text_input.focus();
 		}}
@@ -291,7 +292,7 @@ function wc_bbcode(myField, myValue, myValue2) {
 		var startPos=myField.selectionStart;
 		var endPos=myField.selectionEnd;
 		myField.value=myField.value.substring(0,startPos)+myValue+myField.value.substring(startPos,endPos)+myValue2+myField.value.substring(endPos,myField.value.length);
-		myField.scrollTop = currentScroll;
+        myField.scrollTop = currentScroll;
 		//myField.selectionStart=startPos+myValue.length;
 		myField.selectionEnd=endPos+myValue.length;
 		myField.focus();
