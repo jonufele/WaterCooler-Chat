@@ -4,8 +4,8 @@
  * WaterCooler Chat (Main Class file)
  * 
  * @version 1.4
- * @author Jo„o Ferreira <jflei@sapo.pt>
- * @copyright (c) 2018, Jo„o Ferreira
+ * @author Jo√£o Ferreira <jflei@sapo.pt>
+ * @copyright (c) 2018, Jo√£o Ferreira
  */
     
 class WcChat {
@@ -257,10 +257,11 @@ class WcChat {
     public function __construct() {
 
         // Halt if user is automated
-        if(preg_match(
-            "/bot|crawl|spider|slurp|archiver|mediapartners|agent|scraper|cloudflare|facebookexternalhit/i",
-            $this->myServer('HTTP_USER_AGENT')
-        )) { die(); }
+        require_once(__DIR__ . "/bots.php");
+        if (preg_match($wc_botcheck_regex, $this->myServer('HTTP_USER_AGENT'))) { 
+	    header("HTTP/1.0 403 Forbidden");
+	    exit;
+	}
 
         if(session_id() == '') { session_start(); }
 
