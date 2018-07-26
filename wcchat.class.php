@@ -155,6 +155,38 @@ class WcChat {
     private $roomDef;
 
     /**
+     * Room Definition (write permission)
+     *
+     * @since 1.4
+     * @var string
+     */
+    private $roomWPerm;
+
+    /**
+     * Room Definition (read permission)
+     *
+     * @since 1.4
+     * @var string
+     */
+    private $roomRPerm;
+
+    /**
+     * Room Definition (Last Archive Volume)
+     *
+     * @since 1.4
+     * @var string
+     */
+    private $roomLArchVol;
+
+    /**
+     * Room Definition (Last Archive Volume Message Count)
+     *
+     * @since 1.4
+     * @var string
+     */
+    private $roomLArchVolMsgN;
+
+    /**
      * User List (Raw)
      *
      * @since 1.1
@@ -266,7 +298,7 @@ class WcChat {
 
         // Initialize Includes / Paths
         $this->initIncPath();
-
+        
         // Initialize Current Room
         $this->initCurrRoom();
 
@@ -288,7 +320,7 @@ class WcChat {
       /*===============================================
        |       METHOD CATEGORIES                      |
        ================================================
-       |  INITIALIZATION (5)                          |
+       |  INITIALIZATION (6)                          |
        |  USER DATA HANDLING (3)                      |
        |  ACCESS SECURITY (2)                         |
        |  FILE WRITE/READ (4)                         |
@@ -309,6 +341,7 @@ class WcChat {
        |  hasNonWritableFolders                   |
        |  initDataFiles                           |
        |  initCurrRoom                            |
+       |  initCurrRoomDef                         |
        ===========================================*/
 
     /**
@@ -488,7 +521,7 @@ class WcChat {
 
         define('MESSAGES_LOC', $this->roomDir . base64_encode($this->mySession('current_room')).'.txt');
         define('TOPICL', $this->roomDir . 'topic_'.base64_encode($this->mySession('current_room')).'.txt');
-        define('ROOM_DEF', $this->roomDir . 'def_'.base64_encode($this->mySession('current_room')).'.txt');
+        define('ROOM_DEF_LOC', $this->roomDir . 'def_'.base64_encode($this->mySession('current_room')).'.txt');
         define('MESSAGES_HIDDEN', $this->roomDir . 'hidden_'.base64_encode($this->mySession('current_room')).'.txt');
         define('USERL', $this->dataDir . 'users.txt');
         define('MODL', $this->dataDir . 'mods.txt');
@@ -504,26 +537,29 @@ class WcChat {
         if(!file_exists(EVENTL)) { file_put_contents(EVENTL, ''); }
         if(!file_exists(MESSAGES_LOC)) { file_put_contents(MESSAGES_LOC, time().'|*'.base64_encode('Room').'| has been created.'."\n"); }
         if(!file_exists(TOPICL)) { file_put_contents(TOPICL, ''); }
-        if(!file_exists(ROOM_DEF)) { file_put_contents(ROOM_DEF, '0|0|0|0|'); }
+        if(!file_exists(ROOM_DEF_LOC)) { file_put_contents(ROOM_DEF_LOC, '0|0|0|0|'); }
         if(!file_exists(ROOMS_LASTMOD)) { file_put_contents(ROOMS_LASTMOD, ''); }
         if(!file_exists(MESSAGES_HIDDEN)) { file_put_contents(MESSAGES_HIDDEN, ''); }
 
         $this->modList = $this->readFile(MODL);
         $this->mutedList = $this->readFile(MUTEDL);
         $this->msgList = $this->readFile(MESSAGES_LOC);
-        $this->roomDef = $this->readFile(ROOM_DEF);
+        $this->roomDef = $this->readFile(ROOM_DEF_LOC);
         $this->hiddenMsgList = $this->readFile(MESSAGES_HIDDEN);
         $this->userList = $this->readFile(USERL);
         $this->topic = $this->readFile(TOPICL);
         $this->bannedList = $this->readFile(BANNEDL);
         $this->eventList = $this->readFile(EVENTL);
-
-       // Write the first message to the room (creation note) if no messages exist
+        
+        // Write the first message to the room (creation note) if no messages exist
         if($this->mySession('current_room') == DEFAULT_ROOM && strlen($this->msgList) == 0) {
             $towrite = time().'|*'.base64_encode('room').'|has been created.'."\n";
             $this->writeFile(MESSAGES_LOC, $towrite, 'w');
             $this->msgList = $this->readFile(MESSAGES_LOC);
         }
+        
+        // Initialize Current Room Definitions
+        $this->initCurrRoomDef();
     }
 
     /**
@@ -542,6 +578,20 @@ class WcChat {
             $_SESSION['reset_msg'] = '1';
             setcookie('current_room', DEFAULT_ROOM, time()+(86400*365), '/');
         }
+    }
+    
+    /**
+     * Initiates all definitions for the current room
+     * 
+     * @since 1.4
+     * @return void
+     */    
+    private function initCurrRoomDef() {
+        list($wperm, $rperm, $larch_vol, $larch_vol_msg_n, $tmp) = explode('|', $this->roomDef);
+        $this->roomWPerm = intval($wperm);
+        $this->roomRPerm = intval($rperm);
+        $this->roomLArchVol = intval($larch_vol);
+        $this->roomLArchVolMsgN = intval($larch_vol_msg_n);
     }
 
       /*===========================================
@@ -626,7 +676,6 @@ class WcChat {
         return array('', '', '', '0', '0', '', 0, 0, 0);
     }
 
-
     /**
      * Retrieves user's last activity (Posts, Logins, Joins)
      * 
@@ -702,8 +751,8 @@ class WcChat {
      */
     private function hasRoomPermission($room_name, $mode) {
 
-        // $tmp4 = Unused slots in v1.4.10
-        list($wperm, $rperm, $larch_vol, $larch_vol_msg_n, $tmp4) = 
+        // $tmp = Unused slots in v1.4.10
+        list($wperm, $rperm, $larch_vol, $larch_vol_msg_n, $tmp) = 
             explode(
                 '|', 
                 $this->readFile(
@@ -3078,6 +3127,7 @@ class WcChat {
                     // Meets filesize limit? Is an allowed type? Destination does not exist?
                     if($_FILES['attach']['size'] <= (ATTACHMENT_MAX_FSIZE*1024) && in_array($type, $allowed_types) && !file_exists($dest)) {            
                         copy($_FILES['attach']['tmp_name'], $dest);
+				unlink($_FILES['attach']['tmp_name']);
                         if(in_array($type, $allowed_types_img)) {
                             echo $this->parseImg($dest_web, 'ATTACH');
                         } else {
@@ -3225,8 +3275,8 @@ class WcChat {
                 // $_rperm = Read permission;
                 // $_larch_vol = Last created archive volume;
                 // $_larch_vol_msg_n = Last created archive volume message count;
-                // $_tmp4 is unused in v1.4.10
-                list($_wperm, $_rperm, $_larch_vol, $_larch_vol_msg_n, $_tmp4) = explode('|', $settings, 5);
+                // $_tmp is unused in v1.4.10
+                list($_wperm, $_rperm, $_larch_vol, $_larch_vol_msg_n, $_tmp) = explode('|', $settings, 5);
                 $changes = 0;
                 
                 // Update permissions if changed
@@ -3237,7 +3287,7 @@ class WcChat {
                         $rperm . '|' . 
                         $_larch_vol . '|' . 
                         $_larch_vol_msg_n . '|' . 
-                        $_tmp4
+                        $_tmp
                     );
                     $changes++;
                 }
@@ -3392,6 +3442,7 @@ class WcChat {
                         
                         // Try to create a cropped thumbnail, halt otherwise
                         if($this->thumbnailCreateCr($_FILES['avatar']['tmp_name'], $dest, $tn_size)) {
+                            unlink($_FILES['avatar']['tmp_name']);
                             $nstring = base64_encode($dest_write.'?'.time()).'|'.base64_encode($this->uEmail).'|'.base64_encode($this->uWeb).'|'.$this->uTimezone.'|'.$this->uHourFormat.'|'.$this->uPass;
 
                             // Set user's avatar value
@@ -3591,34 +3642,31 @@ class WcChat {
                                 
                                 // Arquive discarded message if enabled
                                 if(ARCHIVE_MSG === TRUE) {
-                                    list($wperm, $rperm, $larch_vol, $larch_vol_msg_n, $tmp) = explode('|', $this->roomDef);
-                                    $larch_vol = intval($larch_vol);
-                                    if($larch_vol == 0) { $larch_vol = 1; }
-                                    $larch_vol_msg_n = intval($larch_vol_msg_n);
-                                    $archive = str_replace('.txt', '.'.$larch_vol, MESSAGES_LOC);
+                                    if($this->roomLArchVol == 0) { $this->roomLArchVol = 1; }
+                                    $archive = str_replace('.txt', '.'.$this->roomLArchVol, MESSAGES_LOC);
                                     // Check if current arquive is full, if yes, start a new arquive
-                                    if(($larch_vol_msg_n+1) > CHAT_STORE_BUFFER) {
-                                        $larch_vol++;
-                                        $larch_vol_msg_n = 1;
-                                        $archive = str_replace('.txt', '.'.$larch_vol, MESSAGES_LOC);
+                                    if(($this->roomLArchVolMsgN + 1) > CHAT_STORE_BUFFER) {
+                                        $this->roomLArchVol++;
+                                        $this->roomLArchVolMsgN = 1;
+                                        $archive = str_replace('.txt', '.' . $this->roomLArchVol, MESSAGES_LOC);
                                         $this->writeFile(
-                                            ROOM_DEF, 
-                                            $wperm . '|' . 
-                                            $rperm . '|' . 
-                                            $larch_vol . '|' . 
-                                            $larch_vol_msg_n . '|' . 
-                                            $tmp,
+                                            ROOM_DEF_LOC, 
+                                            $this->roomWPerm . '|' . 
+                                            $this->roomRPerm . '|' . 
+                                            $this->roomLArchVol . '|' . 
+                                            $this->roomLArchVolMsgN . '|' . 
+                                            '',
                                             'w'
                                         );    
                                     } else {
-                                        $larch_vol_msg_n++;
+                                        $this->roomLArchVolMsgN++;
                                         $this->writeFile(
-                                            ROOM_DEF, 
-                                            $wperm . '|' . 
-                                            $rperm . '|' . 
-                                            $larch_vol . '|' . 
-                                            $larch_vol_msg_n . '|' . 
-                                            $tmp,
+                                            ROOM_DEF_LOC, 
+                                            $this->roomWPerm . '|' . 
+                                            $this->roomRPerm . '|' . 
+                                            $this->roomLArchVol . '|' . 
+                                            $this->roomLArchVolMsgN . '|' . 
+                                            '',
                                             'w'
                                         );
                                     }
@@ -3740,7 +3788,6 @@ class WcChat {
      
                     // Retrieve post messages
                     if(strlen($this->msgList) > 0 || $this->mySession('archive')) {
-                        list($wperm,$rperm,$last_arch_vol,$tmp,$tmp2) = explode('|', $this->roomDef);
                         if(!$this->mySession('archive')) {
                             $lines = explode("\n", trim($this->msgList));
                         } else {
@@ -3749,7 +3796,7 @@ class WcChat {
                             $archive_target = 
                                 $this->roomDir . 
                                 base64_encode($this->mySession('current_room')) . '.' . 
-                                ($last_arch_vol + 1 - $archive_vol)
+                                ($this->roomLArchVol + 1 - $archive_vol)
                             ;
                             $lines = explode("\n", trim($this->readFile($archive_target)));
                         }
@@ -3761,7 +3808,7 @@ class WcChat {
                             $next_archive_target = 
                                 $this->roomDir . 
                                 base64_encode($this->mySession('current_room')) . '.' . 
-                                ($last_arch_vol + 1 - $next_archive_vol)
+                                ($this->roomLArchVol + 1 - $next_archive_vol)
                             ;
                             
                             if(file_exists($next_archive_target)) {
@@ -3774,13 +3821,14 @@ class WcChat {
                     }
                 }
 
-                // If total post message count > returned index, add the links to load older posts
+                // If content exists before the oldest displayed message or archives exist, initiate the controls to load older posts
                 $older_controls = '';
                 if(count($lines) && $this->myGet('all') == 'ALL' && LOAD_EX_MSG === TRUE) {
                     if($first_elem) {
                         list($tmp1, $tmp2) = explode($first_elem, $this->msgList, 2);
-				        if(trim($tmp1)) { $older_controls = $this->popTemplate('wcchat.posts.older'); }
+				        if(trim($tmp1) || $this->roomLArchVol > 0) { $older_controls = $this->popTemplate('wcchat.posts.older'); }
                     } else {
+                        // No first element returned but lines exist? Add controls in case of screen cleanup.
                         $older_controls = $this->popTemplate('wcchat.posts.older');
                     }
                 }
