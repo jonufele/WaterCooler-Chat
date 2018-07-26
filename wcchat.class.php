@@ -353,7 +353,7 @@ class WcChat {
     private function initIncPath() {
 
         include(__DIR__ . '/settings.php');
-        $this->includeDir = (INCLUDE_DIR ? '/' . trim(INCLUDE_DIR, '/') . '/' : '');
+        $this->includeDir = (INCLUDE_DIR ? '/' . trim(INCLUDE_DIR, '/') . '/' : '/');
         define('THEME', (
             ($this->myCookie('wc_theme') && file_exists($this->includeDir . 'themes/' . $this->myCookie('wc_theme') . '/')) ? 
             $this->myCookie('wc_theme') : 
