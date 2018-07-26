@@ -798,6 +798,7 @@ class WcChat {
             require_once(__DIR__ . "/includes/bots.php");
             if (preg_match($wc_botcheck_regex, $this->myServer('HTTP_USER_AGENT'))) {
                 header("HTTP/1.0 403 Forbidden");
+                echo $this->popTemplate('wcchat.botNoAccessNote');
                 exit;
             }
         }

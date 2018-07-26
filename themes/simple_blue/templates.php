@@ -57,6 +57,8 @@ $templates['wcchat.critical_error'] = '
 	</fieldset>
 </div>';
 
+$templates['wcchat.botNoAccessNote'] = '403: Forbidden; Powered by: <a href="https://github.com/jonufele/WaterCooler-Chat" target="_blank">WaterCooler Chat 1.4</a>';
+
 # ============================================================================
 #                  WCCHAT MODULES : TOPIC
 # ============================================================================
