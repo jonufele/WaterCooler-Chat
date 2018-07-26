@@ -6,7 +6,7 @@ WaterCooler chat is a simple/easy to use, flat file database php/ajax chat syste
 
 ## Features
 
-- *Does not require MySQL Database / Javascript Frameworks 
+- *Does not require MySQL Database / Javascript Frameworks* 
 - *Multi Topic rooms*
 - *Private / Read-Only Rooms*
 - *Multi user*
