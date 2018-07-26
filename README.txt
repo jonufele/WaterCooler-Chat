@@ -3,7 +3,7 @@
 *  WaterCooler Chat 1.4                      *
 ----------------------------------------------
   Copyright (c) 2018
-  v1.4 originally written by Jo„o Ferreira
+  v1.4 originally written by Jo√£o Ferreira
 
 ----------------------------------------------
 *  README                                    *
@@ -67,7 +67,7 @@
    |- data                 - Data Directory (Can be renamed or moved outside web directory)
       |- Rooms             - Room posts/definitions
       |- tmp               - Temporary definitions (user ping)
-   |- files                - User Gewnerated files
+   |- files                - User Generated files
       |- attachments
       |- avatars
       |- thumb
@@ -90,13 +90,13 @@
                        RELEVANT NOTES
 ============================================================================
  
-  - The master moderator status will be given to the first user that joins the chat with a password.
+  - Master moderator status will be given to the first user that joins the chat with a password.
 
-  - The action of hiding a message from the chat takes immediate effect on the other online users, while the unhide action only takes effect on user's next visit to the room.
+  - Hiding a message from the chat takes immediate effect on the other online users, while the unhide action only takes effect on user's next visit to the room.
 
-  - It is not recommended to disable the anti spam restriction, for two reasons: the spam (duh), and the possibility of generating non unique message ids which can harm the hide/unhide feature.
+  - Disabling the anti spam restrction is not recommended for two reasons: the spam (duh!), and the possibility of generating non unique message ids which can harm the hide/unhide feature.
 
-  - To remove the copyright note, you must make a donation to the project.
+  - To remove the copyright note, you must make a donation to the project  (TODO: donation link/URL).
 
   - It is recommended to rename the data directory (or move it outside the web root) to ensure user's privacy. (don't forget to rename on settings.php as well)
 
