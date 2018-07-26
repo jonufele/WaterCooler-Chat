@@ -1,16 +1,21 @@
 # WaterCooler Chat 1.4
 
-WaterCooler chat is a flat file database php/ajax chat system.
-Some of its features: 
+WaterCooler chat is a simple/easy to use, flat file database php/ajax chat system.
+
+![Preview](https://github.com/jonufele/WaterCooler-Chat/blob/master/preview.jpg)
+
+## Features
+
+- *Does not require MySQL Database / Javascript Frameworks 
 - *Multi Topic rooms*
-- *Private/Read-Only Rooms*
-- *multi user*
-- *password protected profiles*
-- *smilies/BBcode*
-- *open chat interface*
+- *Private / Read-Only Rooms*
+- *Multi user*
+- *Password protected profiles*
+- *Smilies/BBcode*
+- *Open chat interface*
 - *Easy to customize themes (100% Html/Css)*
-- *private messages*
-- *moderator tools*
+- *Private messages*
+- *Moderator tools*
 - *Independent display and store buffers*
 - *Invite link*
 - *Start chat with previous conversations listed*
@@ -21,7 +26,7 @@ Some of its features:
 - *Smart archive system*
 - *Shared Chat Across the websites hosted on the same server*
 
-## Instalation
+## Installation
 
  1. Copy package contents to your webserver
  2. Define *INCLUDE_DIR* constant in "*settings.php*" - relative path to chat directory from web root
@@ -62,11 +67,11 @@ Some of its features:
 
 ## Relevant Notes
 
-- The master moderator status will be given to the first user that joins the chat with a password
-- The action of hiding a message from the chat takes immediate effect on the other online users, while the unhide action only takes effect on user's next visit to the room.
-- It is not recommended to disable the anti spam restriction, for two reasons: the spam (duh), and the possibility of generating non unique message ids which can harm the hide/unhide feature.
-- To remove the copyright note, you must make a donation to the project.
-- It is recommended to rename the data directory (or move it outside the web root) to ensure user's privacy. (don't forget to rename on settings.php as well)
+- Master moderator status will be given to the first user that joins the chat with a password.
+- Hiding a message from the chat takes immediate effect on the other online users, while the unhide action only takes effect on user's next visit to the room.
+- Disabling the anti spam restriction is not recommended for two reasons: the spam (duh!), and the possibility of generating non unique message ids which can harm the hide/unhide feature.
+- To remove the copyright note, you must make a donation to the project (See below).
+- It is recommended to rename the data directory (or move it outside the web root) to ensure user's privacy. (don't forget to rename on settings.php as well).
 
 ## Donations
 
@@ -75,7 +80,3 @@ If you like this project, consider making a donation:
 https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=9ZHN6EUXWLAQG
 
 Thank you for choosing WaterCooler Chat.
-
-## Preview
-
-![Preview](https://github.com/jonufele/WaterCooler-Chat/blob/master/preview.jpg)

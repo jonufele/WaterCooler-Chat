@@ -39,6 +39,7 @@ define('LIST_GUESTS', TRUE); // List guests (Users that never joined chat) on us
 define('ANTI_SPAM', 3); // Minimum ammount of time (seconds) between one user's posted messages (seconds, 0 = disabled)
 define('ACC_REC_EMAIL', ''); // Account recovey sender email; default = no-reply@<server_address>; The email account must exist in the webserver.
 define('ARCHIVE_MSG', TRUE); // Archive messages that drop from Store Buffer (system will keep packing the messages in files the same size as the store buffer, available for users to load)
+define('BOT_MAIN_PAGE_ACCESS', FALSE); // Allow search engines / automated bots access to the chat's main page
 
 
 # ============================================================================

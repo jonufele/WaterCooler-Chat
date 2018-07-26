@@ -1,4 +1,4 @@
-**********************************************
+﻿**********************************************
 ----------------------------------------------
 *  WaterCooler Chat 1.4                      *
 ----------------------------------------------
@@ -14,9 +14,14 @@
 		       WHAT IS WATERCOOLER CHAT
 ============================================================================
 
-   WaterCooler chat is a flat file database php/ajax chat system.
-   Some of its features:
+   WaterCooler chat is a simple/easy to use, flat file database php/ajax chat system.
 
+
+===========================================================================
+                       FEATURES
+===========================================================================
+
+    - Does not require MySQL Database / Javascript Frameworks 
     - Multi Topic rooms
     - Private/Read-Only Rooms
     - multi user
@@ -38,7 +43,7 @@
 
 
 ===========================================================================
-                       INSTALATION
+                       INSTALLATION
 ===========================================================================
 
    1 - Copy package contents to your webserver
@@ -59,6 +64,7 @@
   - PHP >= 5.3.0
   - Ability to change permissions if necessary
   - PHP GD library (for generating image thumbnails)
+
 
 ============================================================================
                        FOLDER STRUCTURE
@@ -86,6 +92,7 @@
    |- settings.php         - Raw settings file
    |- wcchat.class.php     - Chat class
 
+
 ============================================================================
                        RELEVANT NOTES
 ============================================================================
@@ -94,9 +101,9 @@
 
   - Hiding a message from the chat takes immediate effect on the other online users, while the unhide action only takes effect on user's next visit to the room.
 
-  - Disabling the anti spam restrction is not recommended for two reasons: the spam (duh!), and the possibility of generating non unique message ids which can harm the hide/unhide feature.
+  - Disabling the anti spam restriction is not recommended for two reasons: the spam (duh!), and the possibility of generating non unique message ids which can harm the hide/unhide feature.
 
-  - To remove the copyright note, you must make a donation to the project  (TODO: donation link/URL).
+  - To remove the copyright note, you must make a donation to the project (See below).
 
   - It is recommended to rename the data directory (or move it outside the web root) to ensure user's privacy. (don't forget to rename on settings.php as well)
 

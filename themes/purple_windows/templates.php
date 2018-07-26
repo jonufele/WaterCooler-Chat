@@ -606,6 +606,10 @@ $templates['wcchat.global_settings'] = '
 				Account Recovery Sender E-mail: <input type="text" id="gs_acc_rec_email" value="{GS_ACC_REC_EMAIL}" class="gsett"><br>
 				<span>Default: {ACC_REC_EM_DEFAULT}; The email must exist in the webserver in order for the email function to work.</span>
 			</div>
+			<div>
+				Bot Main Page Access: <input type="checkbox" id="gs_bot_main_page_access" class="gsett" value="1"{GS_BOT_MAIN_PAGE_ACCESS}><br>
+				<span>Allow search engines / automated bots access to the chat\'s main page</span>
+			</div>
 		</fieldset>
 		<fieldset>
 			<legend>MULTIMEDIA</legend>

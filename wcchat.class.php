@@ -4,9 +4,12 @@
  * WaterCooler Chat (Main Class file)
  * 
  * @version 1.4
- * @author João Ferreira <jflei@sapo.pt>
- * @copyright (c) 2018, João Ferreira
+ * @author Joao Ferreira <jflei@sapo.pt>
+ * @copyright (c) 2018, Joao Ferreira
  */
+ 
+// Edition notes:
+// 1 Tab = 4 spaces
     
 class WcChat {
 
@@ -288,17 +291,13 @@ class WcChat {
      */
     public function __construct() {
 
-        // Halt if user is automated
-        require_once(__DIR__ . "/bots.php");
-        if (preg_match($wc_botcheck_regex, $this->myServer('HTTP_USER_AGENT'))) { 
-	    header("HTTP/1.0 403 Forbidden");
-	    exit;
-	}
-
         if(session_id() == '') { session_start(); }
 
         // Initialize Includes / Paths
         $this->initIncPath();
+        
+        // Halt if user is automated, apply restriction if access is disabled or login attempt
+        $this->botAccess();
         
         // Initialize Current Room
         $this->initCurrRoom();
@@ -323,7 +322,7 @@ class WcChat {
        ================================================
        |  INITIALIZATION (6)                          |
        |  USER DATA HANDLING (3)                      |
-       |  ACCESS SECURITY (2)                         |
+       |  ACCESS SECURITY (3)                         |
        |  FILE WRITE/READ (4)                         |
        |  IMAGE HANDLING (4)                          |
        |  PGC/SESSION/SERVER HANDLING (6)             |
@@ -700,6 +699,7 @@ class WcChat {
        ============================================
        |  hasPermission                           |
        |  hasRoomPermission                       |
+       |  botAccess                               |
        ===========================================*/
 
     /**
@@ -785,6 +785,22 @@ class WcChat {
             default: $permission = TRUE;
         }
         return $permission;
+    }
+
+    /**
+     * Checks bot access / Prevents bot login
+     * 
+     * @since 1.4
+     * @return void
+     */
+    private function botAccess() {
+        if(BOT_MAIN_PAGE_ACCESS === FALSE || $this->myPost('cname')) {
+            require_once(__DIR__ . "/includes/bots.php");
+            if (preg_match($wc_botcheck_regex, $this->myServer('HTTP_USER_AGENT'))) {
+                header("HTTP/1.0 403 Forbidden");
+                exit;
+            }
+        }
     }
 
       /*===========================================
@@ -1607,7 +1623,7 @@ class WcChat {
         );
 
         // Populate Global Settings Form Fields
-        $gsettings_par = array('TITLE', 'INCLUDE_DIR', 'REFRESH_DELAY', 'IDLE_START', 'OFFLINE_PING', 'CHAT_DSP_BUFFER', 'CHAT_STORE_BUFFER', 'CHAT_OLDER_MSG_STEP', 'ARCHIVE_MSG', 'ANTI_SPAM', 'IMAGE_MAX_DSP_DIM',  'IMAGE_AUTO_RESIZE_UNKN', 'VIDEO_WIDTH', 'VIDEO_HEIGHT', 'AVATAR_SIZE', 'DEFAULT_AVATAR', 'DEFAULT_ROOM', 'DEFAULT_THEME', 'INVITE_LINK_CODE', 'ACC_REC_EMAIL', 'ATTACHMENT_TYPES', 'ATTACHMENT_MAX_FSIZE', 'ATTACHMENT_MAX_POST_N');
+        $gsettings_par = array('TITLE', 'INCLUDE_DIR', 'REFRESH_DELAY', 'IDLE_START', 'OFFLINE_PING', 'CHAT_DSP_BUFFER', 'CHAT_STORE_BUFFER', 'CHAT_OLDER_MSG_STEP', 'ARCHIVE_MSG', 'BOT_MAIN_PAGE_ACCESS', 'ANTI_SPAM', 'IMAGE_MAX_DSP_DIM',  'IMAGE_AUTO_RESIZE_UNKN', 'VIDEO_WIDTH', 'VIDEO_HEIGHT', 'AVATAR_SIZE', 'DEFAULT_AVATAR', 'DEFAULT_ROOM', 'DEFAULT_THEME', 'INVITE_LINK_CODE', 'ACC_REC_EMAIL', 'ATTACHMENT_TYPES', 'ATTACHMENT_MAX_FSIZE', 'ATTACHMENT_MAX_POST_N');
 
         $gsettings_par_v = array();
 
@@ -1617,6 +1633,7 @@ class WcChat {
         $gsettings_par_v['GS_LOAD_EX_MSG'] = (LOAD_EX_MSG === TRUE ? ' CHECKED' : '');
         $gsettings_par_v['GS_LIST_GUESTS'] = (LIST_GUESTS === TRUE ? ' CHECKED' : '');
         $gsettings_par_v['GS_ARCHIVE_MSG'] = (ARCHIVE_MSG === TRUE ? ' CHECKED' : '');
+        $gsettings_par_v['GS_BOT_MAIN_PAGE_ACCESS'] = (BOT_MAIN_PAGE_ACCESS === TRUE ? ' CHECKED' : '');        
         $gsettings_par_v['GS_GEN_REM_THUMB'] = (GEN_REM_THUMB === TRUE ? ' CHECKED' : '');
         $gsettings_par_v['GS_ATTACHMENT_UPLOADS'] = (ATTACHMENT_UPLOADS === TRUE ? ' CHECKED' : '');
 
@@ -1715,13 +1732,13 @@ class WcChat {
             array(
                 'TITLE' => TITLE,
                 'CONTENTS' => (
-			($this->isBanned !== FALSE) ? 
-				$this->popTemplate('wcchat.critical_error', array('ERROR' => 'You are banned!'.$tag)) : 
-				($this->stopMsg ? 
-					$this->popTemplate('wcchat.critical_error', array('ERROR' => $this->stopMsg)) : 
-					$contents
-				)
-			),
+            ($this->isBanned !== FALSE) ? 
+                $this->popTemplate('wcchat.critical_error', array('ERROR' => 'You are banned!'.$tag)) : 
+                ($this->stopMsg ? 
+                    $this->popTemplate('wcchat.critical_error', array('ERROR' => $this->stopMsg)) : 
+                    $contents
+                )
+            ),
                 'ONLOAD' => (($this->isBanned !== FALSE || $this->stopMsg) ? '' : $onload),
                 'REFRESH_DELAY' => REFRESH_DELAY,
                 'STYLE_LASTMOD' => filemtime(__DIR__.'/themes/'.THEME.'/style.css'),
@@ -2473,12 +2490,12 @@ class WcChat {
                         $this->mySession('global_start_point')
                     )
                 ) {
-				    $start_point = (
-				        LOAD_EX_MSG !== FALSE ? 
+                    $start_point = (
+                        LOAD_EX_MSG !== FALSE ? 
                         $this->myCookie('start_point_'.$this->parseCookieName($this->mySession('current_room'))) : 
                         $this->mySession('global_start_point')
                     );
-				    $time_date2 = gmdate('d-M', $start_point+($this->uTimezone * 3600));
+                    $time_date2 = gmdate('d-M', $start_point+($this->uTimezone * 3600));
                         $output = $this->popTemplate(
                             'wcchat.posts.self',
                             array(
@@ -3128,7 +3145,7 @@ class WcChat {
                     // Meets filesize limit? Is an allowed type? Destination does not exist?
                     if($_FILES['attach']['size'] <= (ATTACHMENT_MAX_FSIZE*1024) && in_array($type, $allowed_types) && !file_exists($dest)) {            
                         copy($_FILES['attach']['tmp_name'], $dest);
-				unlink($_FILES['attach']['tmp_name']);
+                unlink($_FILES['attach']['tmp_name']);
                         if(in_array($type, $allowed_types_img)) {
                             echo $this->parseImg($dest_web, 'ATTACH');
                         } else {
@@ -3176,7 +3193,7 @@ class WcChat {
 
                 // Set arrays with $_POST ids and batch process
                 $arr = array();
-                $gsettings_par = array('TITLE', 'INCLUDE_DIR', 'REFRESH_DELAY', 'IDLE_START', 'OFFLINE_PING', 'CHAT_DSP_BUFFER', 'CHAT_STORE_BUFFER', 'CHAT_OLDER_MSG_STEP', 'ARCHIVE_MSG', 'ANTI_SPAM', 'IMAGE_MAX_DSP_DIM',  'IMAGE_AUTO_RESIZE_UNKN', 'VIDEO_WIDTH', 'VIDEO_HEIGHT', 'AVATAR_SIZE', 'DEFAULT_AVATAR', 'DEFAULT_ROOM', 'DEFAULT_THEME', 'INVITE_LINK_CODE', 'ACC_REC_EMAIL', 'ATTACHMENT_TYPES', 'ATTACHMENT_MAX_FSIZE', 'ATTACHMENT_MAX_POST_N');
+                $gsettings_par = array('TITLE', 'INCLUDE_DIR', 'REFRESH_DELAY', 'IDLE_START', 'OFFLINE_PING', 'CHAT_DSP_BUFFER', 'CHAT_STORE_BUFFER', 'CHAT_OLDER_MSG_STEP', 'ARCHIVE_MSG', 'BOT_MAIN_PAGE_ACCESS', 'ANTI_SPAM', 'IMAGE_MAX_DSP_DIM',  'IMAGE_AUTO_RESIZE_UNKN', 'VIDEO_WIDTH', 'VIDEO_HEIGHT', 'AVATAR_SIZE', 'DEFAULT_AVATAR', 'DEFAULT_ROOM', 'DEFAULT_THEME', 'INVITE_LINK_CODE', 'ACC_REC_EMAIL', 'ATTACHMENT_TYPES', 'ATTACHMENT_MAX_FSIZE', 'ATTACHMENT_MAX_POST_N');
 
                 foreach($gsettings_par as $key => $value) {
                     $arr[$value] = $this->myPost('gs_'.strtolower($value));
@@ -3199,11 +3216,12 @@ class WcChat {
                     array_merge(
                         $arr,
                         array(
-                            'LOAD_EX_MSG' => (($_POST['gs_load_ex_msg'] == '1') ? 'TRUE' : 'FALSE'),
-                            'LIST_GUESTS' => (($_POST['gs_list_guests'] == '1') ? 'TRUE' : 'FALSE'),
-                            'ARCHIVE_MSG' => (($_POST['gs_archive_msg'] == '1') ? 'TRUE' : 'FALSE'),
-                            'GEN_REM_THUMB' => (($_POST['gs_gen_rem_thumb'] == '1') ? 'TRUE' : 'FALSE'),
-                            'ATTACHMENT_UPLOADS' => (($_POST['gs_attachment_uploads'] == '1') ? 'TRUE' : 'FALSE')        
+                            'LOAD_EX_MSG' => (($this->myPost('gs_load_ex_msg') == '1') ? 'TRUE' : 'FALSE'),
+                            'LIST_GUESTS' => (($this->myPost('gs_list_guests') == '1') ? 'TRUE' : 'FALSE'),
+                            'ARCHIVE_MSG' => (($this->myPost('gs_archive_msg') == '1') ? 'TRUE' : 'FALSE'),
+                            'BOT_MAIN_PAGE_ACCESS' => (($this->myPost('gs_bot_main_page_access') == '1') ? 'TRUE' : 'FALSE'),
+                            'GEN_REM_THUMB' => (($this->myPost('gs_gen_rem_thumb') == '1') ? 'TRUE' : 'FALSE'),
+                            'ATTACHMENT_UPLOADS' => (($this->myPost('gs_attachment_uploads') == '1') ? 'TRUE' : 'FALSE')        
                         )
                     )
                 );
@@ -3827,7 +3845,7 @@ class WcChat {
                 if(count($lines) && $this->myGet('all') == 'ALL' && LOAD_EX_MSG === TRUE) {
                     if($first_elem) {
                         list($tmp1, $tmp2) = explode($first_elem, $this->msgList, 2);
-				        if(trim($tmp1) || $this->roomLArchVol > 0) { $older_controls = $this->popTemplate('wcchat.posts.older'); }
+                        if(trim($tmp1) || $this->roomLArchVol > 0) { $older_controls = $this->popTemplate('wcchat.posts.older'); }
                     } else {
                         // No first element returned but lines exist? Add controls in case of screen cleanup.
                         $older_controls = $this->popTemplate('wcchat.posts.older');
