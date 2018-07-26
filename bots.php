@@ -86,4 +86,6 @@
         'yoogliFetchAgent', 'Zao',      'ZyBorg',
         '[a-z0-9\\-_]*((?<!cu)bot|crawler|archiver|transcoder|spider)'
 
-); //end $more_bots array
+); //end array
+
+$wc_botcheck_regex = "%(" . implode("|", array_merge($wc_chat_bots, $wc_chat_more_bots)) . ")%";
