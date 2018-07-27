@@ -395,7 +395,26 @@ class WcChat {
     private function initIncPath() {
 
         include __DIR__ . '/settings.php';
-        $this->includeDir = (INCLUDE_DIR ? '/' . trim(INCLUDE_DIR, '/') . '/' : '/');
+        $this->dataDir = (DATA_DIR ? rtrim(DATA_DIR, '/') . '/' : '');
+        $this->roomDir = DATA_DIR . 'rooms/';
+        $this->includeDir = (
+            trim(INCLUDE_DIR, '/') ? 
+            '/' . trim(INCLUDE_DIR, '/') . '/' : 
+            '/'
+        );
+        
+        // Attempt to set the include dir on the very first run
+        if(
+            !file_exists($this->roomDir . base64_encode(DEFAULT_ROOM) . '.txt') && 
+            $this->myServer('REQUEST_URI') != '/' && 
+            is_writable(__DIR__ . '/settings.php')
+        ) {
+            $this->includeDir = '/' . trim($this->myServer('REQUEST_URI'), '/') . '/';
+            $this->updateConf(
+                array('INCLUDE_DIR' => trim($this->myServer('REQUEST_URI'), '/'))
+            );
+        }
+        
         define('THEME', (
             ($this->myCookie('wc_theme') && file_exists(__DIR__ . '/themes/' . $this->myCookie('wc_theme') . '/')) ? 
             $this->myCookie('wc_theme') : 
@@ -405,8 +424,7 @@ class WcChat {
         include __DIR__ . '/themes/' . THEME . '/templates.php';
         $this->templates = $templates;
         $this->ajaxCaller = $this->includeDir . 'ajax.php?';
-        $this->dataDir = (DATA_DIR ? rtrim(DATA_DIR, '/') . '/' : '');
-        $this->roomDir = DATA_DIR . 'rooms/';
+
     }
 
     /**
@@ -3505,6 +3523,12 @@ class WcChat {
             case 'upd_user':
                 $output = '';
                 $oname = $this->myPost('oname');
+
+                // Halt if target is a Moderator and user is not current nor Master Moderator
+                if(!$this->isMasterMod && $this->getMod($oname) !== FALSE && $this->name != $oname && trim($oname, ' ')) {
+                    echo 'You cannot edit other moderator!';
+                    die();
+                }
                 
                 // Halt if target user is invalid (happens if the user was renamed)
                 if($this->userMatch($oname) === FALSE) {
@@ -3778,8 +3802,8 @@ class WcChat {
 
                         $this->writeFile(USERL, $towrite, 'w');
                     }
-                    echo trim($output);
                 }
+                echo trim($output);
             break;
             
             // Changes User Status (Available/Do Not Disturb)
