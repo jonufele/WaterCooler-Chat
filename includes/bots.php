@@ -1,4 +1,4 @@
- <?php
+<?php
  
  $wc_chat_bots = array (
           'bot','crawl','spider','spyder','slurp','b-o-t','search','seek',
@@ -89,3 +89,5 @@
 ); //end array
 
 $wc_botcheck_regex = "%(" . implode("|", array_merge($wc_chat_bots, $wc_chat_more_bots)) . ")%";
+
+?>
