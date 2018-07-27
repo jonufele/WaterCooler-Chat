@@ -48,13 +48,15 @@
 
    1 - Copy package contents to your webserver
 
-   2 - Define INCLUDE_DIR constant in "settings.php" - relative path to chat directory from web root
+   2 - Load the chat on your browser.
 
-   3 - Load the chat on a browser and login, set-up a password in your profile options in order to be assigned as the first moderator.
+   3 - In case you see broken images, define INCLUDE_DIR constant in "settings.php" - relative path to chat directory from web root (on the very first run, the system will attempt to do this automatically)
 
-   4 - Customize master settings and themes to match your preferences.
+   4 - Choose a name and login, set-up a password in your profile options in order to be assigned as the first moderator.
 
-   5 - Use index.embedded.php as reference if you want to embbed chat on another page.
+   5 - Customize master settings and themes to match your preferences.
+
+   6 - Use index.embedded.php as reference if you want to embbed chat on another page.
 
 
 ============================================================================

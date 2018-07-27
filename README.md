@@ -29,8 +29,9 @@ WaterCooler chat is a simple/easy to use, flat file database php/ajax chat syste
 ## Installation
 
  1. Copy package contents to your webserver
- 2. Define *INCLUDE_DIR* constant in "*settings.php*" - relative path to chat directory from web root
- 3. Load the chat on a browser and login, set-up a password in your profile options in order to be assigned as the first moderator.
+ 2. Load the chat on your browser
+ 2. In case you see broken images, define INCLUDE_DIR constant in "*settings.php*" - relative path to chat directory from web root *(on the very first run, the system will attempt to do this automatically)*
+ 3. Choose a name and login, set-up a password in your profile options in order to be assigned as the first moderator.
  4. Customize master settings and themes to match your preferences.
  5. Use *index.embedded.php* as reference if you want to embbed chat on another page.
 
