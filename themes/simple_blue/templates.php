@@ -404,7 +404,7 @@ $templates['wcchat.posts.normal'] = '
 <div class="msg_item" id="js_{ID}">
 	<div class="msg{PM_SUFIX}">
 		{PM_TAG}
-		<img src="{AVATAR}" class="thumb" {WIDTH} onload="wc_doscroll()">
+		<img src="{AVATAR}" class="avatar_thumb" {WIDTH} onload="wc_doscroll()">
 		<div class="msg_right_col">
 			{HIDE_ICON}
 			[<span class="user">{POPULATE_START}{USER}{POPULATE_END}{PM_TARGET}</span>]

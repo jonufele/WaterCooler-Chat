@@ -394,7 +394,7 @@ class WcChat {
      */
     private function initIncPath() {
 
-        include(__DIR__ . '/settings.php');
+        include __DIR__ . '/settings.php';
         $this->includeDir = (INCLUDE_DIR ? '/' . trim(INCLUDE_DIR, '/') . '/' : '/');
         define('THEME', (
             ($this->myCookie('wc_theme') && file_exists(__DIR__ . '/themes/' . $this->myCookie('wc_theme') . '/')) ? 
@@ -402,7 +402,7 @@ class WcChat {
             DEFAULT_THEME
         ));
         define('INCLUDE_DIR_THEME', $this->includeDir . 'themes/' . THEME . '/');
-        include(__DIR__ . '/themes/' . THEME . '/templates.php');
+        include __DIR__ . '/themes/' . THEME . '/templates.php';
         $this->templates = $templates;
         $this->ajaxCaller = $this->includeDir . 'ajax.php?';
         $this->dataDir = (DATA_DIR ? rtrim(DATA_DIR, '/') . '/' : '');
@@ -903,7 +903,7 @@ class WcChat {
     private function botAccess() {
     
         if(BOT_MAIN_PAGE_ACCESS === FALSE || $this->myPost('cname')) {
-            require_once(__DIR__ . "/includes/bots.php");
+            require_once __DIR__ . "/includes/bots.php";
             if (preg_match($wc_botcheck_regex, $this->myServer('HTTP_USER_AGENT'))) {
                 header("HTTP/1.0 403 Forbidden");
                 echo $this->popTemplate('wcchat.botNoAccessNote');
@@ -3203,25 +3203,25 @@ class WcChat {
                 '<div style="margin: 10px">
                     <img src="\\1" class="thumb" onload="wc_doscroll()">
                 </div>',
-                '<div style="width: \\3px; text-align: center; font-size: 10px; margin: 10px">
+                '<div style="width: \\3px;" class="thumb_container">
                     <img src="\\5" style="width: \\3px; height: \\4px;" class="thumb" onload="wc_doscroll()"><br>
                     <img src="' . INCLUDE_DIR_THEME . 'images/attach.png">
                     <a href="' . ($down_perm ? $this->includeDir . 'files/attachments/\\5' : '#') . '" target="_blank" ' . $down_alert . '>\\1 x \\2</a>
                 </div>',
-                '<div style="width: \\3px; text-align: center; font-size: 10px; margin: 10px">
+                '<div style="width: \\3px;" class="thumb_container">
                     <img src="' . $this->includeDir . 'files/thumb/tn_\\5.jpg" class="thumb" onload="wc_doscroll()"><br>
                     <img src="' . INCLUDE_DIR_THEME . 'images/attach.png">
                     <a href="' . ($down_perm ? $this->includeDir . 'files/attachments/\\6' : '#') . '" target="_blank" ' . $down_alert . '>\\1 x \\2</a>
                 </div>',
-                '<div style="width: \\3px; text-align: center; font-size: 10px; margin: 10px">
+                '<div style="width: \\3px;" class="thumb_container">
                     <img src="\\5" style="width: \\3px; height: \\4px;" class="thumb" onload="wc_doscroll()"><br>
                     <a href="' . ($down_perm ? '\\5' : '#') . '" target="_blank" ' . $down_alert . '>\\1 x \\2</a>
                 </div>',
-                '<div style="width: \\3px; text-align: center; font-size: 10px; margin: 10px">
+                '<div style="width: \\3px;" class="thumb_container">
                     <img src="' . $this->includeDir . 'files/thumb/tn_\\5.jpg" class="thumb" onload="wc_doscroll()"><br>
                     <a href="' . ($down_perm ? '\\6' : '#') . '" target="_blank" ' . $down_alert.'>\\1 x \\2</a>
                 </div>',
-                '<div style="width: \\1px; text-align: center; font-size: 10px; margin: 10px;">
+                '<div style="width: \\1px;" class="thumb_container">
                     <img src="\\2" style="width: \\1px;" class="thumb" onload="wc_doscroll()"><br>
                     <a href="' . ($down_perm ? '\\2' : '#').'" target="_blank" ' . $down_alert . '>Unknown Dimensions</a>
                 </div>',

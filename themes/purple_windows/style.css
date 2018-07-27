@@ -232,12 +232,25 @@ H1 {
 	color: #6335bf;
 }
 
-#wc_msg_container .msg img.thumb,
-#wc_msg_container .msg_pm img.thumb {
+#wc_msg_container .msg img.avatar_thumb,
+#wc_msg_container .msg_pm img.avatar_thumb {
 	padding: 1px;
 	border: 1px solid #7b5f6a;
 	margin: 5px 10px 0 10px;
 	float: left;
+}
+
+#wc_msg_container .msg img.thumb,
+#wc_msg_container .msg_pm img.thumb {
+	padding: 1px;
+	border: 1px solid #7b5f6a;
+}
+
+#wc_msg_container .msg .thumb_container,
+#wc_msg_container .msg_pm .thumb_container {
+	text-align: center;
+	font-size: 10px;
+	margin: 10px;
 }
 
 #wc_msg_container .msg iframe,
