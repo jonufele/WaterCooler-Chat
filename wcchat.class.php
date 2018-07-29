@@ -2858,6 +2858,7 @@ class WcChat {
                 ($time . '|' . $user) : 
                 ($time . '|*' . $user)
             );
+            $hidden_cookie = 'hide_' . $this->parseCookieName($unique_id);
             
             // Start counting older messages
             if($older_index !== NULL) {
@@ -3026,7 +3027,7 @@ class WcChat {
                                     'MSG' => $this->popTemplate(
                                         'wcchat.posts.hidden' . ($hidden ? '_mod' : ''), 
                                         '', 
-                                        $hidden || $this->myCookie('hide_' . $unique_id), 
+                                        $hidden || $this->myCookie($hidden_cookie), 
                                         $this->parseBbcode($msg)
                                     ),
                                     'ID' => $unique_id,
@@ -3034,7 +3035,7 @@ class WcChat {
                                         'wcchat.posts.hide_icon', 
                                         array(
                                             'REVERSE' => (
-                                                ($hidden || $this->myCookie('hide_' . $unique_id)) ? 
+                                                ($hidden || $this->myCookie($hidden_cookie)) ? 
                                                 '_r' : 
                                                 ''
                                             ), 
@@ -3084,7 +3085,7 @@ class WcChat {
                                 'MSG' => $this->popTemplate(
                                     'wcchat.posts.hidden', 
                                     '', 
-                                    $hidden, 
+                                    $hidden || $this->myCookie($hidden_cookie), 
                                     $this->parseBbcode($msg)
                                 ),
                                 'ID' => $unique_id,
@@ -3092,7 +3093,7 @@ class WcChat {
                                     'wcchat.posts.hide_icon', 
                                     array(
                                         'REVERSE' => (
-                                            ($hidden || $this->myCookie('hide_' . $unique_id)) ? 
+                                            ($hidden || $this->myCookie($hidden_cookie)) ? 
                                             '_r' : 
                                             ''
                                         ), 
