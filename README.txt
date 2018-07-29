@@ -101,13 +101,15 @@
  
   - Master moderator status will be given to the first user that joins the chat with a password.
 
-  - Hiding a message from the chat takes immediate effect on the other online users, while the unhide action only takes effect on user's next visit to the room.
+  - Moderators under edit mode: Hiding a message from the chat takes immediate effect on the other online users, while the unhide action only takes effect on user's next visit to the room.
 
   - Disabling the anti spam restriction is not recommended for two reasons: the spam (duh!), and the possibility of generating non unique message ids which can harm the hide/unhide feature.
 
   - To remove the copyright note, you must make a donation to the project (See below).
 
   - It is recommended to rename the data directory (or move it outside the web root) to ensure user's privacy. (don't forget to rename on settings.php as well)
+
+  - While loading older messages, one block contains less messages than the others, this is normal, it means the end of the archive has been reached, if more archives exist, the loading can continue.
 
 
 ============================================================================

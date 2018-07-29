@@ -194,7 +194,7 @@ function wc_toggle_msg(c, id) {
 	http.open("GET", c+"mode=toggle_msg&id="+id, true);
 	http.onreadystatechange=function(){if(http.readyState==4){
 		if(http.responseText.length > 0) {
-			if(http.responseText == "NO_ACCESS") {
+			if(http.responseText.search('ERROR') != -1) {
 				alert(http.responseText);
 			} else {
 				msg.innerHTML = http.responseText;
@@ -679,63 +679,84 @@ function wc_trim_chat(lim)
 	}
 }
 
-function wc_update_components(c) {
+function wc_update_components(c, incdir) {
 
 	var http = getHTTPObject();
-	http.open("GET", c+"mode=update_components&reload=0&new=0&join=0&ilmod=", true);
+	http.open("GET", c+"mode=update_components&reload=0&new=0&join=0&all=0&loop=1&ilmod=", true);
 	http.onreadystatechange=function(){if(http.readyState==4){
-		arr = http.responseText.split("[$]");
-
-		var open = 0;
-		var elems = document.getElementsByClassName('form_box');
-		for(i = 0 ; i < elems.length ; i++) {
-			if(elems[i].parentNode.className != 'closed') { open = 1; }
-		}
-
-		if(arr[0].length > 0 && open == 0) { 
-			document.getElementById('wc_ulist').innerHTML = arr[0];
-		}
-
-		if(arr[1].length > 0 && document.getElementById('wc_topic_editbox').className == 'closed') {
-			document.getElementById('wc_topic').innerHTML = arr[1];
-		}
-
-
-		var croom = document.getElementById('wc_croom_box');
- 		if(croom != null) {
-			if(croom.className != 'closed') { open = 1; }
-		}
-
-		if(arr[2].length > 0 && open == 0) { document.getElementById('wc_room_list').innerHTML = arr[2]; }
-
-		if(arr[3].length > 0) {
-			var arr2 = arr[3].split(" ");
-			for(i = 0 ; i < arr2.length ; i++) {
-				msg = document.getElementById(arr2[i]);
-				if(msg != null) {
-					icon = document.getElementById('wc_icon_' + arr2[i]);
-					if(msg.innerHTML.search("hidden") == -1) {
-						msg.innerHTML = '<i>This message is hidden.</i>';
-						if(icon != null) {
-							icon.src = icon.src.replace("arrow", "arrow_r");
-						}
-					}
-				}
-			}
-		}
-
-		if(arr[4].length > 0) {
-			var objDiv = document.getElementById('wc_msg_container');
-			var prevpos = objDiv.scrollTop;
-			var cont = document.createElement("div");
-			cont.innerHTML = arr[4];
-			document.getElementById('wc_msg_container').appendChild(cont);
-			objDiv.scrollTop = objDiv.scrollHeight;
-		}
-
-		if(arr[5].length > 0) {
-			alert(arr[5]);
-		}
+        if(http.responseText.length > 0) {
+    		arr = http.responseText.split("[$]");
+    
+    		var open = 0;
+    		var elems = document.getElementsByClassName('form_box');
+    		for(i = 0 ; i < elems.length ; i++) {
+    			if(elems[i].parentNode.className != 'closed') { open = 1; }
+    		}
+    
+    		if(arr[0].length > 0 && open == 0) {
+    				document.getElementById('wc_ulist').innerHTML = arr[0];
+    		}
+    
+    		if(arr[1].length > 0 && document.getElementById('wc_topic_editbox').className == 'closed') {
+    			document.getElementById('wc_topic').innerHTML = arr[1];
+    		}
+    
+    
+    		var croom = document.getElementById('wc_croom_box');
+     		if(croom != null) {
+    			if(croom.className != 'closed') { open = 1; }
+    		}
+    
+    		if(arr[2].length > 0 && open == 0) { document.getElementById('wc_room_list').innerHTML = arr[2]; }
+    
+    		if(arr[3].length > 0) {
+    			var arr2 = arr[3].split(" ");
+    			for(i = 0 ; i < arr2.length ; i++) {
+    				msg = document.getElementById(arr2[i]);
+    				if(msg != null) {
+    					icon = document.getElementById('wc_icon_' + arr2[i]);
+    					if(msg.innerHTML.search("hidden for all users") == -1) {
+    						msg.innerHTML = '<i><img src="'+incdir+'images/mod.png" class="mod_icon"> This message is hidden for all users.</i>';
+    						if(icon != null && icon.src.search('arrow_r') == -1) {
+    							icon.src = icon.src.replace("arrow", "arrow_r");
+    						}
+    					}
+    				}
+    			}
+    		}
+    
+    		if(arr[4].length > 0) {
+    			var objDiv = document.getElementById('wc_msg_container');
+    			var prevpos = objDiv.scrollTop;
+    			var cont = document.createElement("div");
+    			cont.innerHTML = arr[4];
+    			document.getElementById('wc_msg_container').appendChild(cont);
+    			objDiv.scrollTop = objDiv.scrollHeight;
+    		}
+    
+    		if(arr[5].length > 0) {
+    			alert(arr[5]);
+    		}
+    
+    		if(arr[6].length > 0) {
+    			var isScrolledToBottom = objDiv.scrollHeight - objDiv.clientHeight <= objDiv.scrollTop + 1;
+    			if(http.responseText.indexOf("RESET") == -1) {
+    				if(http.responseText != 'You are banned!') {
+    					var cont = document.createElement("div");
+    					cont.innerHTML = http.responseText;
+    					document.getElementById('wc_msg_container').appendChild(cont);
+    				} else {
+    					document.getElementById('wc_msg_container').innerHTML = http.responseText;
+    				}
+    			} else {
+    				alert('The room you were viewing was removed/renamed! We apologize for the inconvenience.');
+    				document.getElementById('wc_msg_container').innerHTML = http.responseText.slice(5);
+    				wc_refreshtopic(c);
+    			}
+    			wc_trim_chat(lim);
+    			if(isScrolledToBottom) { objDiv.scrollTop = objDiv.scrollHeight; }
+    		}
+    	}
 	}}
  	http.send(null);
 }
@@ -762,31 +783,11 @@ function wc_updmsg(c, all, refresh_delay, lim, incdir)
 
 	(function wc_theLoop () {
   		setTimeout(function wc_() {
-			http.open("GET", c+"mode=updmsg&all=0&loop=1", true);
-			http.onreadystatechange=function(){if(http.readyState==4){
-				if(http.responseText.length > 0) {
-					var isScrolledToBottom = objDiv.scrollHeight - objDiv.clientHeight <= objDiv.scrollTop + 1;
-					if(http.responseText.indexOf("RESET") == -1) {
-						if(http.responseText != 'You are banned!') {
-							var cont = document.createElement("div");
-							cont.innerHTML = http.responseText;
-							document.getElementById('wc_msg_container').appendChild(cont);
-						} else {
-							document.getElementById('wc_msg_container').innerHTML = http.responseText;
-						}
-					} else {
-						alert('The room you were viewing was removed/renamed! We apologize for the inconvenience.');
-						document.getElementById('wc_msg_container').innerHTML = http.responseText.slice(5);
-						wc_refreshtopic(c);
-					}
-					wc_trim_chat(lim);
-					if(isScrolledToBottom) { objDiv.scrollTop = objDiv.scrollHeight; }
-				} 
-			}}
- 			http.send(null); wc_update_components(c);
+			wc_update_components(c, incdir);
 
-			if(document.getElementById('wc_msg_container').innerHTML != 'You are banned!') { wc_theLoop(); }
-
+			if(document.getElementById('wc_msg_container').innerHTML != 'You are banned!') { 
+				wc_theLoop();
+			}
  	 	}, refresh_delay);
 	})();
 }
@@ -848,16 +849,7 @@ function wc_toggle_edit(c)
 		for (var i = 0; i < n; i++){
 			boxes[0].className = class1;
 		}
-		var boxes2 = document.getElementsByClassName('hide_icon');
-		var class2 = 'hide_icon_off';
-		if(boxes2.length == 0) {
-			var boxes2 = document.getElementsByClassName('hide_icon_off');
-			var class2 = 'hide_icon';
-		}
-		var n2 = boxes2.length;
-		for (var i = 0; i < n2; i++){
-			boxes2[0].className = class2;
-		}
+
 		var create_room_link = document.getElementById('wc_create_link');
 		var class3 = 'create_link_off';
 		if(create_room_link.className == 'create_link_off') {

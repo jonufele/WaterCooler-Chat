@@ -246,6 +246,11 @@ H1 {
 	border: 1px solid #7b5f6a;
 }
 
+#wc_msg_container .msg img.mod_icon,
+#wc_msg_container .msg_pm img.mod_icon {
+	width: 10px;
+}
+
 #wc_msg_container .msg .thumb_container,
 #wc_msg_container .msg_pm .thumb_container {
 	text-align: center;

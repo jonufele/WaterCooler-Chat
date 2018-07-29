@@ -11,5 +11,6 @@
 
 include __DIR__.'/wcchat.class.php';
 $chat = new WcChat();
+$chat->ajax();
 
 ?>

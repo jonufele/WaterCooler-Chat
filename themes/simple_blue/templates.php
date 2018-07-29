@@ -131,11 +131,11 @@ $templates['wcchat.toolbar.bbcode'] = '
 $templates['wcchat.toolbar.bbcode.attachment_uploads'] = ' <a href="#" onclick="wc_attach_test({ATTACHMENT_MAX_POST_N}); return false"><img src="{INCLUDE_DIR_THEME}images/upl.png" id="wc_attachment_upl_icon"  title="Upload Attachments"></a> 
 <span id="wc_attach_cont" class="closed"><input id="wc_attach" type="file" class="closed" onchange="wc_attach_upl(\'{CALLER}\', event, \'{INCLUDE_DIR_THEME}\')"></span>';
 
-$templates['wcchat.toolbar.commands'] = '<div id="wc_commands"><a href="#" onclick="wc_showcom(); return false" title="Commands">COM</a> | <a href="#" onclick="wc_clear_screen(\'{CALLER}\', \'{INCLUDE_DIR_THEME}\'); return false" title="Clear Screen">CLR</a> | <a href="#" onclick="wc_toggle_time(\'{CALLER}\'); return false" title="Toggle TimeStamps">TS</a>{GSETTINGS}{EDIT}</div>';
+$templates['wcchat.toolbar.commands'] = '<div id="wc_commands"><a href="#" onclick="wc_showcom(); return false" title="Commands"><img src="{INCLUDE_DIR_THEME}images/cmd.png" style="width: 18px"></a> <a href="#" onclick="wc_clear_screen(\'{CALLER}\', \'{INCLUDE_DIR_THEME}\'); return false" title="Clear Screen"><img src="{INCLUDE_DIR_THEME}images/clr.png" style="width: 18px"></a> <a href="#" onclick="wc_toggle_time(\'{CALLER}\'); return false" title="Toggle TimeStamps"><img src="{INCLUDE_DIR_THEME}images/ts.png" style="width: 18px"></a>{GSETTINGS}{EDIT}</div>';
 
-$templates['wcchat.toolbar.commands.gsettings'] = ' | <a href="#" onclick="wc_toggle(\'wc_msg_container\'); wc_toggle(\'wc_global_settings\'); return false" title="Global Settings">GST</a>';
+$templates['wcchat.toolbar.commands.gsettings'] = ' <a href="#" onclick="wc_toggle(\'wc_msg_container\'); wc_toggle(\'wc_global_settings\'); return false" title="Global Settings"><img src="{INCLUDE_DIR_THEME}images/gsett.png" style="width: 18px"></a>';
 
-$templates['wcchat.toolbar.commands.edit'] = ' | <a href="#" onclick="wc_toggle_edit(\'{CALLER}\'); return false" title="Toggle Edit Mode On/Off">EDT</a>';
+$templates['wcchat.toolbar.commands.edit'] = ' <a href="#" onclick="wc_toggle_edit(\'{CALLER}\'); return false" title="Toggle Edit Mode On/Off"><img src="{INCLUDE_DIR_THEME}images/edtmode.png" style="width: 18px"></a>';
 
 $templates['wcchat.toolbar.smiley.item'] = '<a href="#" OnClick="wc_bbcode(document.getElementById(\'{field}\'),\'{str_pat}\',\'\'); return false"><img src="{INCLUDE_DIR_THEME}images/smilies/{str_rep}" title="{title}"></a> ';
 
@@ -432,6 +432,8 @@ $templates['wcchat.posts.normal.pm_target.self'] = ' <img src="{INCLUDE_DIR_THEM
 $templates['wcchat.posts.hide_icon'] = '<a href="#" onclick="wc_toggle_msg(\'{CALLER}\', \'{ID}\'); return false;"><img src="{INCLUDE_DIR_THEME}images/arrow{REVERSE}.png" id="wc_icon_{ID}" title="Hide/Unhide Message" class="hide_icon{OFF}"></a> ';
 
 $templates['wcchat.posts.hidden'] = '<i>This message is hidden.</i>';
+
+$templates['wcchat.posts.hidden_mod'] = '<i><img src="{INCLUDE_DIR_THEME}images/mod.png" class="mod_icon"> This message is hidden for all users.</i>';
 
 $templates['wcchat.posts.event'] = '
 <div class="msg">
