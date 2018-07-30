@@ -96,6 +96,14 @@ class WcChat {
     private $uAvatar;
 
     /**
+     * Avatar Display Width
+     *
+     * @since 1.4
+     * @var int
+     */
+    private $uAvatarW;
+
+    /**
      * User Link (Web)
      *
      * @since 1.1
@@ -149,7 +157,7 @@ class WcChat {
      * @since 1.1
      * @var array
      */
-    private $udata;
+    private $uData;
 
     /**
      * templates
