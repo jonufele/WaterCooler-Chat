@@ -95,8 +95,12 @@ function wc_attach_upl(c, event, incdir)
 
 function setCookie(cname, cvalue, exdays) {
     var d = new Date();
-    d.setTime(d.getTime() + (exdays*24*60*60*1000));
-    var expires = "expires="+ d.toUTCString();
+    if(exdays != 0) {
+        d.setTime(d.getTime() + (exdays*24*60*60*1000));
+        var expires = "expires="+ d.toUTCString();
+    } else {
+        var expires = "expires=0";
+    }
     document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
 }
 
@@ -189,25 +193,39 @@ function wc_toggle_msg(c, id) {
 
 	var msg = document.getElementById(id);
 	var icon = document.getElementById('wc_icon_' + id);
+	var toggle_edit_icon = document.getElementById('wc_toggle_edit_icon');
 	var http = getHTTPObject();
-
-	http.open("GET", c+"mode=toggle_msg&id="+id, true);
-	http.onreadystatechange=function(){if(http.readyState==4){
-		if(http.responseText.length > 0) {
-			if(http.responseText.search('ERROR') != -1) {
-				alert(http.responseText);
-			} else {
-				msg.innerHTML = http.responseText;
-				if(icon.src.search("arrow_r") != -1) {
-					icon.src = icon.src.replace("arrow_r", "arrow");
-				} else {
-					icon.src = icon.src.replace("arrow", "arrow_r");
-				}
-			}
-		}
-		wc_refreshrooms(c, 'forced');
-	}}
- 	http.send(null);
+	
+	if(document.cookie.search('hide_edit=1') == -1 && toggle_edit_icon != null) {
+	   if(document.cookie.search('skip_hide_msg=1') == -1 && icon.src.search('arrow_r') == -1) {
+	       var conf = confirm('You are now under edit mode, this action will hide the message for all users, are you sure?');
+           if(conf) { setCookie('skip_hide_msg', 1, 0); }
+       } else {
+            conf = true;
+       }
+	} else {
+        var conf = true;
+    }
+ 
+    if(conf || icon.src.search('arrow_r') != -1) {
+    	http.open("GET", c+"mode=toggle_msg&id="+id, true);
+    	http.onreadystatechange=function(){if(http.readyState==4){
+    		if(http.responseText.length > 0) {
+    			if(http.responseText.search('ERROR') != -1) {
+    				alert(http.responseText);
+    			} else {
+    				msg.innerHTML = http.responseText;
+    				if(icon.src.search("arrow_r") != -1) {
+    					icon.src = icon.src.replace("arrow_r", "arrow");
+    				} else {
+    					icon.src = icon.src.replace("arrow", "arrow_r");
+    				}
+    			}
+    		}
+    		wc_refreshrooms(c, 'forced');
+    	}}
+     	http.send(null);
+ 	}
 }
 
 function wc_check_hidden_msg(c) {
@@ -844,6 +862,7 @@ function wc_toggle_edit(c)
 		if(boxes.length == 0) {
 			var boxes = document.getElementsByClassName('edit_bt_off');
 			var class1 = 'edit_bt';
+			setCookie('skip_hide_msg', 0, -1);
 		}
 		var n = boxes.length;
 		for (var i = 0; i < n; i++){

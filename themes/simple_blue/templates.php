@@ -79,8 +79,11 @@ $templates['wcchat.topic.box'] = '
 <div id="wc_topic_editbox" class="closed">
 	<div id="bbcode">{BBCODE}</div>
 	<textarea id="wc_topic_txt" rows="5" cols="50">{TOPIC_TXT}</textarea><br>
-	<div class="info">To hide part of the content by default, add the "[**]" string to generate a "Show more/less" link.</div>
-	<input type="submit" name="submit" value="Update Topic" onclick="wc_upd_topic(\'{CALLER}\')"> <input type="submit" name="cancel" value="Cancel" onclick="wc_toggle(\'wc_topic_con\'); wc_toggle(\'wc_topic_editbox\');">
+	<div class="info">
+		To hide part of the content by default, add the "[**]" string to generate a "Show more/less" link.
+	</div>
+	<input type="submit" name="submit" value="Update Topic" onclick="wc_upd_topic(\'{CALLER}\')"> 
+	<input type="submit" name="cancel" value="Cancel" onclick="wc_toggle(\'wc_topic_con\'); wc_toggle(\'wc_topic_editbox\');">
 </div>';
 
 $templates['wcchat.topic.box.partial'] = '
@@ -113,29 +116,66 @@ $templates['wcchat.toolbar'] = '
 		</a>
 	</span>
 	{USER_NAME}{JOINED_STATUS} | {BBCODE}
-	<span id="wc_smiley_box" class="closed">{SMILIES}<a href="#" onclick="wc_toggle(\'wc_smiley_icon\'); wc_toggle(\'wc_smiley_box\');">[x]</a></span> 
+	<span id="wc_smiley_box" class="closed">
+		{SMILIES}
+		<a href="#" onclick="wc_toggle(\'wc_smiley_icon\'); wc_toggle(\'wc_smiley_box\');">[x]</a>
+	</span> 
 	<img id="wc_post_loader" src="{INCLUDE_DIR_THEME}images/loader.gif" class="closed">
 </div>';
 
 $templates['wcchat.toolbar.joined_status'] = '<a href="#" onclick="wc_toggle_status(\'{CALLER}\'); return false;" id="wc_joined_status_c" class="closed"><img src="{INCLUDE_DIR_THEME}images/joined_{MODE}.png" class="joined_status" title="Toggle Status (Available / Do Not Disturb)"></a>';
 
 $templates['wcchat.toolbar.bbcode'] = '
-<a href="#" onclick="wc_bbcode(document.getElementById(\'{FIELD}\'), \'[B]\', \'[/B]\'); return false;"><img src="{INCLUDE_DIR_THEME}images/bbcode/b.png" title="bold"></a> 
-<a href="#" onclick="wc_bbcode(document.getElementById(\'{FIELD}\'), \'[I]\', \'[/I]\'); return false;"><img src="{INCLUDE_DIR_THEME}images/bbcode/i.png" title="italic"></a> 
-<a href="#" class="underline" onclick="wc_bbcode(document.getElementById(\'{FIELD}\'), \'[U]\', \'[/U]\'); return false;"><img src="{INCLUDE_DIR_THEME}images/bbcode/u.png" title="underlined"></a> 
-<a href="#" onclick="wc_bbcode(document.getElementById(\'{FIELD}\'), \'[URL=&quot;http://&quot;]\', \'[/URL]\'); return false;"><img src="{INCLUDE_DIR_THEME}images/bbcode/urlt.png" title="link with description/image"></a> 
-<a href="#" onclick="wc_bbcode(document.getElementById(\'{FIELD}\'), \'[IMG]\', \'[/IMG]\'); return false;"><img src="{INCLUDE_DIR_THEME}images/bbcode/img.png" title="Image link not terminating with extension"></a>{ATTACHMENT_UPLOADS}
-<span id="wc_smiley_icon{FIELD}"><a href="#" onclick="wc_toggle(\'wc_smiley_icon{FIELD}\'); wc_toggle(\'wc_smiley_box{FIELD}\'); return false;"><img src="{INCLUDE_DIR_THEME}images/smilies/sm1.gif"></a></span>
-<span id="wc_smiley_box{FIELD}" class="closed">{SMILIES}<a href="#" onclick="wc_toggle(\'wc_smiley_icon{FIELD}\'); wc_toggle(\'wc_smiley_box{FIELD}\'); return false">[x]</a></span>';
+<a href="#" onclick="wc_bbcode(document.getElementById(\'{FIELD}\'), \'[B]\', \'[/B]\'); return false;">
+	<img src="{INCLUDE_DIR_THEME}images/bbcode/b.png" title="bold">
+</a> 
+<a href="#" onclick="wc_bbcode(document.getElementById(\'{FIELD}\'), \'[I]\', \'[/I]\'); return false;">
+	<img src="{INCLUDE_DIR_THEME}images/bbcode/i.png" title="italic">
+</a> 
+<a href="#" class="underline" onclick="wc_bbcode(document.getElementById(\'{FIELD}\'), \'[U]\', \'[/U]\'); return false;">
+	<img src="{INCLUDE_DIR_THEME}images/bbcode/u.png" title="underlined">
+</a> 
+<a href="#" onclick="wc_bbcode(document.getElementById(\'{FIELD}\'), \'[URL=&quot;http://&quot;]\', \'[/URL]\'); return false;">
+	<img src="{INCLUDE_DIR_THEME}images/bbcode/urlt.png" title="link with description/image">
+</a> 
+<a href="#" onclick="wc_bbcode(document.getElementById(\'{FIELD}\'), \'[IMG]\', \'[/IMG]\'); return false;">
+	<img src="{INCLUDE_DIR_THEME}images/bbcode/img.png" title="Image link not terminating with extension">
+</a>
+{ATTACHMENT_UPLOADS}
+<span id="wc_smiley_icon{FIELD}">
+	<a href="#" onclick="wc_toggle(\'wc_smiley_icon{FIELD}\'); wc_toggle(\'wc_smiley_box{FIELD}\'); return false;">
+		<img src="{INCLUDE_DIR_THEME}images/smilies/sm1.gif">
+	</a>
+</span>
+<span id="wc_smiley_box{FIELD}" class="closed">
+	{SMILIES}
+	<a href="#" onclick="wc_toggle(\'wc_smiley_icon{FIELD}\'); wc_toggle(\'wc_smiley_box{FIELD}\'); return false">[x]</a>
+</span>';
 
-$templates['wcchat.toolbar.bbcode.attachment_uploads'] = ' <a href="#" onclick="wc_attach_test({ATTACHMENT_MAX_POST_N}); return false"><img src="{INCLUDE_DIR_THEME}images/upl.png" id="wc_attachment_upl_icon"  title="Upload Attachments"></a> 
-<span id="wc_attach_cont" class="closed"><input id="wc_attach" type="file" class="closed" onchange="wc_attach_upl(\'{CALLER}\', event, \'{INCLUDE_DIR_THEME}\')"></span>';
+$templates['wcchat.toolbar.bbcode.attachment_uploads'] = ' <a href="#" onclick="wc_attach_test({ATTACHMENT_MAX_POST_N}); return false">
+	<img src="{INCLUDE_DIR_THEME}images/upl.png" id="wc_attachment_upl_icon"  title="Upload Attachments">
+</a> 
+<span id="wc_attach_cont" class="closed">
+	<input id="wc_attach" type="file" class="closed" onchange="wc_attach_upl(\'{CALLER}\', event, \'{INCLUDE_DIR_THEME}\')">
+</span>';
 
-$templates['wcchat.toolbar.commands'] = '<div id="wc_commands"><a href="#" onclick="wc_showcom(); return false" title="Commands"><img src="{INCLUDE_DIR_THEME}images/cmd.png" style="width: 18px"></a> <a href="#" onclick="wc_clear_screen(\'{CALLER}\', \'{INCLUDE_DIR_THEME}\'); return false" title="Clear Screen"><img src="{INCLUDE_DIR_THEME}images/clr.png" style="width: 18px"></a> <a href="#" onclick="wc_toggle_time(\'{CALLER}\'); return false" title="Toggle TimeStamps"><img src="{INCLUDE_DIR_THEME}images/ts.png" style="width: 18px"></a>{GSETTINGS}{EDIT}</div>';
+$templates['wcchat.toolbar.commands'] = '
+<div id="wc_commands">
+	<a href="#" onclick="wc_showcom(); return false" title="Commands">
+		<img src="{INCLUDE_DIR_THEME}images/cmd.png">
+	</a> 
+	<a href="#" onclick="wc_clear_screen(\'{CALLER}\', \'{INCLUDE_DIR_THEME}\'); return false" title="Clear Screen">
+		<img src="{INCLUDE_DIR_THEME}images/clr.png"></a> 
+	<a href="#" onclick="wc_toggle_time(\'{CALLER}\'); return false" title="Toggle TimeStamps">
+		<img src="{INCLUDE_DIR_THEME}images/ts.png">
+	</a>
+	{GSETTINGS}
+	{EDIT}
+</div>';
 
-$templates['wcchat.toolbar.commands.gsettings'] = ' <a href="#" onclick="wc_toggle(\'wc_msg_container\'); wc_toggle(\'wc_global_settings\'); return false" title="Global Settings"><img src="{INCLUDE_DIR_THEME}images/gsett.png" style="width: 18px"></a>';
+$templates['wcchat.toolbar.commands.gsettings'] = ' <a href="#" onclick="wc_toggle(\'wc_msg_container\'); wc_toggle(\'wc_global_settings\'); return false" title="Global Settings"><img src="{INCLUDE_DIR_THEME}images/gsett.png"></a>';
 
-$templates['wcchat.toolbar.commands.edit'] = ' <a href="#" onclick="wc_toggle_edit(\'{CALLER}\'); return false" title="Toggle Edit Mode On/Off"><img src="{INCLUDE_DIR_THEME}images/edtmode.png" style="width: 18px"></a>';
+$templates['wcchat.toolbar.commands.edit'] = ' <a href="#" onclick="wc_toggle_edit(\'{CALLER}\'); return false" title="Toggle Edit Mode On/Off"><img src="{INCLUDE_DIR_THEME}images/edtmode.png" id="wc_toggle_edit_icon"></a>';
 
 $templates['wcchat.toolbar.smiley.item'] = '<a href="#" OnClick="wc_bbcode(document.getElementById(\'{field}\'),\'{str_pat}\',\'\'); return false"><img src="{INCLUDE_DIR_THEME}images/smilies/{str_rep}" title="{title}"></a> ';
 

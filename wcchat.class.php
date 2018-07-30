@@ -411,10 +411,14 @@ class WcChat {
         }
         
         define('THEME', (
-            ($this->myCookie('wc_theme') && file_exists(__DIR__ . '/themes/' . $this->myCookie('wc_theme') . '/')) ? 
+            (
+                $this->myCookie('wc_theme') && 
+                file_exists(__DIR__ . '/themes/' . $this->myCookie('wc_theme') . '/')
+            ) ? 
             $this->myCookie('wc_theme') : 
             DEFAULT_THEME
         ));
+        
         define('INCLUDE_DIR_THEME', $this->includeDir . 'themes/' . THEME . '/');
         include __DIR__ . '/themes/' . THEME . '/templates.php';
         $this->templates = $templates;
@@ -507,12 +511,19 @@ class WcChat {
         );
     
         // Set certified User status
-        if($this->hasData($this->uPass) && $this->myCookie('chatpass') && $this->myCookie('chatpass') == $this->uPass) {
+        if(
+            $this->hasData($this->uPass) && 
+            $this->myCookie('chatpass') && 
+            $this->myCookie('chatpass') == $this->uPass
+        ) {
             $this->isCertifiedUser = TRUE;
         }
 
         // Set has perofile access status
-        if($this->isLoggedIn && ($this->isCertifiedUser || !$this->uPass)) {
+        if(
+            $this->isLoggedIn && 
+            ($this->isCertifiedUser || !$this->uPass)
+        ) {
             $this->hasProfileAccess = TRUE;
         }
 
@@ -1215,7 +1226,10 @@ class WcChat {
      * @param int $thumbsize
      * @return bool
      */
-    private function thumbnailCreateMed ($original_image, $source_image, $w, $h, $target_image, $thumbsize)
+    private function thumbnailCreateMed (
+        $original_image, $source_image, 
+        $w, $h, $target_image, $thumbsize
+    )
     {
         if(!$source_image || !function_exists('gd_info')) { return FALSE; }
 
@@ -1346,24 +1360,25 @@ class WcChat {
                     $par[4] . '|' . 
                     $npasse
                 );
-                $request_uri = explode('?', $_SERVER['REQUEST_URI']);
+                
+                $request_uri = explode('?', $this->myServer('REQUEST_URI'));
                 if(mail(
                     $par[1],
                     'Account Recovery',
                     "Your new password is: " . $npass . "\n\n\n" . 
                     (
                         (
-                            !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || 
-                            $_SERVER['SERVER_PORT'] == 443
+                            !$this->hasData($this->myServer('HTTPS')) && $this->myServer('HTTPS') !== 'off' || 
+                            $this->myServer('SERVER_PORT') == 443
                         ) ? 
                         'https://' : 
                         'http://'
-                    ) . $_SERVER['SERVER_NAME'] . $request_uri[0],
+                    ) . $this->myServer('SERVER_NAME') . $request_uri[0],
                     $this->mailHeaders(
                         (
                             trim(ACC_REC_EMAIL) ? 
                             trim(ACC_REC_EMAIL) : 
-                            'no-reply@' . $_SERVER['SERVER_NAME']
+                            'no-reply@' . $this->myServer('SERVER_NAME')
                         ),
                         TITLE,
                         $par[1],
@@ -1402,7 +1417,7 @@ class WcChat {
                 die();
             }
             
-            if(INVITE_LINK_CODE && $this->myGet('invite') != INVITE_LINK_CODE && $this->userMatch($_POST['cname']) === FALSE) {
+            if(INVITE_LINK_CODE && $this->myGet('invite') != INVITE_LINK_CODE && $this->userMatch($this->myPost('cname')) === FALSE) {
                 $_SESSION['login_err'] = 'Cannot login! You must follow an invite link to login the first time!';
                 header('location: ' . $this->myServer('REQUEST_URI') . '#wc_join');
                 die();
@@ -1457,13 +1472,17 @@ class WcChat {
      * @param string $index
      * @return string|void Returns void if unset/empty, otherwise string
      */
-    private function myPost($index) {
+    private function myPost($index, $bool = NULL) {
 
         if (isset($_POST[$index])) {
+            if($bool !== NULL) { return TRUE; }
             if ($this->hasData($_POST[$index])) {
                 return $this->parseName($_POST[$index]);
             }
+        } elseif($bool !== NULL) {
+            return FALSE;
         }
+        
         return '';
     }
 
@@ -1474,13 +1493,17 @@ class WcChat {
      * @param string $index
      * @return string|void Returns void if unset/empty, otherwise string
      */
-    private function myGet($index) {
+    private function myGet($index, $bool = NULL) {
 
         if (isset($_GET[$index])) {
+            if($bool !== NULL) { return TRUE; }
             if ($this->hasData($_GET[$index])) {
                 return $this->parseName($_GET[$index]);
             }
+        } elseif($bool !== NULL) {
+            return FALSE;
         }
+        
         return '';
     }
 
@@ -1491,13 +1514,18 @@ class WcChat {
      * @param string $index
      * @return string|void Returns void if unset/empty, otherwise string
      */
-    private function myCookie($index) {
+    private function myCookie($index, $bool = NULL) {
 
+        $index = $this->parseCookieName($index);
         if (isset($_COOKIE[$index])) {
+            if($bool !== NULL) { return TRUE; }
             if ($this->hasData($_COOKIE[$index])) {
                 return $this->parseName($_COOKIE[$index]);
             }
+        } elseif($bool !== NULL) {
+            return FALSE;
         }
+        
         return '';
     }
 
@@ -1508,13 +1536,17 @@ class WcChat {
      * @param string $index
      * @return string|void Returns void if unset/empty, otherwise string
      */
-    private function mySession($index) {
+    private function mySession($index, $bool = NULL) {
 
         if (isset($_SESSION[$index])) {
+            if($bool !== NULL) { return TRUE; }
             if ($this->hasData($_SESSION[$index])) {
                 return $this->parseName($_SESSION[$index]);
             }
+        } elseif($bool !== NULL) {
+            return FALSE;
         }
+        
         return '';
     }
 
@@ -1525,13 +1557,17 @@ class WcChat {
      * @param string $index
      * @return string|void Returns void if unset/empty, otherwise string
      */
-    private function myServer($index) {
+    private function myServer($index, $bool = NULL) {
 
         if (isset($_SERVER[$index])) {
+            if($bool !== NULL) { return TRUE; }
             if ($this->hasData($_SERVER[$index])) {
                 return $this->parseName($_SERVER[$index]);
             }
+        } elseif($bool !== NULL) {
+            return FALSE;
         }
+        
         return '';
     }
     
@@ -1546,7 +1582,7 @@ class WcChat {
     private function wcSetCookie($name, $value) {
     
         setcookie(
-            $name, 
+            $this->parseCookieName($name), 
             $value,
             time() + (86400*365), 
             '/'
@@ -1563,7 +1599,7 @@ class WcChat {
     private function wcUnsetCookie($name) {
     
         setcookie(
-            $name, 
+            $this->parseCookieName($name), 
             '',
             time() - 3600, 
             '/'
@@ -1719,15 +1755,14 @@ class WcChat {
                 '_' . $this->mySession('current_room')
             );
             
-        $enc =  $this->parseCookieName($id);
         switch($mode) {
             case 'store':
                 $_SESSION[$id] = time();
-                $this->wcSetCookie($enc, time());
+                $this->wcSetCookie($id, time());
             break;
             case 'read':
-                if($this->myCookie($enc) && !$this->mySession($id)) {
-                    $_SESSION[$id] = $this->myCookie($enc);
+                if($this->myCookie($id) && !$this->mySession($id)) {
+                    $_SESSION[$id] = $this->myCookie($id);
                 }
                 return $this->mySession($id);
             break;
@@ -1860,7 +1895,7 @@ class WcChat {
                     'CUSER_LINK' => $this->popTemplate(
                         'wcchat.join.cuser_link', 
                         array(
-                            'RETURN_URL' => urlencode($_SERVER['REQUEST_URI'])
+                            'RETURN_URL' => urlencode($this->myServer('REQUEST_URI'))
                         )
                     ),
                     'USER_NAME' => $this->name,
@@ -1958,14 +1993,14 @@ class WcChat {
                                 'URL' => 
                                     (
                                         (
-                                            (!empty($_SERVER['HTTPS']) && 
-                                            $_SERVER['HTTPS'] !== 'off') || 
-                                            $_SERVER['SERVER_PORT'] == 443
+                                            (!$this->hasData($this->myServer('HTTPS')) && 
+                                            $this->myServer('HTTPS') !== 'off') || 
+                                            $this->myServer('SERVER_PORT') == 443
                                         ) ? 
                                         'https://' : 
                                         'http://'
-                                    ) . $_SERVER['SERVER_NAME'] . $_SERVER['REQUEST_URI'],
-                                'ACC_REC_EM_DEFAULT' => 'no-reply@' . $_SERVER['SERVER_NAME']
+                                    ) . $this->myServer('SERVER_NAME') . $this->myServer('REQUEST_URI'),
+                                'ACC_REC_EM_DEFAULT' => 'no-reply@' . $this->myServer('SERVER_NAME')
                             ),
                             $gsettings_par_v
                         )
@@ -2095,7 +2130,10 @@ class WcChat {
      * @param string $no_cond_content Content to display if condition is not met
      * @return string|void Html Template
      */
-    private function popTemplate($model, $data = NULL, $cond = NULL, $no_cond_content = NULL) {
+    private function popTemplate(
+        $model, $data = NULL, 
+        $cond = NULL, $no_cond_content = NULL
+    ) {
     
         $out = '';
         if (!isset($cond) || (isset($cond) && $cond == TRUE)) {
@@ -2858,7 +2896,7 @@ class WcChat {
                 ($time . '|' . $user) : 
                 ($time . '|*' . $user)
             );
-            $hidden_cookie = 'hide_' . $this->parseCookieName($unique_id);
+            $hidden_cookie = 'hide_' . $unique_id;
             
             // Start counting older messages
             if($older_index !== NULL) {
@@ -2909,7 +2947,7 @@ class WcChat {
                     (
                         $time < $this->myCookie(
                             'start_point_' . 
-                            $this->parseCookieName($this->mySession('current_room'))
+                            $this->mySession('current_room')
                         ) && 
                         $older_index === NULL &&
                         LOAD_EX_MSG !== FALSE
@@ -2924,7 +2962,7 @@ class WcChat {
                         LOAD_EX_MSG !== FALSE ? 
                         $this->myCookie(
                             'start_point_' . 
-                            $this->parseCookieName($this->mySession('current_room'))
+                            $this->mySession('current_room')
                         ) : 
                         $this->mySession('global_start_point')
                     );
@@ -3394,7 +3432,11 @@ class WcChat {
      */
     private function parseCookieName($name) {
     
-        return str_replace('=', '_', base64_encode($name));    
+        return str_replace(
+            array('=', ',', ';', ' ', "\t", "\r", "\013", "\014"), 
+            array('_', '_', '_', '_', '', '', '', ''), 
+            $name
+        );    
     }
 
       /*===========================================
@@ -4076,10 +4118,10 @@ class WcChat {
                             'Account Recovery',
                             "Someone (probably you) has requested an account recovery.\n
                                 Click the following link in order to reset your account password:\n\n" . 
-                                $_SERVER['HTTP_REFERER'] . '?recover=' . $this->uPass . "&u=" . urlencode(base64_encode($this->name)) . 
+                                $this->myServer('HTTP_REFERER') . '?recover=' . $this->uPass . "&u=" . urlencode(base64_encode($this->name)) . 
                                 "\n\nIf you did not request this, please ignore it.",
                             $this->mailHeaders(
-                                (trim(ACC_REC_EMAIL) ? trim(ACC_REC_EMAIL) : 'no-reply@' . $_SERVER['SERVER_NAME']),
+                                (trim(ACC_REC_EMAIL) ? trim(ACC_REC_EMAIL) : 'no-reply@' . $this->myServer('SERVER_NAME')),
                                 TITLE,
                                 $this->uEmail,
                                 $this->name
@@ -4193,7 +4235,7 @@ class WcChat {
                     $id_hidden = str_replace('|', '*|', $id);
                     $action = $output = '';
                     $hard_mode = $soft_mode = FALSE;
-                    $cookie_name = 'hide_' . $this->parseCookieName($id);
+                    $cookie_name = 'hide_' . $id;
                     
                     // If message has not been hidden by a moderator, hide it (or allow soft hide)
                     if(strpos($this->msgList, $id) !== FALSE) {
@@ -4202,7 +4244,7 @@ class WcChat {
                         // 1 - a normal user/moderator outside edit mode (soft hide, cookie only)
                         // 2 - a moderator under edit mode (hard hide, all users)
                         if(!$this->hasPermission('MSG_HIDE', 'skip_msg') || $this->mycookie('hide_edit') == 1) {
-                            if(isset($_COOKIE[$cookie_name])) {
+                            if($this->myCookie($cookie_name, 'BOOL')) {
                                 $this->wcUnsetCookie($cookie_name);
                                 preg_match_all(
                                     '/^' . preg_quote($id) . '\|(.*)$/im', 
@@ -4217,7 +4259,7 @@ class WcChat {
                             $soft_mode = TRUE;
                         } else {
                             // If cookie exists, ignore hard mode, undo soft mode first
-                            if(isset($_COOKIE[$cookie_name])) {
+                            if($this->myCookie($cookie_name, 'BOOL')) {
                                 $this->wcUnsetCookie($cookie_name);
                                 preg_match_all(
                                     '/^' . preg_quote($id) . '\|(.*)$/im', 
@@ -4566,14 +4608,14 @@ class WcChat {
                 // Create a new chat start point (For a Screen Cleanup)
                 case 'new_start_point':
                     $this->wcSetCookie(
-                        'start_point_' . $this->parseCookieName($this->mySession('current_room')), 
+                        'start_point_' . $this->mySession('current_room'), 
                         time()
                     );
                 break;
                 
                 case 'undo_start_point':
                     $this->wcUnsetCookie(
-                        'start_point_' . $this->parseCookieName($this->mySession('current_room'))
+                        'start_point_' . $this->mySession('current_room')
                     );
                 break;
                 
@@ -4668,7 +4710,7 @@ class WcChat {
                                     if($this->userMatch($par[1]) !== FALSE) {
                                         $this->writeEvent('ignore', $par[1]);
                                         $this->wcSetCookie(
-                                            'ign_' . $this->parseCookieName($par[1]), 
+                                            'ign_' . $par[1], 
                                             '1'
                                         );
                                         echo 'Successfully ignored ' . $par[1];
@@ -4684,7 +4726,7 @@ class WcChat {
                                     ) {
                                         $this->writeEvent('unignore', $par[1]);
                                         $this->wcSetCookie(
-                                            'ign_' . $this->parseCookieName($par[1]), 
+                                            'ign_' . $par[1], 
                                             ''
                                         );
                                         echo 'Successfully unignored ' . $par[1];
