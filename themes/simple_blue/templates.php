@@ -608,8 +608,12 @@ $templates['wcchat.global_settings'] = '
 		<fieldset>
 			<legend>CHAT PARAMETERS</legend>
 			<div>
-				Refresh Delay: <input type="text" id="gs_refresh_delay" value="{GS_REFRESH_DELAY}" class="gsett"> ms<br>
+				Refresh Delay: <input type="text" id="gs_refresh_delay" value="{GS_REFRESH_DELAY}" class="gsett"> s<br>
 				<span>Message Refresh Delay (do not set this too low to avoid server overload)</span>
+			</div>
+			<div>
+				Refresh Delay (Idle): <input type="text" id="gs_refresh_delay_idle" value="{GS_REFRESH_DELAY_IDLE}" class="gsett"> s<br>
+				<span>0 = Disabled; Message Refresh Delay While Idling</span>
 			</div>
 			<div>
 				Idle Start: <input type="text" id="gs_idle_start" value="{GS_IDLE_START}" class="gsett"> s<br>

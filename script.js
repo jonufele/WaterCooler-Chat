@@ -93,7 +93,7 @@ function wc_attach_upl(c, event, incdir)
 	http.send(formData);
 }
 
-function setCookie(cname, cvalue, exdays) {
+function wc_setCookie(cname, cvalue, exdays) {
     var d = new Date();
     if(exdays != 0) {
         d.setTime(d.getTime() + (exdays*24*60*60*1000));
@@ -104,8 +104,21 @@ function setCookie(cname, cvalue, exdays) {
     document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
 }
 
+function wc_getCookie(name) {
+	cookies = document.cookie;
+	if(cookies.search(name + '=') != -1) {
+		var par = cookies.replace(' ', '').split(';');
+		n = par.length;
+		for(i=0; i < n ; i++) {
+			if(par[i].search(name + '=') != -1) {
+				return par[i].replace(name + '=', '');
+			}
+		}
+	}
+}
+
 function apply_theme(v) {
-	setCookie('wc_theme', v, 365);
+	wc_setCookie('wc_theme', v, 365);
 	location.reload();
 }
 
@@ -199,7 +212,7 @@ function wc_toggle_msg(c, id) {
 	if(document.cookie.search('hide_edit=1') == -1 && toggle_edit_icon != null) {
 	   if(document.cookie.search('skip_hide_msg=1') == -1 && icon.src.search('arrow_r') == -1) {
 	       var conf = confirm('You are now under edit mode, this action will hide the message for all users, are you sure?');
-           if(conf) { setCookie('skip_hide_msg', 1, 0); }
+           if(conf) { wc_setCookie('skip_hide_msg', 1, 0); }
        } else {
             conf = true;
        }
@@ -382,8 +395,12 @@ function wc_upd_topic(c)
 	var t = document.getElementById('wc_topic_txt').value;
 	http.open("GET", c+"mode=upd_topic&t="+encodeURIComponent(t), true);
 	http.onreadystatechange=function(){if(http.readyState==4){
-		document.getElementById('wc_topic').innerHTML = http.responseText;
-		wc_smsge(c, 'topic_update', 0);
+		if(http.responseText.length > 0) {
+			document.getElementById('wc_topic').innerHTML = http.responseText;
+			wc_smsge(c, 'topic_update', 0);
+		} else {
+			alert('Nothing To Update!');
+		}
 	}}
  	http.send(null);
 }
@@ -697,8 +714,9 @@ function wc_trim_chat(lim)
 	}
 }
 
-function wc_update_components(c, incdir) {
+function wc_update_components(c, incdir, lim) {
 
+	var objDiv = document.getElementById('wc_msg_container');
 	var http = getHTTPObject();
 	http.open("GET", c+"mode=update_components&reload=0&new=0&join=0&all=0&loop=1&ilmod=", true);
 	http.onreadystatechange=function(){if(http.readyState==4){
@@ -744,7 +762,6 @@ function wc_update_components(c, incdir) {
     		}
     
     		if(arr[4].length > 0) {
-    			var objDiv = document.getElementById('wc_msg_container');
     			var prevpos = objDiv.scrollTop;
     			var cont = document.createElement("div");
     			cont.innerHTML = arr[4];
@@ -758,17 +775,17 @@ function wc_update_components(c, incdir) {
     
     		if(arr[6].length > 0) {
     			var isScrolledToBottom = objDiv.scrollHeight - objDiv.clientHeight <= objDiv.scrollTop + 1;
-    			if(http.responseText.indexOf("RESET") == -1) {
+    			if(arr[6].indexOf("RESET") == -1) {
     				if(http.responseText != 'You are banned!') {
     					var cont = document.createElement("div");
-    					cont.innerHTML = http.responseText;
+    					cont.innerHTML = arr[6];
     					document.getElementById('wc_msg_container').appendChild(cont);
     				} else {
-    					document.getElementById('wc_msg_container').innerHTML = http.responseText;
+    					document.getElementById('wc_msg_container').innerHTML = arr[6];
     				}
     			} else {
     				alert('The room you were viewing was removed/renamed! We apologize for the inconvenience.');
-    				document.getElementById('wc_msg_container').innerHTML = http.responseText.slice(5);
+    				document.getElementById('wc_msg_container').innerHTML = arr[6].slice(5);
     				wc_refreshtopic(c);
     			}
     			wc_trim_chat(lim);
@@ -784,6 +801,8 @@ function wc_updmsg(c, all, refresh_delay, lim, incdir)
 	var http = getHTTPObject();
 	var prev;
 	var objDiv = document.getElementById('wc_msg_container');
+	var refresh = refresh_delay;
+
 	if(all == 'ALL') {
 		objDiv.innerHTML = '<div style="text-align: center"><img src="'+incdir+'images/loader.gif"></div>';
 	}
@@ -801,12 +820,20 @@ function wc_updmsg(c, all, refresh_delay, lim, incdir)
 
 	(function wc_theLoop () {
   		setTimeout(function wc_() {
-			wc_update_components(c, incdir);
+
+			wc_update_components(c, incdir, lim);
+
+			if(document.cookie.search('idle_refresh=') != -1) {
+				var idle_refresh_cookie = wc_getCookie('idle_refresh');
+				if(idle_refresh_cookie >= 1) { refresh = idle_refresh_cookie; }
+			} else {
+				refresh = refresh_delay;
+			}
 
 			if(document.getElementById('wc_msg_container').innerHTML != 'You are banned!') { 
 				wc_theLoop();
 			}
- 	 	}, refresh_delay);
+ 	 	}, refresh * 1000);
 	})();
 }
 
@@ -862,7 +889,7 @@ function wc_toggle_edit(c)
 		if(boxes.length == 0) {
 			var boxes = document.getElementsByClassName('edit_bt_off');
 			var class1 = 'edit_bt';
-			setCookie('skip_hide_msg', 0, -1);
+			wc_setCookie('skip_hide_msg', 0, -1);
 		}
 		var n = boxes.length;
 		for (var i = 0; i < n; i++){

@@ -10,53 +10,105 @@
  */
 
 # NOTE: It's prefrerrable to use the chat interface to edit the settings below.
-#      The data directory path can only be edited manually.
+#      The data directory path can only be edited manually here.
 
 # ============================================================================
 #                  MAIN TITLE
 # ============================================================================
 
-define('TITLE', 'My Chat'); // Main chat title
+// Main chat title
+define('TITLE', 'My Chat');
 
 # ============================================================================
 #                  INCLUDE DIRECTORY
 # ============================================================================
 
-define('INCLUDE_DIR', ''); // Relative Path from web root to chat system (Empty if on the root)
+// Relative Path from web root to chat system (Empty if on the root)
+define('INCLUDE_DIR', '');
 
 # ============================================================================
 #                  CHAT SETTINGS
 # ============================================================================
 
-define('REFRESH_DELAY', 5000); // Message Refresh Delay (miliseconds, do not set this too low to avoid server overload)
-define('IDLE_START', 300); // Minimum period of time (seconds) to be considered idle
-define('OFFLINE_PING', 10); // Minimum period of time (seconds) to be considered offline after last successful ping
-define('LOAD_EX_MSG', TRUE); // TRUE - When someone joins chat, the existent messages are displayed; FALSE - Starts with empty screen
-define('CHAT_DSP_BUFFER', 100); // Maximum number of chat posts to display
-define('CHAT_STORE_BUFFER', 500); // Maximum number of chat posts to store / Available to load
-define('CHAT_OLDER_MSG_STEP', 20); // Maximum number of old chat posts to retrieve at once
-define('LIST_GUESTS', TRUE); // List guests (Users that never joined chat) on user list
-define('ANTI_SPAM', 3); // Minimum ammount of time (seconds) between one user's posted messages (seconds, 0 = disabled)
-define('ACC_REC_EMAIL', ''); // Account recovey sender email; default = no-reply@<server_address>; The email account must exist in the webserver.
-define('ARCHIVE_MSG', TRUE); // Archive messages that drop from Store Buffer (system will keep packing the messages in files the same size as the store buffer, available for users to load)
-define('BOT_MAIN_PAGE_ACCESS', FALSE); // Allow search engines / automated bots access to the chat's main page
+// Message Refresh Delay (seconds)
+define('REFRESH_DELAY', 5);
+
+// Message Refresh Delay while idling (seconds); 0 = Disabled
+define('REFRESH_DELAY_IDLE', 30);
+
+// Minimum period of time (seconds) to be considered idle
+define('IDLE_START', 300);
+
+ // Minimum period of time (seconds) to be considered offline after last successful ping
+define('OFFLINE_PING', 10);
+
+// Load Existing messages on a new visit
+// TRUE = When someone joins chat, the existent messages are displayed;
+// FALSE = Starts with empty screen
+define('LOAD_EX_MSG', TRUE);
+
+// Maximum number of chat posts to display
+define('CHAT_DSP_BUFFER', 100);
+
+// Maximum number of chat posts to store / Available to load
+define('CHAT_STORE_BUFFER', 500);
+
+// Maximum number of old chat posts to retrieve at once
+define('CHAT_OLDER_MSG_STEP', 20);
+
+// List guests (Users that never joined chat) on user list
+define('LIST_GUESTS', TRUE);
+
+// Minimum ammount of time (seconds) between one user's posted messages (seconds, 0 = disabled)
+define('ANTI_SPAM', 3);
+
+// Account recovey sender email;
+// default = no-reply@<server_address>;
+// The email account must exist in the webserver
+define('ACC_REC_EMAIL', '');
+
+// Archive messages that drop from Store Buffer (system will keep packing the messages in files the same size as the store buffer, available for users to load)
+define('ARCHIVE_MSG', TRUE);
+
+// Allow search engines / automated bots access to the chat's main page
+define('BOT_MAIN_PAGE_ACCESS', FALSE);
 
 
 # ============================================================================
 #                  MULTIMEDIA SETTINGS
 # ============================================================================
 
-define('IMAGE_MAX_DSP_DIM', 300); // Maximum displayed dimension of images within messages (pixels)
-define('IMAGE_AUTO_RESIZE_UNKN', 100); // Resize Images with unknown dimension within messages (pixels)
-define('VIDEO_WIDTH', 400); // Video container width
-define('VIDEO_HEIGHT', 250); // Video container height
-define('AVATAR_SIZE', 0); // width in pixels; Default = 25 (square avatar)
+// Maximum displayed dimension of images within messages (pixels)
+define('IMAGE_MAX_DSP_DIM', 300);
+
+// Resize Images with unknown dimension within messages (pixels)
+define('IMAGE_AUTO_RESIZE_UNKN', 100);
+
+// Video container width
+define('VIDEO_WIDTH', 400);
+
+// Video container height
+define('VIDEO_HEIGHT', 250);
+
+// width in pixels; Default = 25 (square avatar)
+define('AVATAR_SIZE', 0);
+
 define('DEFAULT_AVATAR', 'images/noav.gif');
-define('GEN_REM_THUMB', TRUE); // Generate thumbnails for remote images
-define('ATTACHMENT_UPLOADS', TRUE); // Allow upload of attachments
-define('ATTACHMENT_TYPES', 'jpg jpeg gif png txt pdf zip'); // Allowed file types in attachments (separated by spaces)
-define('ATTACHMENT_MAX_FSIZE', 1024); // KB, Maximum filesize of an attached file
-define('ATTACHMENT_MAX_POST_N', 2); // Maximum number of attachments allowed per post
+
+// Generate thumbnails for remote images
+define('GEN_REM_THUMB', TRUE);
+
+// Allow upload of attachments
+define('ATTACHMENT_UPLOADS', TRUE);
+
+// Allowed file types in attachments (separated by spaces)
+define('ATTACHMENT_TYPES', 'jpg jpeg gif png txt pdf zip');
+
+// KB, Maximum filesize of an attached file
+define('ATTACHMENT_MAX_FSIZE', 1024);
+
+// Maximum number of attachments allowed per post
+define('ATTACHMENT_MAX_POST_N', 2);
 
 
 # ============================================================================

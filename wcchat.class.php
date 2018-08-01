@@ -336,6 +336,14 @@ class WcChat {
     private $roomDir;
 
     /**
+     * Window of time to catch events/pings
+     *
+     * @since 1.4
+     * @var int
+     */
+    private $catchWindow;
+
+    /**
      * Construct
      * 
      */
@@ -396,8 +404,21 @@ class WcChat {
      * @return void
      */
     private function initIncPath() {
-
+    
         include __DIR__ . '/settings.php';
+        
+        // Halt if settings has errors
+        $settings_has_errors = $this->settingsHasErrors();
+        if($settings_has_errors !== FALSE) {
+            echo '
+                <b>Settings configuration has errors</b>
+                <br>(Use the interface editor in the future to avoid this)<br><br> 
+                please fix the following errors in settings.php:<br><br>' . 
+                $settings_has_errors
+            ;
+            die(); 
+        }
+        
         $this->dataDir = (DATA_DIR ? rtrim(DATA_DIR, '/') . '/' : '');
         $this->roomDir = DATA_DIR . 'rooms/';
         $this->includeDir = (
@@ -431,7 +452,6 @@ class WcChat {
         include __DIR__ . '/themes/' . THEME . '/templates.php';
         $this->templates = $templates;
         $this->ajaxCaller = $this->includeDir . 'ajax.php?';
-
     }
 
     /**
@@ -550,6 +570,9 @@ class WcChat {
                 $this->isMasterMod = TRUE;
             }
         }
+
+        // Set catch window according to user idle status
+        $this->catchWindow = $this->getCatchWindow();
     }
 
     /**
@@ -590,6 +613,83 @@ class WcChat {
         } else {
             return FALSE;
         }
+    }
+
+    /**
+     * Checks if settings errors exist
+     * 
+     * @since 1.4
+     * @return bool|string error list
+     */    
+    private function settingsHasErrors() {
+    
+        // Halt if errors exist
+        $errors = '';
+        if(
+            !is_numeric(REFRESH_DELAY) || 
+            intval(REFRESH_DELAY) < 1
+        ) {
+            $errors = '- REFRESH_DELAY must be an integer >= 1' . "\n";
+        }
+        
+        if(
+            !is_numeric(REFRESH_DELAY_IDLE) || 
+            intval(REFRESH_DELAY_IDLE) < 0
+        ) {
+            $errors .= '- REFRESH_DELAY_IDLE must be an integer >= 0' . "\n";
+        }
+        
+        if(
+            !is_numeric(IDLE_START) || 
+            intval(IDLE_START) < 60
+        ) {
+            $errors .= '- IDLE_START must be an integer >= 60' . "\n";
+        }
+        
+        if(
+            !is_numeric(OFFLINE_PING) || 
+            intval(OFFLINE_PING) < 1
+        ) {
+            $errors .= '- OFFLINE_PING must be an integer >= 1' . "\n";
+        }
+                
+        if(
+            !is_numeric(ANTI_SPAM) || 
+            intval(ANTI_SPAM) < 0
+        ) {
+            $errors .= '- ANTI_SPAM must be an integer >= 0' . "\n";
+        }
+        
+        if(
+            !is_numeric(CHAT_OLDER_MSG_STEP) || 
+            intval(CHAT_OLDER_MSG_STEP) < 1
+        ) {
+            $errors .= '- CHAT_OLDER_MSG_STEP must be an integer >= 1' . "\n";
+        }
+        
+        if(
+            intval(CHAT_DSP_BUFFER) > intval(CHAT_STORE_BUFFER) || 
+            !is_numeric(CHAT_DSP_BUFFER) || 
+            !is_numeric(CHAT_STORE_BUFFER)
+        ) {
+            $errors .= '- CHAT_STORE_BUFFER must be >= CHAT_DSP_BUFFER' . "\n";
+        }
+        
+        if(ACC_REC_EMAIL) {
+            if(!filter_var(ACC_REC_EMAIL, FILTER_VALIDATE_EMAIL)) {
+                $errors .= '- ACC_REC_EMAIL is invalid!' . "\n";
+            }
+        }
+        
+        if(!file_exists($this->roomDir . base64_encode(DEFAULT_ROOM) . '.txt') && $this->hasData($this->roomDir)) {
+            $errors .= '- DEFAULT_ROOM is invalid' . "\n";
+        }
+        
+        if(!file_exists(__DIR__ . '/themes/' . DEFAULT_THEME)) {
+            $errors .= '- DEFAULT_THEME is invalid' . "\n";
+        }
+        
+        return ($errors ? nl2br(trim($errors)) : FALSE);
     }
 
     /**
@@ -718,6 +818,8 @@ class WcChat {
        |  userMatch                               |
        |  userData                                |
        |  userLAct                                |
+       |  getUserCatchWindow                      |
+       |  getCatchWindow                          |
        ===========================================*/
 
     /**
@@ -828,6 +930,39 @@ class WcChat {
             $time2 = $this->uData[7];
         }
         return $time2;
+    }
+
+    /**
+     * Retrieves a user's current catch Window (according to his/her idle status)
+     * 
+     * @since 1.4
+     * @param string $name
+     * @param int $last_act     
+     * @return int
+     */
+    private function getUserCatchWindow($name, $last_act) {
+        if((time()-$last_act) > IDLE_START && REFRESH_DELAY_IDLE != 0) {
+            return REFRESH_DELAY_IDLE + OFFLINE_PING;
+        } else {
+            return REFRESH_DELAY + OFFLINE_PING;
+        }    
+    }
+    
+    /**
+     * Retrieves default catchWindow
+     * 
+     * @since 1.1
+     * @param string $forced_name
+     * @return int
+     */
+    private function getCatchWindow($force_idle = NULL) {
+       return 
+        (
+            (((time() - $this->uData[7]) > IDLE_START || $force_idle !== NULL) && REFRESH_DELAY_IDLE != 0) ? 
+            REFRESH_DELAY_IDLE : 
+            REFRESH_DELAY
+        ) + 
+        OFFLINE_PING;   
     }
 
       /*===========================================
@@ -988,8 +1123,13 @@ class WcChat {
      */
     private function writeEvent($omode, $target, $return_raw_line = NULL) {
 
-        // Overwrite content if last modified time is higher than 60s (Enough time for all online users to get the update)
-        if((time()-filemtime(EVENTL)) > 60) { $mode = 'w'; } else { $mode = 'a'; }
+        // Overwrite content if last modified time is higher than Idle catchWindow
+        // (Enough time for all online users to get the update (Idle or not))
+        if((time()-filemtime(EVENTL)) > $this->getCatchWindow('FORCE_IDLE')) { 
+            $mode = 'w'; 
+        } else { 
+            $mode = 'a';
+        }
 
         // Write event according to mode value
         switch($omode) {
@@ -1018,7 +1158,7 @@ class WcChat {
         }
         $this->writeFile(EVENTL, $towrite, $mode);
 
-        if($return_raw_line != NULL) {
+        if($return_raw_line !== NULL) {
             return $towrite;
         }
     }
@@ -1446,7 +1586,7 @@ class WcChat {
             
             $last_seen = $this->getPing($this->myPost('cname'));
 
-            if(!$this->isLoggedIn && ((time()-$last_seen) < OFFLINE_PING)) {
+            if(!$this->isLoggedIn && ((time()-$last_seen) <= $this->catchWindow)) {
                 
                 $tmp = $this->userData($this->myPost('cname'));
                 if(
@@ -1465,6 +1605,7 @@ class WcChat {
                     die();
                 }
             }
+            if($this->myCookie('idle_refresh')) { $this->wcUnsetCookie('idle_refresh'); }
             
             $this->wcSetCookie('cname', trim($this->myPost('cname'), ' '));
             $_SESSION['cname'] = trim($this->myPost('cname'), ' ');
@@ -1808,13 +1949,16 @@ class WcChat {
                     $user_row[2] = (($f == '0') ? time() : $f);
                     $user_row[3] = time();
                     $user_row[4] = 1;
+                    $this->wcUnsetCookie('idle_refresh');
                 break;
                 case 'new_message':
                     $user_row[3] = time();
+                    $this->wcUnsetCookie('idle_refresh');
                 break;
                 case 'user_visit':
                     if($f == '0' || ($f != '0' && $this->hasProfileAccess)) {
                         $user_row[3] = time();
+                        $this->wcUnsetCookie('idle_refresh');
                     }
                 break;
             }
@@ -1955,7 +2099,7 @@ class WcChat {
         );
 
         // Populate Global Settings Form Fields
-        $gsettings_par = array('TITLE', 'INCLUDE_DIR', 'REFRESH_DELAY', 'IDLE_START', 'OFFLINE_PING', 'CHAT_DSP_BUFFER', 'CHAT_STORE_BUFFER', 'CHAT_OLDER_MSG_STEP', 'ARCHIVE_MSG', 'BOT_MAIN_PAGE_ACCESS', 'ANTI_SPAM', 'IMAGE_MAX_DSP_DIM',  'IMAGE_AUTO_RESIZE_UNKN', 'VIDEO_WIDTH', 'VIDEO_HEIGHT', 'AVATAR_SIZE', 'DEFAULT_AVATAR', 'DEFAULT_ROOM', 'DEFAULT_THEME', 'INVITE_LINK_CODE', 'ACC_REC_EMAIL', 'ATTACHMENT_TYPES', 'ATTACHMENT_MAX_FSIZE', 'ATTACHMENT_MAX_POST_N');
+        $gsettings_par = array('TITLE', 'INCLUDE_DIR', 'REFRESH_DELAY', 'REFRESH_DELAY_IDLE', 'IDLE_START', 'OFFLINE_PING', 'CHAT_DSP_BUFFER', 'CHAT_STORE_BUFFER', 'CHAT_OLDER_MSG_STEP', 'ARCHIVE_MSG', 'BOT_MAIN_PAGE_ACCESS', 'ANTI_SPAM', 'IMAGE_MAX_DSP_DIM',  'IMAGE_AUTO_RESIZE_UNKN', 'VIDEO_WIDTH', 'VIDEO_HEIGHT', 'AVATAR_SIZE', 'DEFAULT_AVATAR', 'DEFAULT_ROOM', 'DEFAULT_THEME', 'INVITE_LINK_CODE', 'ACC_REC_EMAIL', 'ATTACHMENT_TYPES', 'ATTACHMENT_MAX_FSIZE', 'ATTACHMENT_MAX_POST_N');
 
         $gsettings_par_v = array();
 
@@ -2172,7 +2316,7 @@ class WcChat {
                 array(
                     $this->ajaxCaller,
                     $this->includeDir,
-                    INCLUDE_DIR_THEME
+                    (defined('INCLUDE_DIR_THEME') ? INCLUDE_DIR_THEME : '')
                 ),
                 $out
             );
@@ -2360,14 +2504,21 @@ class WcChat {
                     }
 
                     $mod_perm = FALSE;
-                    if($this->hasPermission('MOD', 'skip_msg') || $this->hasPermission('UNMOD', 'skip_msg') || $this->hasPermission('BAN', 'skip_msg') || $this->hasPermission('UNBAN', 'skip_msg') || $this->hasPermission('MUTE', 'skip_msg') || $this->hasPermission('UNMUTE', 'skip_msg')) {
+                    if(
+                        $this->hasPermission('MOD', 'skip_msg') || 
+                        $this->hasPermission('UNMOD', 'skip_msg') || 
+                        $this->hasPermission('BAN', 'skip_msg') || 
+                        $this->hasPermission('UNBAN', 'skip_msg') || 
+                        $this->hasPermission('MUTE', 'skip_msg') || 
+                        $this->hasPermission('UNMUTE', 'skip_msg')
+                    ) {
                         $mod_perm = TRUE;
                     }
 
                     // Is user a guest?
                     if($f != '0') {
                         // No guest, is online?
-                        if((time() - $last_ping) < OFFLINE_PING) {
+                        if((time() - $last_ping) <= $this->getUserCatchWindow($usr, $l)) {
                             // Yes, it's an online user
                             $target_array = '_on'; 
 
@@ -2533,19 +2684,24 @@ class WcChat {
                         $lurker
                     ),
                 )
-            );
+            ); 
 
-         // Return user list if changes exist
-         $sfv = strtoupper(dechex(crc32(trim($output))));
-         if(
-             ($sfv != $this->mySession('user_list_sfv')) || 
-             !$this->mySession('user_list_sfv') || 
-             $visit !== NULL || 
-             $this->myGet('ilmod')
-         ) {
-             $_SESSION['user_list_sfv'] = $sfv;
-             return $output;
-         }
+        // Sets a cookie to enlarge refresh delay if user is idling
+        if(!$this->myCookie('idle_refresh') && $visit === NULL && (time()-$this->uData[7]) > IDLE_START && REFRESH_DELAY_IDLE != 0) {
+            $this->wcSetCookie('idle_refresh', REFRESH_DELAY_IDLE);
+        }
+
+        // Return user list if changes exist
+        $sfv = strtoupper(dechex(crc32(trim($output))));
+        if(
+            ($sfv != $this->mySession('user_list_sfv')) || 
+            !$this->mySession('user_list_sfv') || 
+            $visit !== NULL || 
+            $this->myGet('ilmod')
+        ) {
+            $_SESSION['user_list_sfv'] = $sfv;
+            return $output;
+        }
     }
 
     /**
@@ -3212,7 +3368,7 @@ class WcChat {
                 if(
                     ($time <= $lastread) || 
                     (!$lastread && $action != 'SEND') || 
-                    (time() - $time) > OFFLINE_PING
+                    (time() - $time) > $this->catchWindow
                 ) {
                     break;
                 }
@@ -3540,7 +3696,7 @@ class WcChat {
     }
 
     /**
-     * Parses Messages (Ajax Component)
+     * Updates/Refreshes Screen Post Messages (Ajax Component)
      * 
      * @since 1.2
      * @return string|void Html Template
@@ -4154,7 +4310,7 @@ class WcChat {
                     // Set arrays with $_POST ids and batch process
                     $arr = array();
                     $gsettings_par = array(
-                        'TITLE', 'INCLUDE_DIR', 'REFRESH_DELAY', 'IDLE_START', 
+                        'TITLE', 'INCLUDE_DIR', 'REFRESH_DELAY', 'REFRESH_DELAY_IDLE', 'IDLE_START', 
                         'OFFLINE_PING', 'CHAT_DSP_BUFFER', 'CHAT_STORE_BUFFER', 
                         'CHAT_OLDER_MSG_STEP', 'ARCHIVE_MSG', 'BOT_MAIN_PAGE_ACCESS', 
                         'ANTI_SPAM', 'IMAGE_MAX_DSP_DIM',  'IMAGE_AUTO_RESIZE_UNKN', 
@@ -4190,6 +4346,75 @@ class WcChat {
                         }
                         $arr['PERM_'.$value] = trim($arr['PERM_' . $value], ' ');
                     }
+                    
+                    // Halt if errors exist
+                    $error = '';
+                    if(
+                        !ctype_digit($this->myPost('gs_refresh_delay')) || 
+                        intval($this->myPost('gs_refresh_delay')) < 1
+                    ) {
+                        $error = '- "Refresh Delay" must be an integer >= 1' . "\n";
+                    }
+                    
+                    if(
+                        !ctype_digit($this->myPost('gs_refresh_delay_idle')) || 
+                        intval($this->myPost('gs_refresh_delay_idle')) < 0
+                    ) {
+                        $error .= '- "Refresh delay (idle)" must be an integer >= 0' . "\n";
+                    }
+                    
+                    if(
+                        !ctype_digit($this->myPost('gs_idle_start')) || 
+                        intval($this->myPost('gs_idle_start')) < 60
+                    ) {
+                        $error .= '- "Idle Start" must be an integer >= 60' . "\n";
+                    }
+                    
+                    if(
+                        !ctype_digit($this->myPost('gs_offline_ping')) || 
+                        intval($this->myPost('gs_offline_ping')) < 1
+                    ) {
+                        $error .= '- "Offline Ping" must be an integer >= 1' . "\n";
+                    }
+                            
+                    if(
+                        !ctype_digit($this->myPost('gs_anti_spam')) || 
+                        intval($this->myPost('gs_anti_spam')) < 0
+                    ) {
+                        $error .= '- "Anti-SPAM" must be an integer >= 0' . "\n";
+                    }
+                    
+                    if(
+                        !ctype_digit($this->myPost('gs_chat_older_msg_step')) || 
+                        intval($this->myPost('gs_chat_older_msg_step')) < 1
+                    ) {
+                        $error .= '- "Older Message Load Step" must be an integer >= 1' . "\n";
+                    }
+                    
+                    if(
+                        intval($this->myPost('gs_chat_dsp_buffer')) > intval($this->myPost('gs_chat_store_buffer')) || 
+                        !ctype_digit($this->myPost('gs_chat_dsp_buffer')) || 
+                        !ctype_digit($this->myPost('gs_chat_store_buffer'))
+                    ) {
+                        $error .= '- "Chat Store Buffer" must be >= "Chat Display Buffer"' . "\n";
+                    }
+                    
+                    if($this->myPost('gs_acc_rec_email')) {
+                        if(!filter_var($this->myPost('gs_acc_rec_email'), FILTER_VALIDATE_EMAIL)) {
+                            $error .= '- "Account Recovery Sender E-mail" is invalid!' . "\n";
+                        }
+                    }
+                    
+                    if(!file_exists($this->roomDir . base64_encode($this->myPost('gs_default_room')) . '.txt')) {
+                        $error .= '- "Default Room" is invalid' . "\n";
+                    }
+                    
+                    if(!file_exists(__DIR__ . '/themes/' . $this->myPost('gs_default_theme'))) {
+                        $error .= '- "Default Theme" is invalid' . "\n";
+                    }
+                    
+                    
+                    if($error) { echo trim($error); die(); }
         
                     // Update settings.php
                     $res = $this->updateConf(
@@ -4224,7 +4449,7 @@ class WcChat {
                         $this->checkTopicChanges() . '[$]' . 
                         $this->refreshRooms() . '[$]' . 
                         (
-                            filemtime($this->roomDir . 'hidden_' . base64_encode($this->mySession('current_room')) . '.txt') < OFFLINE_PING ? 
+                            (filemtime($this->roomDir . 'hidden_' . base64_encode($this->mySession('current_room')) . '.txt') <= $this->catchWindow) ? 
                             $this->checkHiddenMsg() : 
                             ''
                         ) . '[$]' . 
@@ -4318,7 +4543,7 @@ class WcChat {
                                 MESSAGES_HIDDEN, 
                                 ' ' . $id, 
                                 (
-                                    ((time() - filemtime(MESSAGES_HIDDEN)) > OFFLINE_PING) ? 
+                                    ((time() - filemtime(MESSAGES_HIDDEN)) > $this->catchWindow) ? 
                                     'w' : 
                                     'a'
                                 )
@@ -4650,9 +4875,11 @@ class WcChat {
                     if(!$this->hasPermission('TOPIC_E')) { die(); }
                     
                     $t = $this->myGET('t');
-                    $this->writeFile(TOPICL, $t, 'w', 'allow_empty');
-        
-                    echo $this->parseTopicContainer();
+
+                    if($t != $this->topic) {
+                        $this->writeFile(TOPICL, $t, 'w', 'allow_empty');
+                        echo $this->parseTopicContainer();
+                    }
                 break;
                 
                 // Checks if topic has changed
@@ -4810,7 +5037,7 @@ class WcChat {
                                         } else {
                                             $user_status = $this->userData($target);
                                             if(
-                                                (time() - $this->getPing($target)) < OFFLINE_PING && 
+                                                (time() - $this->getPing($target)) <= $this->catchWindow && 
                                                 $user_status[8] == 2
                                             ) {
                                                 echo 'User ' . $target . ' does not want to be disturbed at the moment!';
@@ -4904,7 +5131,6 @@ class WcChat {
                                 ;
                                 $this->writeFile(MESSAGES_LOC, $source . $towrite, 'w');
                                 touch(ROOMS_LASTMOD);
-                                $this->handleLastRead('store');
                                 list($output, $index, $first_elem) = $this->parseMsg(
                                     array(trim($towrite)), 
                                     0, 
