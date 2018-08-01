@@ -942,9 +942,9 @@ class WcChat {
      */
     private function getUserCatchWindow($name, $last_act) {
         if((time()-$last_act) > IDLE_START && REFRESH_DELAY_IDLE != 0) {
-            return REFRESH_DELAY_IDLE + OFFLINE_PING;
+            return intval(REFRESH_DELAY_IDLE/1000) + OFFLINE_PING;
         } else {
-            return REFRESH_DELAY + OFFLINE_PING;
+            return intval(REFRESH_DELAY/1000) + OFFLINE_PING;
         }    
     }
     
@@ -959,8 +959,8 @@ class WcChat {
        return 
         (
             (((time() - $this->uData[7]) > IDLE_START || $force_idle !== NULL) && REFRESH_DELAY_IDLE != 0) ? 
-            REFRESH_DELAY_IDLE : 
-            REFRESH_DELAY
+            intval(REFRESH_DELAY_IDLE/1000) : 
+            intval(REFRESH_DELAY/1000)
         ) + 
         OFFLINE_PING;   
     }
