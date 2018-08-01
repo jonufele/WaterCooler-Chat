@@ -30,11 +30,11 @@ define('INCLUDE_DIR', '');
 #                  CHAT SETTINGS
 # ============================================================================
 
-// Message Refresh Delay (seconds)
-define('REFRESH_DELAY', 5);
+// Message Refresh Delay (miliseconds, do not set too low to avoid server overload)
+define('REFRESH_DELAY', 5000);
 
-// Message Refresh Delay while idling (seconds); 0 = Disabled
-define('REFRESH_DELAY_IDLE', 30);
+// Message Refresh Delay while idling (miliseconds); 0 = Disabled
+define('REFRESH_DELAY_IDLE', 30000);
 
 // Minimum period of time (seconds) to be considered idle
 define('IDLE_START', 300);

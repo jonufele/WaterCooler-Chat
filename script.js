@@ -833,7 +833,7 @@ function wc_updmsg(c, all, refresh_delay, lim, incdir)
 			if(document.getElementById('wc_msg_container').innerHTML != 'You are banned!') { 
 				wc_theLoop();
 			}
- 	 	}, refresh * 1000);
+ 	 	}, refresh);
 	})();
 }
 
