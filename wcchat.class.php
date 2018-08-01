@@ -2992,6 +2992,7 @@ class WcChat {
         $index = 0;
         $output = $new = $first_elem = '';
         $previous = $prev_unique_id = $skip_new = 0;
+        $puser = '';
         $old_start = FALSE;        
         $today_date = gmdate('d-M', time() + ($this->uTimezone * 3600));
         if($older_index != NULL) { $older_index = str_replace('js_', '', $older_index); }
@@ -3097,12 +3098,13 @@ class WcChat {
                 $new = '';
                 if($this->myGet('all') == 'ALL' && !$skip_new) {
                     if($previous) {
-                        if($time <= $lastread && $previous > $lastread) {
+                        if($time <= $lastread && $previous > $lastread && $puser != base64_encode($this->name)) {
                             $new = $this->popTemplate('wcchat.posts.new_msg_separator');
                             $skip_new = 1;
-                        } else { $previous = $time; }
+                        } else { $previous = $time; $puser = $user; }
                     } else {
                         $previous = $time;
+                        $puser = $user;
                     }
                 }
      
