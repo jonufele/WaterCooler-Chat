@@ -208,9 +208,9 @@ function wc_toggle_msg(c, id, prefix) {
 	var icon = document.getElementById('wc_icon_' + id);
 	var toggle_edit_icon = document.getElementById('wc_toggle_edit_icon');
 	var http = getHTTPObject();
-	
-	if(document.cookie.search('hide_edit=1') == -1 && toggle_edit_icon != null) {
-	   if(document.cookie.search('skip_hide_msg=1') == -1 && icon.src.search('arrow_r') == -1) {
+
+	if(document.cookie.search(prefix + '_hide_edit=1') == -1 && toggle_edit_icon != null) {
+	   if(document.cookie.search(prefix + '_skip_hide_msg=1') == -1 && icon.src.search('arrow_r') == -1) {
 	       var conf = confirm('You are now under edit mode, this action will hide the message for all users, are you sure?');
            if(conf) { wc_setCookie('skip_hide_msg', 1, 0, prefix); }
        } else {
@@ -849,7 +849,7 @@ function wc_updmsg(c, all, refresh_delay, lim, incdir, prefix)
 
 			wc_update_components(c, incdir, lim);
 
-			if(document.cookie.search('idle_refresh=') != -1) {
+			if(document.cookie.search(prefix + '_idle_refresh=') != -1) {
 				var idle_refresh_cookie = wc_getCookie('idle_refresh', prefix);
 				if(idle_refresh_cookie >= 1) { refresh = idle_refresh_cookie; }
 			} else {

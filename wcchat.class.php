@@ -365,7 +365,7 @@ class WcChat {
      * @since 1.4
      * @var string
      */
-    private $includeDirServer = __DIR__ . '/';
+    private $includeDirServer;
 
     /**
      * Construct
@@ -428,6 +428,8 @@ class WcChat {
      * @return void
      */
     private function initIncPath() {
+
+        $this->includeDirServer = __DIR__ . '/';
     
         include $this->includeDirServer . 'settings.php';
         $this->wcPrefix = strtoupper(dechex(crc32($this->includeDirServer)));
