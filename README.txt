@@ -103,7 +103,7 @@
 
   - Moderators under edit mode: Hiding a message from the chat takes immediate effect on the other online users, while the unhide action only takes effect on user's next visit to the room.
 
-  - Disabling the anti spam restriction is not recommended for two reasons: the spam (duh!), and the possibility of generating non unique message ids which can harm the hide/unhide feature.
+  - In case microtime function is not available, disabling the anti spam restriction may generate non unique message ids which can trouble the hide/unhide feature.
 
   - To remove the copyright note, you must make a donation to the project (See below).
 

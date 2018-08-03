@@ -93,7 +93,7 @@ function wc_attach_upl(c, event, incdir)
 	http.send(formData);
 }
 
-function wc_setCookie(cname, cvalue, exdays) {
+function wc_setCookie(cname, cvalue, exdays, prefix) {
     var d = new Date();
     if(exdays != 0) {
         d.setTime(d.getTime() + (exdays*24*60*60*1000));
@@ -101,24 +101,24 @@ function wc_setCookie(cname, cvalue, exdays) {
     } else {
         var expires = "expires=0";
     }
-    document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
+    document.cookie = prefix + '_' + cname + "=" + cvalue + ";" + expires + ";path=/";
 }
 
-function wc_getCookie(name) {
+function wc_getCookie(name, prefix) {
 	cookies = document.cookie;
 	if(cookies.search(name + '=') != -1) {
 		var par = cookies.replace(' ', '').split(';');
 		n = par.length;
 		for(i=0; i < n ; i++) {
 			if(par[i].search(name + '=') != -1) {
-				return par[i].replace(name + '=', '');
+				return par[i].replace(prefix + '_' + name + '=', '');
 			}
 		}
 	}
 }
 
-function apply_theme(v) {
-	wc_setCookie('wc_theme', v, 365);
+function apply_theme(v, prefix) {
+	wc_setCookie('wc_theme', v, 365, prefix);
 	location.reload();
 }
 
@@ -202,7 +202,7 @@ function wc_undo_clear_screen(c, incdir) {
  	http.send(null);
 }
 
-function wc_toggle_msg(c, id) {
+function wc_toggle_msg(c, id, prefix) {
 
 	var msg = document.getElementById(id);
 	var icon = document.getElementById('wc_icon_' + id);
@@ -212,7 +212,7 @@ function wc_toggle_msg(c, id) {
 	if(document.cookie.search('hide_edit=1') == -1 && toggle_edit_icon != null) {
 	   if(document.cookie.search('skip_hide_msg=1') == -1 && icon.src.search('arrow_r') == -1) {
 	       var conf = confirm('You are now under edit mode, this action will hide the message for all users, are you sure?');
-           if(conf) { wc_setCookie('skip_hide_msg', 1, 0); }
+           if(conf) { wc_setCookie('skip_hide_msg', 1, 0, prefix); }
        } else {
             conf = true;
        }
@@ -562,6 +562,29 @@ function wc_upd_user(c, id, event)
 	http.send(formData);
 }
 
+function wc_del_user(c, id, event)
+{
+	event.preventDefault();
+
+	var conf = confirm('Are you sure you want to remove this user?\nThis action cannot be un-done!');
+
+	if(conf) {
+ 		var http = getHTTPObject();
+		http.open("GET", c+"mode=del_user&id=" + id, true);
+		http.onreadystatechange=function(){if(http.readyState==4){
+			if(http.responseText.length > 0) {
+				var s = http.responseText;
+				if(s.search('successfully') != -1) {
+					wc_toggle('wc_uedt_' + id);
+					wc_updu(0, c, 0, 0, 'ignore_lastmod');
+				}
+				alert(s);
+			}
+		}}
+		http.send(null);
+	}
+}
+
 function wc_upd_gsettings(c, event)
 {
 	event.preventDefault();
@@ -708,7 +731,10 @@ function wc_trim_chat(lim)
 		n = msg.length;
 		if(n >= lim) {
 			for(i = 0 ; i < (n-lim); i++) {
+				msg[i].id = '';
+				msg[i].innerHTML = '';
 				msg[i].className = 'closed';
+				
 			}
 		}
 	}
@@ -796,7 +822,7 @@ function wc_update_components(c, incdir, lim) {
  	http.send(null);
 }
 
-function wc_updmsg(c, all, refresh_delay, lim, incdir)
+function wc_updmsg(c, all, refresh_delay, lim, incdir, prefix)
 {
 	var http = getHTTPObject();
 	var prev;
@@ -824,7 +850,7 @@ function wc_updmsg(c, all, refresh_delay, lim, incdir)
 			wc_update_components(c, incdir, lim);
 
 			if(document.cookie.search('idle_refresh=') != -1) {
-				var idle_refresh_cookie = wc_getCookie('idle_refresh');
+				var idle_refresh_cookie = wc_getCookie('idle_refresh', prefix);
 				if(idle_refresh_cookie >= 1) { refresh = idle_refresh_cookie; }
 			} else {
 				refresh = refresh_delay;
@@ -879,7 +905,7 @@ function wc_toggle_time(c)
  	http.send(null);
 }
 
-function wc_toggle_edit(c)
+function wc_toggle_edit(c, prefix)
 {
 	var http = getHTTPObject();
 	http.open("GET", c+"mode=toggle_edit", true);
@@ -889,7 +915,7 @@ function wc_toggle_edit(c)
 		if(boxes.length == 0) {
 			var boxes = document.getElementsByClassName('edit_bt_off');
 			var class1 = 'edit_bt';
-			wc_setCookie('skip_hide_msg', 0, -1);
+			wc_setCookie('skip_hide_msg', 0, -1, prefix);
 		}
 		var n = boxes.length;
 		for (var i = 0; i < n; i++){

@@ -240,6 +240,14 @@ class WcChat {
     private $roomLArchVolMsgN;
 
     /**
+     * Room Definition (Last Modified)
+     *
+     * @since 1.4
+     * @var string
+     */
+    private $roomLastMod;
+
+    /**
      * User List (Raw)
      *
      * @since 1.1
@@ -344,6 +352,22 @@ class WcChat {
     private $catchWindow;
 
     /**
+     * Unique prefix to be used in cookies/sessions
+     *
+     * @since 1.4
+     * @var string
+     */
+    private $wcPrefix;
+
+    /**
+     * Include Dir (full Server path)
+     *
+     * @since 1.4
+     * @var string
+     */
+    private $includeDirServer = __DIR__ . '/';
+
+    /**
      * Construct
      * 
      */
@@ -376,10 +400,10 @@ class WcChat {
        |  INITIALIZATION (6)                          |
        |  USER DATA HANDLING (3)                      |
        |  ACCESS SECURITY (3)                         |
-       |  FILE WRITE/READ (4)                         |
+       |  FILE WRITE/READ (5)                         |
        |  IMAGE HANDLING (4)                          |
        |  PGC/SESSION/SERVER HANDLING (8)             |
-       |  SETTERS/GETTERS (8)                         |
+       |  SETTERS/GETTERS (10)                        |
        |  PARSER / INTERFACER (13)                    |
        |  AJAX COMPONENTS (4)                         |
        |  AJAX PROCESSOR (1)                          |
@@ -405,7 +429,8 @@ class WcChat {
      */
     private function initIncPath() {
     
-        include __DIR__ . '/settings.php';
+        include $this->includeDirServer . 'settings.php';
+        $this->wcPrefix = strtoupper(dechex(crc32($this->includeDirServer)));
         
         // Halt if settings has errors
         $settings_has_errors = $this->settingsHasErrors();
@@ -431,7 +456,7 @@ class WcChat {
         if(
             !file_exists($this->roomDir . base64_encode(DEFAULT_ROOM) . '.txt') && 
             $this->myServer('REQUEST_URI') != '/' && 
-            is_writable(__DIR__ . '/settings.php')
+            is_writable($this->includeDirServer . 'settings.php')
         ) {
             $this->includeDir = '/' . trim($this->myServer('REQUEST_URI'), '/') . '/';
             $this->updateConf(
@@ -442,14 +467,14 @@ class WcChat {
         define('THEME', (
             (
                 $this->myCookie('wc_theme') && 
-                file_exists(__DIR__ . '/themes/' . $this->myCookie('wc_theme') . '/')
+                file_exists($this->includeDirServer . 'themes/' . $this->myCookie('wc_theme') . '/')
             ) ? 
             $this->myCookie('wc_theme') : 
             DEFAULT_THEME
         ));
         
         define('INCLUDE_DIR_THEME', $this->includeDir . 'themes/' . THEME . '/');
-        include __DIR__ . '/themes/' . THEME . '/templates.php';
+        include $this->includeDirServer . 'themes/' . THEME . '/templates.php';
         $this->templates = $templates;
         $this->ajaxCaller = $this->includeDir . 'ajax.php?';
     }
@@ -464,18 +489,19 @@ class WcChat {
 
         if(!$this->mySession('cname')) {
             // Try use cookie value to resume session
-            if($this->myCookie('cname')) {
+            if($this->myCookie('cname') && !$this->mySession('skip_cookie')) {
                 if($this->userMatch($this->myCookie('cname')) !== FALSE) {
-                    $_SESSION['cname'] = $this->name = $this->myCookie('cname');
+                    $this->wcSetSession('cname', $this->myCookie('cname'));
+                    $this->name = $this->myCookie('cname');
                     $this->isLoggedIn = TRUE;
                 } else {
                     // Cookie user does not exist / outdated, fail to resume session
                     // Inform user via login error message
-                    $_SESSION['login_err'] = 
+                    $this->wcSetSession('login_err', 
                         'Username <i>' . $this->myCookie('cname') . 
                         '</i> does not exist, cannot be resumed!<br>
                         (Maybe it was renamed by a moderator?)'
-                    ;
+                    );
                     $this->wcUnsetCookie('cname');
                 }
             }
@@ -508,17 +534,18 @@ class WcChat {
             $this->myGet('mode')
         ) {
             // If dummy profile, it means the previous name was changed, clear SESSION value
-            if($this->uData[7] == 0) { unset($_SESSION['cname']); }
+            if($this->uData[7] == 0) { $this->wcUnsetSession('cname'); }
 
             // Clear password cookie, user must supply it again
             $this->wcUnsetCookie('chatpass');
             $this->isLoggedIn = FALSE;
 
             // Issue alert
-            $_SESSION['alert_msg'] = 
+            $this->wcSetSession('alert_msg',
                 'Your login credentials are outdated!' . "\n" .
                 'Refresh page (or use the form below) and login again!' . "\n" .
-                '(Possible cause: You (or a moderator) edited your profile.)';
+                '(Possible cause: You (or a moderator) edited your profile.)'
+            );
         }
 
         $this->uAvatar      = $this->uData[0];
@@ -559,7 +586,10 @@ class WcChat {
         if(strlen(trim($this->modList)) == 0 && $this->isCertifiedUser) {
             $this->writeFile(MODL, "\n" . base64_encode($this->name), 'w');
             touch(ROOMS_LASTMOD);
-            $_SESSION['alert_msg'] = 'You have been assigned Master Moderator, reload page in order to get all moderator tools.';
+            $this->wcSetSession(
+                'alert_msg', 
+                'You have been assigned Master Moderator, reload page in order to get all moderator tools.'
+            );
         }
 
         // Set Master Moderator and Moderator status
@@ -587,10 +617,10 @@ class WcChat {
         $tmp1 = is_writable($this->roomDir);
         $tmp2 = is_writable($this->dataDir);
         $tmp3 = is_writable($this->dataDir . 'tmp/');
-        $tmp4 = is_writable(__DIR__ . '/files/');
-        $tmp5 = is_writable(__DIR__ . '/files/attachments/');
-        $tmp6 = is_writable(__DIR__ . '/files/avatars/');
-        $tmp7 = is_writable(__DIR__ . '/files/thumb/');
+        $tmp4 = is_writable($this->includeDirServer . 'files/');
+        $tmp5 = is_writable($this->includeDirServer . 'files/attachments/');
+        $tmp6 = is_writable($this->includeDirServer . 'files/avatars/');
+        $tmp7 = is_writable($this->includeDirServer . 'files/thumb/');
 
         if(!$tmp1 || !$tmp2 || !$tmp3 || !$tmp4 || !$tmp5 || !$tmp6 || !$tmp7) {
 
@@ -681,11 +711,14 @@ class WcChat {
             }
         }
         
-        if(!file_exists($this->roomDir . base64_encode(DEFAULT_ROOM) . '.txt') && $this->hasData($this->roomDir)) {
+        if(
+            !file_exists($this->roomDir . base64_encode(DEFAULT_ROOM) . '.txt') && 
+            $this->hasData($this->roomDir)
+        ) {
             $errors .= '- DEFAULT_ROOM is invalid' . "\n";
         }
         
-        if(!file_exists(__DIR__ . '/themes/' . DEFAULT_THEME)) {
+        if(!file_exists($this->includeDirServer . 'themes/' . DEFAULT_THEME)) {
             $errors .= '- DEFAULT_THEME is invalid' . "\n";
         }
         
@@ -738,14 +771,22 @@ class WcChat {
         if(!file_exists(MUTEDL)) { file_put_contents(MUTEDL, ''); }
         if(!file_exists(BANNEDL)) { file_put_contents(BANNEDL, ''); }
         if(!file_exists(EVENTL)) { file_put_contents(EVENTL, ''); }
+        
+        // Initialize messages file with the creation note
         if(!file_exists(MESSAGES_LOC)) {
             file_put_contents(
                 MESSAGES_LOC,
                     time() . '|*' . base64_encode('Room') . '| has been created.' . "\n"
             );
         }
+        
         if(!file_exists(TOPICL)) { file_put_contents(TOPICL, ''); }
-        if(!file_exists(ROOM_DEF_LOC)) { file_put_contents(ROOM_DEF_LOC, '0|0|0|0|'); }
+        if(!file_exists(ROOM_DEF_LOC)) {
+            file_put_contents(
+                ROOM_DEF_LOC, 
+                '0|0|0|0|' . $this->parseMicroTime()
+            );
+        }
         if(!file_exists(ROOMS_LASTMOD)) { file_put_contents(ROOMS_LASTMOD, ''); }
         if(!file_exists(MESSAGES_HIDDEN)) { file_put_contents(MESSAGES_HIDDEN, ''); }
 
@@ -760,9 +801,10 @@ class WcChat {
         $this->eventList        = $this->readFile(EVENTL);
         
         // Write the first message to the room (creation note) if no messages exist
-        if($this->mySession('current_room') == DEFAULT_ROOM && strlen($this->msgList) == 0) {
-            $towrite = time() . '|*' . base64_encode('room') . '|has been created.' . "\n";
+        if(strlen($this->msgList) == 0) {
+            $towrite = $this->parseMicroTime() . '|*' . base64_encode('room') . '|has been created.' . "\n";
             $this->writeFile(MESSAGES_LOC, $towrite, 'w');
+            $this->updateCurrRoomLastMod();
             $this->msgList = $this->readFile(MESSAGES_LOC);
         }
         
@@ -780,19 +822,19 @@ class WcChat {
  
         // Initialize Current Room Session / Cookie
         if(!$this->mySession('current_room')) {
-            $_SESSION['current_room'] = (
+            $this->wcSetSession('current_room', (
                 (
                     $this->myCookie('current_room') && 
                     file_exists($this->roomDir . base64_encode($this->myCookie('current_room')) . '.txt')
                 ) ? 
                 $this->myCookie('current_room') : 
                 DEFAULT_ROOM
-            );
+            ));
         } elseif(
             !file_exists($this->roomDir . base64_encode($this->mySession('current_room')) . '.txt')
         ) {
-            $_SESSION['current_room'] = DEFAULT_ROOM;
-            $_SESSION['reset_msg'] = '1';
+            $this->wcSetSession('current_room', DEFAULT_ROOM);
+            $this->wcSetSession('reset_msg', '1');
             $this->wcSetCookie('current_room', DEFAULT_ROOM);
         }
     }
@@ -805,11 +847,12 @@ class WcChat {
      */    
     private function initCurrRoomDef() {
     
-        list($wperm, $rperm, $larch_vol, $larch_vol_msg_n, $tmp) = explode('|', $this->roomDef);
+        list($wperm, $rperm, $larch_vol, $larch_vol_msg_n, $last_mod) = explode('|', $this->roomDef);
         $this->roomWPerm        = intval($wperm);
         $this->roomRPerm        = intval($rperm);
         $this->roomLArchVol     = intval($larch_vol);
         $this->roomLArchVolMsgN = intval($larch_vol_msg_n);
+        $this->roomLastMod      = $last_mod;
     }
 
       /*===========================================
@@ -832,11 +875,11 @@ class WcChat {
      * @return bool|array
      */
     private function userMatch($name, $v = NULL, $return_match = NULL) {
-
-        // Check if the row has been supplied
+    
+         // Check if the row has been supplied
         if($v !== NULL) {
             list($tmp, $tmp2) = explode('|', $v, 2);
-            if($tmp == base64_encode($name)) {
+            if($tmp == base64_encode($name) && $this->hasData(trim($name, ' '))) {
                 return TRUE;
             } else {
                 return FALSE;
@@ -845,12 +888,16 @@ class WcChat {
             // Row has not been supplied, try to find a match on the raw user list
             if(
                 strpos(
-                    trim($this->userList), 
-                    base64_encode($name) . '|'
-                ) !== FALSE
+                    "\n" . trim($this->userList), 
+                    "\n" . base64_encode($name) . '|'
+                ) !== FALSE && 
+                $this->hasData(trim($name, ' '))
             ) {
                 if($return_match !== NULL) {
-                    list($tmp, $v2) = explode(base64_encode($name) . '|', trim($this->userList), 2);
+                    list($tmp, $v2) = explode(
+                        "\n" . base64_encode($name) . '|', "\n" . trim($this->userList), 
+                        2
+                    );
                     if(strpos($v2, "\n") !== FALSE) {
                         list($v3, $tmp1) = explode("\n", $v2, 2);
                     } else {
@@ -958,7 +1005,13 @@ class WcChat {
     private function getCatchWindow($force_idle = NULL) {
        return 
         (
-            (((time() - $this->uData[7]) > IDLE_START || $force_idle !== NULL) && REFRESH_DELAY_IDLE != 0) ? 
+            (
+                (
+                    (time() - $this->uData[7]) > IDLE_START || 
+                    $force_idle !== NULL
+                ) && 
+                REFRESH_DELAY_IDLE != 0
+            ) ? 
             intval(REFRESH_DELAY_IDLE/1000) : 
             intval(REFRESH_DELAY/1000)
         ) + 
@@ -1070,7 +1123,7 @@ class WcChat {
     private function botAccess() {
     
         if(BOT_MAIN_PAGE_ACCESS === FALSE || $this->myPost('cname')) {
-            require_once __DIR__ . "/includes/bots.php";
+            require_once $this->includeDirServer . "includes/bots.php";
             if (preg_match($wc_botcheck_regex, $this->myServer('HTTP_USER_AGENT'))) {
                 header("HTTP/1.0 403 Forbidden");
                 echo $this->popTemplate('wcchat.botNoAccessNote');
@@ -1086,6 +1139,7 @@ class WcChat {
        |  writeEvent                              |
        |  readFile                                |
        |  updateConf                              |
+       |  updateCurrRoomLastMod                   |
        ===========================================*/
 
     /**
@@ -1125,7 +1179,7 @@ class WcChat {
 
         // Overwrite content if last modified time is higher than Idle catchWindow
         // (Enough time for all online users to get the update (Idle or not))
-        if((time()-filemtime(EVENTL)) > $this->getCatchWindow('FORCE_IDLE')) { 
+        if((time()-$this->parseFileMTime(EVENTL)) > $this->getCatchWindow('FORCE_IDLE')) { 
             $mode = 'w'; 
         } else { 
             $mode = 'a';
@@ -1134,24 +1188,24 @@ class WcChat {
         // Write event according to mode value
         switch($omode) {
             case 'ignore':
-                $towrite = time() . '|' . base64_encode($this->name) . '|' . 
+                $towrite = $this->parseMicroTime() . '|' . base64_encode($this->name) . '|' . 
                     base64_encode($target) . '|<b>' . $this->name . 
                     '</b> is ignoring you.' . "\n";
             break;
             
             case 'unignore':
-                $towrite = time() . '|' . base64_encode($this->name) . '|' . 
+                $towrite = $this->parseMicroTime() . '|' . base64_encode($this->name) . '|' . 
                     base64_encode($target) . '|<b>' . $this->name . 
                     '</b> is no longer ignoring you.' . "\n";
             break;
             
             case 'join':
-                $towrite = time() . '|' . base64_encode($this->name) . '|<b>' . 
+                $towrite = $this->parseMicroTime() . '|' . base64_encode($this->name) . '|<b>' . 
                 $this->name . '</b> has joined chat.' . "\n";
             break;
             
             case 'topic_update':
-                $towrite = time() . '|' . base64_encode($this->name) . '|<b>' . 
+                $towrite = $this->parseMicroTime() . '|' . base64_encode($this->name) . '|<b>' . 
                 $this->name . '</b> updated the topic (' . $this->mySession('current_room') . 
                 ').' . "\n";
             break;
@@ -1194,7 +1248,7 @@ class WcChat {
      */
     private function updateConf($array) {
 
-        $conf = $this->readFile(__DIR__ . '/settings.php');
+        $conf = $this->readFile($this->includeDirServer . 'settings.php');
         $conf_bak = $conf;
 
         foreach($array as $key => $value) {
@@ -1215,14 +1269,35 @@ class WcChat {
                 );
             }
         }
-        $handle = fopen(__DIR__ . '/settings.php', 'w');
+        $handle = fopen($this->includeDirServer . 'settings.php', 'w');
         fwrite($handle, $conf);
         fclose($handle);
 
-        if($this->readFile(__DIR__ . '/settings.php') != $conf_bak) {
+        if($this->readFile($this->includeDirServer . 'settings.php') != $conf_bak) {
             return TRUE;
         } else
             return FALSE;    
+    }
+    
+    /**
+     * Updates Current Room Last Modified Bit
+     * 
+     * @since 1.4
+     * @return void
+     */    
+    private function updateCurrRoomLastMod() {
+    
+        list($wperm, $rperm, $larch_vol, $larch_vol_msg_n, $last_mod) = explode('|', $this->roomDef);
+        
+        $this->writeFile(
+            ROOM_DEF_LOC,
+            $wperm . '|' .
+            $rperm . '|' .
+            $larch_vol . '|' .
+            $larch_vol_msg_n . '|' .
+            $this->parseMicroTime(),
+            'w'
+        );
     }
 
       /*===========================================
@@ -1288,7 +1363,7 @@ class WcChat {
         $source_tag = (
             ($attach === NULL) ? 
             $source : 
-            str_replace(__DIR__ . '/files/attachments/', '', $source)
+            str_replace($this->includeDirServer . 'files/attachments/', '', $source)
         );
 
         // Use http instead of https (in case https wrapper is not installed)
@@ -1323,7 +1398,7 @@ class WcChat {
                             $image,
                             $w,
                             $h, 
-                            __DIR__ . '/' . $target,
+                            $this->includeDirServer . $target,
                             IMAGE_MAX_DSP_DIM
                         )
                     ) {
@@ -1400,7 +1475,11 @@ class WcChat {
             $temp_image = @ImageCreateTrueColor($thw, $thy);
         }
 
-        @ImageCopyResampled($temp_image, $source_image, 0, 0, 0, 0, $thw, $thy, $w, $h);
+        @ImageCopyResampled(
+            $temp_image, $source_image, 
+            0, 0, 0, 0, 
+            $thw, $thy, $w, $h
+        );
 
         @ImageJPEG($temp_image, $target_image, 80);
 
@@ -1441,7 +1520,11 @@ class WcChat {
         // Create a temporary image for cropping original (using smallest side for dimensions)
         $temp_image1 = @ImageCreateTrueColor($smallestdimension, $smallestdimension);
         // Resize the image to smallest dimension (centered using offset values from above)
-        @ImageCopyResampled($temp_image1, $source_image, 0, 0, $widthoffset, $heightoffset, $smallestdimension, $smallestdimension, $smallestdimension, $smallestdimension);
+        @ImageCopyResampled(
+            $temp_image1, $source_image, 0, 0, 
+            $widthoffset, $heightoffset, $smallestdimension, $smallestdimension, 
+            $smallestdimension, $smallestdimension
+        );
         // Create thumbnail and save
 
         @ImageJPEG($temp_image1, $target_image, 90);
@@ -1449,7 +1532,10 @@ class WcChat {
         // Create a temporary new image for the final thumbnail
         $temp_image2 = @ImageCreateTrueColor($thumbsize, $thumbsize);
         // Resize this image to the given thumbnail size
-        @ImageCopyResampled($temp_image2, $temp_image1, 0, 0, 0, 0, $thumbsize, $thumbsize, $smallestdimension, $smallestdimension);
+        @ImageCopyResampled(
+            $temp_image2, $temp_image1, 0, 0, 0, 0, 
+            $thumbsize, $thumbsize, $smallestdimension, $smallestdimension
+        );
         // Create thumbnail and save
 
         @ImageJPEG($temp_image2, $target_image, 90);
@@ -1484,10 +1570,11 @@ class WcChat {
 
         // Process "Change User" Request
         if($this->myGet('cuser')) {
-            unset($_SESSION['cname']);
-            unset($_SESSION['login_err']);
+            $this->wcUnsetSession('cname');
+            $this->wcUnsetSession('login_err');
             $this->wcUnsetCookie('cname');
             $this->wcUnsetCookie('chatpass');
+            $this->wcSetSession('skip_cookie', 1);
             header('location: ' . $this->myGet('ret') . '#wc_topic');
             die();
         }
@@ -1516,7 +1603,10 @@ class WcChat {
                     "Your new password is: " . $npass . "\n\n\n" . 
                     (
                         (
-                            !$this->hasData($this->myServer('HTTPS')) && $this->myServer('HTTPS') !== 'off' || 
+                            (
+                                $this->hasData($this->myServer('HTTPS')) && 
+                                $this->myServer('HTTPS') !== 'off'
+                            ) || 
                             $this->myServer('SERVER_PORT') == 443
                         ) ? 
                         'https://' : 
@@ -1559,33 +1649,55 @@ class WcChat {
         // Process Login Request
         if($this->myPost('cname')) {
                 
-            if(!$this->hasPermission('LOGIN', 'skip_msg') || $this->getBanned($this->myPost('cname')) !== FALSE) {
-                $_SESSION['login_err'] = 'Cannot login! Access Denied!';
+            if(
+                !$this->hasPermission('LOGIN', 'skip_msg') || 
+                $this->getBanned($this->myPost('cname')) !== FALSE
+            ) {
+                $this->wcSetSession('login_err', 'Cannot login! Access Denied!');
                 header('location: ' . $this->myServer('REQUEST_URI') . '#wc_join');
                 die();
             }
             
-            if(INVITE_LINK_CODE && $this->myGet('invite') != INVITE_LINK_CODE && $this->userMatch($this->myPost('cname')) === FALSE) {
-                $_SESSION['login_err'] = 'Cannot login! You must follow an invite link to login the first time!';
+            if(
+                INVITE_LINK_CODE && 
+                $this->myGet('invite') != INVITE_LINK_CODE && 
+                $this->userMatch($this->myPost('cname')) === FALSE
+            ) {
+                $this->wcSetSession(
+                    'login_err', 
+                    'Cannot login! You must follow an invite link to login the first time!'
+                );
                 header('location: ' . $this->myServer('REQUEST_URI') . '#wc_join');
                 die();
             }
             
-            if(strlen(trim($this->myPost('cname'), ' ')) == 0 || strlen(trim($this->myPost('cname'), ' ')) > 30 || preg_match("/[\?<>\$\{\}\"\:\|,; ]/i", $this->myPost('cname'))) {
-                $_SESSION['login_err'] = 'Invalid Nickname, too long (max = 30) or<br>with invalid characters (<b>? < > $ { } " : | , ; space</b>)!';
+            if(
+                strlen(trim($this->myPost('cname'), ' ')) == 0 || 
+                strlen(trim($this->myPost('cname'), ' ')) > 30 || 
+                preg_match("/[\?<>\$\{\}\"\:\|,; ]/i", $this->myPost('cname'))
+            ) {
+                $this->wcSetSession(
+                    'login_err', 
+                    'Invalid Nickname, too long (max = 30) or<br>
+                    with invalid characters (<b>? < > $ { } " : | , ; space</b>)!'
+                );
                 header('location: ' . $this->myServer('REQUEST_URI') . '#wc_join');
                 die();
             }
             
             if(trim(strtolower($this->myPost('cname'))) == 'guest')
             {
-                $_SESSION['login_err'] = 'Username "Guest" is reserved AND cannot be used!';
+                $this->wcSetSession(
+                    'login_err', 
+                    'Username "Guest" is reserved AND cannot be used!'
+                );
                 header('location: ' . $this->myServer('REQUEST_URI') . '#wc_join');
                 die();
             }
             
             $last_seen = $this->getPing($this->myPost('cname'));
 
+            // Check if chosen name is online
             if(!$this->isLoggedIn && ((time()-$last_seen) <= $this->catchWindow)) {
                 
                 $tmp = $this->userData($this->myPost('cname'));
@@ -1600,15 +1712,27 @@ class WcChat {
                 }
                 
                 if($passok === FALSE) {
-                    $_SESSION['login_err'] = 'Nickname <b>' . $this->myPost('cname') . '</b> is currenly in use!';
+                    $this->wcSetSession(
+                        'login_err', 
+                        'Nickname <b>' . $this->myPost('cname') . '</b> is currenly in use!'
+                    );
                     header('location: ' . $this->myServer('REQUEST_URI') . '#wc_join');
                     die();
                 }
             }
+            
+            // Clear idle_refresh id any (you're not idle if you're logging in)
             if($this->myCookie('idle_refresh')) { $this->wcUnsetCookie('idle_refresh'); }
             
             $this->wcSetCookie('cname', trim($this->myPost('cname'), ' '));
-            $_SESSION['cname'] = trim($this->myPost('cname'), ' ');
+            $this->wcSetSession(
+                'cname', 
+                trim($this->myPost('cname'), ' ')
+            );
+
+            // Clear the session that was used to change user
+            $this->wcUnsetSession('skip_cookie');
+
             header('location: ' . $this->myServer('REQUEST_URI') . '#wc_topic');
             die();
         }
@@ -1665,7 +1789,8 @@ class WcChat {
      */
     private function myCookie($index, $bool = NULL) {
 
-        $index = $this->parseCookieName($index);
+        $index = $this->wcPrefix . '_' . $this->parseCookieName($index);
+        
         if (isset($_COOKIE[$index])) {
             if($bool !== NULL) { return TRUE; }
             if ($this->hasData($_COOKIE[$index])) {
@@ -1686,6 +1811,8 @@ class WcChat {
      * @return string|void Returns void if unset/empty, otherwise string
      */
     private function mySession($index, $bool = NULL) {
+    
+        $index = $this->wcPrefix . '_' . $index;
 
         if (isset($_SESSION[$index])) {
             if($bool !== NULL) { return TRUE; }
@@ -1731,7 +1858,7 @@ class WcChat {
     private function wcSetCookie($name, $value) {
     
         setcookie(
-            $this->parseCookieName($name), 
+            $this->parseCookieName($this->wcPrefix . '_' . $name), 
             $value,
             time() + (86400*365), 
             '/'
@@ -1748,11 +1875,37 @@ class WcChat {
     private function wcUnsetCookie($name) {
     
         setcookie(
-            $this->parseCookieName($name), 
+            $this->parseCookieName($this->wcPrefix . '_' . $name), 
             '',
             time() - 3600, 
             '/'
         );
+    }
+    
+    /**
+     * Sets a Session variable
+     * 
+     * @since 1.4
+     * @param string $name
+     * @param string $value        
+     * @return void
+     */
+    private function wcSetSession($name, $value) {
+    
+        $_SESSION[$this->wcPrefix . '_' . $name] = $value;
+    
+    }
+    
+    /**
+     * Unsets a Cookie
+     * 
+     * @since 1.4
+     * @param string $name   
+     * @return void
+     */
+    private function wcUnsetSession($name) {
+    
+        unset($_SESSION[$this->wcPrefix . '_' . $name]);
     }
 
       /*===========================================
@@ -1766,6 +1919,9 @@ class WcChat {
        |  getMod                                  |
        |  handleLastRead                          |
        |  updateUser                              |
+       |  parseMicroTime                          |
+       |  parseFileMtime                          |
+       |  parseRoomLastMod                        |
        ===========================================*/
 
     /**
@@ -1796,7 +1952,7 @@ class WcChat {
     
         $src = $this->dataDir . 'tmp/' . base64_encode($name);
         if(file_exists($src)) {
-            return filemtime($src);
+            return $this->parseFileMTime($src);
         } else {
             return 0;
         }
@@ -1830,7 +1986,7 @@ class WcChat {
             $matches
         );
         
-        if(isset($matches[1][0]) && $this->hasData(trim($name))) {
+        if(isset($matches[1][0]) && $this->hasData(trim($name, ' '))) {
             if(time() < $matches[1][0] || $matches[1][0] == 0) {
                 return $matches[1][0];
             } else {
@@ -1856,7 +2012,7 @@ class WcChat {
             $matches
         );
         
-        if(isset($matches[1][0]) && $this->hasData(trim($name))) {
+        if(isset($matches[1][0]) && $this->hasData(trim($name, ' '))) {
             if(time() < $matches[1][0] || $matches[1][0] == 0) {
                 return $matches[1][0];
             } else {
@@ -1881,7 +2037,7 @@ class WcChat {
             $this->modList, 
             $matches
         );
-        if(isset($matches[1][0]) && $this->hasData(trim($name)))
+        if(isset($matches[1][0]) && $this->hasData(trim($name, ' ')))
             return TRUE;
         else
             return FALSE;
@@ -1906,12 +2062,12 @@ class WcChat {
             
         switch($mode) {
             case 'store':
-                $_SESSION[$id] = time();
-                $this->wcSetCookie($id, time());
+                $this->wcSetSession($id, $this->parseMicroTime());
+                $this->wcSetCookie($id, $this->parseMicroTime());
             break;
             case 'read':
                 if($this->myCookie($id) && !$this->mySession($id)) {
-                    $_SESSION[$id] = $this->myCookie($id);
+                    $this->wcSetSession($id, $this->myCookie($id));
                 }
                 return $this->mySession($id);
             break;
@@ -1932,7 +2088,8 @@ class WcChat {
         // If user row not provided, get row from users list
         $list_replace = FALSE;
         if($user_row === NULL) {
-            $user_row = $original_row = $this->userMatch($this->name, NULL, 'RETURN_MATCH');
+            $user_row = $original_row = 
+                $this->userMatch($this->name, NULL, 'RETURN_MATCH');
             $list_replace = TRUE;
         }
 
@@ -1956,7 +2113,10 @@ class WcChat {
                     $this->wcUnsetCookie('idle_refresh');
                 break;
                 case 'user_visit':
-                    if($f == '0' || ($f != '0' && $this->hasProfileAccess)) {
+                    if(
+                        $f == '0' || 
+                        ($f != '0' && $this->hasProfileAccess)
+                    ) {
                         $user_row[3] = time();
                         $this->wcUnsetCookie('idle_refresh');
                     }
@@ -1974,6 +2134,64 @@ class WcChat {
                 trim(implode('|', $user_row)),
                 $this->userList
             );
+        }
+    }
+    
+    /**
+     * Gets mirotime
+     * 
+     * @since 1.4
+     * @return int
+     */
+    private function parseMicroTime() {
+
+        if (function_exists('microtime')) {
+            list($ms, $s) = explode(' ', microtime());
+		return ($s+$ms);
+        } else {
+            return time();
+        }
+    }
+    
+    /**
+     * Gets filemtime with clean cache
+     * 
+     * @since 1.4
+     * @return int
+     */
+    private function parseFileMTime($file) {
+        clearstatcache();
+        return filemtime($file);
+    }
+
+    /**
+     * Gets Room's Last Modified Time (Either stored or file's)
+     * 
+     * @since 1.4
+     * @return int
+     */
+    private function parseRoomLastMod($target = NULL) {
+        if($target === NULL) {
+            if($this->roomLastMod) {
+                return $this->roomLastMod;
+            } else {
+        	   return $this->parseFileMTime(MESSAGES_LOC);
+            }
+        } else {       
+            $room_def = explode(
+                '|', 
+                $this->readFile(
+                    $this->roomDir . 'def_' . base64_encode($target) . '.txt'
+                )
+            );
+            
+            if($room_def[4]) {
+                return $room_def[4];
+            } else {
+        	    return $this->parseFileMTime(
+                    $this->roomDir . base64_encode($target) . '.txt'
+                );
+            }
         }
     }
 
@@ -2065,7 +2283,7 @@ class WcChat {
             $err = '';
             if($this->mySession('login_err')) {
                 $err = $this->mySession('login_err');
-                unset($_SESSION['login_err']);
+                $this->wcUnsetSession('login_err');
             }
 
             $JOIN = $this->popTemplate(
@@ -2079,7 +2297,12 @@ class WcChat {
 
         }
 
-        $BBCODE = ((!$this->isLoggedIn && $this->myCookie('cname') && !$this->uPass) ? 
+        $BBCODE = (
+            (
+                !$this->isLoggedIn && 
+                $this->myCookie('cname') && 
+                !$this->uPass
+            ) ? 
             '<i>Hint: Set-up a password in settings to skip the login screen on your next visit.</i>' :
             $this->popTemplate(
                 'wcchat.toolbar.bbcode',
@@ -2099,7 +2322,15 @@ class WcChat {
         );
 
         // Populate Global Settings Form Fields
-        $gsettings_par = array('TITLE', 'INCLUDE_DIR', 'REFRESH_DELAY', 'REFRESH_DELAY_IDLE', 'IDLE_START', 'OFFLINE_PING', 'CHAT_DSP_BUFFER', 'CHAT_STORE_BUFFER', 'CHAT_OLDER_MSG_STEP', 'ARCHIVE_MSG', 'BOT_MAIN_PAGE_ACCESS', 'ANTI_SPAM', 'IMAGE_MAX_DSP_DIM',  'IMAGE_AUTO_RESIZE_UNKN', 'VIDEO_WIDTH', 'VIDEO_HEIGHT', 'AVATAR_SIZE', 'DEFAULT_AVATAR', 'DEFAULT_ROOM', 'DEFAULT_THEME', 'INVITE_LINK_CODE', 'ACC_REC_EMAIL', 'ATTACHMENT_TYPES', 'ATTACHMENT_MAX_FSIZE', 'ATTACHMENT_MAX_POST_N');
+        $gsettings_par = array(
+            'TITLE', 'INCLUDE_DIR', 'REFRESH_DELAY', 'REFRESH_DELAY_IDLE', 
+            'IDLE_START', 'OFFLINE_PING', 'CHAT_DSP_BUFFER', 'CHAT_STORE_BUFFER', 
+            'CHAT_OLDER_MSG_STEP', 'ARCHIVE_MSG', 'BOT_MAIN_PAGE_ACCESS', 'ANTI_SPAM', 
+            'IMAGE_MAX_DSP_DIM',  'IMAGE_AUTO_RESIZE_UNKN', 'VIDEO_WIDTH', 'VIDEO_HEIGHT', 
+            'AVATAR_SIZE', 'DEFAULT_AVATAR', 'DEFAULT_ROOM', 'DEFAULT_THEME', 
+            'INVITE_LINK_CODE', 'ACC_REC_EMAIL', 'ATTACHMENT_TYPES', 'ATTACHMENT_MAX_FSIZE', 
+            'ATTACHMENT_MAX_POST_N'
+        );
 
         $gsettings_par_v = array();
 
@@ -2115,7 +2346,7 @@ class WcChat {
 
         $gsettings_perm = array(
             'GSETTINGS', 'ROOM_C', 'ROOM_E', 'ROOM_D', 'MOD', 
-            'UNMOD', 'USER_E', 'TOPIC_E', 'BAN', 'UNBAN', 'MUTE', 
+            'UNMOD', 'USER_E', 'USER_D', 'TOPIC_E', 'BAN', 'UNBAN', 'MUTE', 
             'UNMUTE', 'MSG_HIDE', 'MSG_UNHIDE', 'POST', 'PROFILE_E', 
             'IGNORE', 'PM_SEND', 'LOGIN', 'ACC_REC', 'READ_MSG', 
             'ROOM_LIST', 'USER_LIST', 'ATTACH_UPL', 'ATTACH_DOWN');
@@ -2126,7 +2357,8 @@ class WcChat {
             $perm_data = constant('PERM_' . $value);
             $perm_fields = explode(' ', $perm_data);
             foreach($gsettings_perm2 as $key2 => $value2) {
-                $gsettings_par_v['GS_' . $value2 . '_' . $value] = (in_array($value2, $perm_fields) ? ' CHECKED' : '');
+                $gsettings_par_v['GS_' . $value2 . '_' . $value] = 
+                    (in_array($value2, $perm_fields) ? ' CHECKED' : '');
             }
         }
 
@@ -2134,7 +2366,12 @@ class WcChat {
             'wcchat',
             array(
                 'TITLE' => TITLE,
-                'TOPIC' => $this->popTemplate('wcchat.topic', array('TOPIC' => $this->parseTopicContainer())),
+                'TOPIC' => $this->popTemplate(
+                    'wcchat.topic', 
+                    array(
+                        'TOPIC' => $this->parseTopicContainer()
+                    )
+                ),
                 'STATIC_MSG' => (!$this->isLoggedIn ? $this->popTemplate('wcchat.static_msg') : ''),
                 'POSTS' => $this->popTemplate('wcchat.posts'),
                 'GSETTINGS' => ($this->hasPermission('GSETTINGS', 'skip_msg') ? 
@@ -2145,8 +2382,10 @@ class WcChat {
                                 'URL' => 
                                     (
                                         (
-                                            (!$this->hasData($this->myServer('HTTPS')) && 
-                                            $this->myServer('HTTPS') !== 'off') || 
+                                            (
+                                                $this->hasData($this->myServer('HTTPS')) && 
+                                                $this->myServer('HTTPS') !== 'off'
+                                            ) || 
                                             $this->myServer('SERVER_PORT') == 443
                                         ) ? 
                                         'https://' : 
@@ -2184,6 +2423,7 @@ class WcChat {
                                     $this->hasPermission('MOD', 'skip_msg') || 
                                     $this->hasPermission('UNMOD', 'skip_msg') || 
                                     $this->hasPermission('USER_E', 'skip_msg') || 
+                                    $this->hasPermission('USER_D', 'skip_msg') || 
                                     $this->hasPermission('TOPIC_E', 'skip_msg') || 
                                     $this->hasPermission('BAN', 'skip_msg') || 
                                     $this->hasPermission('UNBAN', 'skip_msg') || 
@@ -2195,10 +2435,16 @@ class WcChat {
                             )
                         ),
                         'ICON_STATE' => ($this->hasProfileAccess ? '' : 'closed'),
-                        'JOINED_STATUS' => $this->popTemplate('wcchat.toolbar.joined_status', array('MODE' => 'on'))
+                        'JOINED_STATUS' => $this->popTemplate(
+                            'wcchat.toolbar.joined_status', 
+                            array('MODE' => 'on')
+                        )
                     )
                 ),
-                'TEXT_INPUT' => $this->popTemplate('wcchat.text_input', array('CHAT_DSP_BUFFER' => CHAT_DSP_BUFFER)),
+                'TEXT_INPUT' => $this->popTemplate(
+                    'wcchat.text_input', 
+                    array('CHAT_DSP_BUFFER' => CHAT_DSP_BUFFER)
+                ),
                 'SETTINGS' => $this->popTemplate(
                     'wcchat.settings',
                     array(
@@ -2216,8 +2462,14 @@ class WcChat {
                     )
                 ),
                 'JOIN' => $this->popTemplate('wcchat.join', array('JOIN' => $JOIN)),
-                'ROOM_LIST' => $this->popTemplate('wcchat.rooms', array('RLIST' => $this->parseRooms())),
-                'USER_LIST' => $this->popTemplate('wcchat.users', array('ULIST' => $this->parseUsers('VISIT'))),
+                'ROOM_LIST' => $this->popTemplate(
+                    'wcchat.rooms', 
+                    array('RLIST' => $this->parseRooms())
+                ),
+                'USER_LIST' => $this->popTemplate(
+                    'wcchat.users', 
+                    array('ULIST' => $this->parseUsers('VISIT'))
+                ),
                 'THEMES' => $this->parseThemes()
             )
         );
@@ -2256,16 +2508,22 @@ class WcChat {
                 'TITLE' => TITLE,
                 'CONTENTS' => (
             ($this->isBanned !== FALSE) ? 
-                $this->popTemplate('wcchat.critical_error', array('ERROR' => 'You are banned!' . $tag)) : 
+                $this->popTemplate(
+                    'wcchat.critical_error', 
+                    array('ERROR' => 'You are banned!' . $tag)
+                ) : 
                 ($this->stopMsg ? 
-                    $this->popTemplate('wcchat.critical_error', array('ERROR' => $this->stopMsg)) : 
+                    $this->popTemplate(
+                        'wcchat.critical_error', 
+                        array('ERROR' => $this->stopMsg)
+                    ) : 
                     $contents
                 )
             ),
                 'ONLOAD' => (($this->isBanned !== FALSE || $this->stopMsg) ? '' : $onload),
                 'REFRESH_DELAY' => REFRESH_DELAY,
-                'STYLE_LASTMOD' => filemtime(__DIR__ . '/themes/'.THEME.'/style.css'),
-                'SCRIPT_LASTMOD' => filemtime(__DIR__ . '/script.js'),
+                'STYLE_LASTMOD' => $this->parseFileMTime($this->includeDirServer . 'themes/'.THEME.'/style.css'),
+                'SCRIPT_LASTMOD' => $this->parseFileMTime($this->includeDirServer . 'script.js'),
                 'DEFAULT_THEME' => DEFAULT_THEME
             )
         );
@@ -2311,12 +2569,14 @@ class WcChat {
                 array(
                     '{CALLER}',
                     '{INCLUDE_DIR}',
-                    '{INCLUDE_DIR_THEME}'
+                    '{INCLUDE_DIR_THEME}',
+                    '{PREFIX}'
                 ),
                 array(
                     $this->ajaxCaller,
                     $this->includeDir,
-                    (defined('INCLUDE_DIR_THEME') ? INCLUDE_DIR_THEME : '')
+                    (defined('INCLUDE_DIR_THEME') ? INCLUDE_DIR_THEME : ''),
+                    $this->wcPrefix
                 ),
                 $out
             );
@@ -2364,7 +2624,16 @@ class WcChat {
             // If LIST_GUESTS is disabled, only process user if he/she joined the chat at least once in the past
             // Note: A user is not considered part of the guest group if he/she is logged to an unprotected name, but
             // to be listed, needs to join the chat (unless LIST_GUESTS is enabled)
-            if($this->isLoggedIn && (LIST_GUESTS === TRUE || (LIST_GUESTS === FALSE && $this->uData[6] != '0'))) {
+            if(
+                $this->isLoggedIn && 
+                (
+                    LIST_GUESTS === TRUE || 
+                    (
+                        LIST_GUESTS === FALSE && 
+                        $this->uData[6] != '0'
+                    )
+                )
+            ) {
                 if($this->userMatch($this->name) === FALSE) {
                     if($this->name != 'Guest') {
                         $contents .= "\n" . 
@@ -2418,6 +2687,29 @@ class WcChat {
             $this->writeFile(USERL, trim($contents), 'w');
         }
 
+        // Parses permissions
+        $edit_perm = FALSE;
+        if($this->hasPermission('USER_E', 'skip_msg')) {
+            $edit_perm = TRUE;
+        }
+
+        $mod_perm = FALSE;
+        if(
+            $this->hasPermission('MOD', 'skip_msg') || 
+            $this->hasPermission('UNMOD', 'skip_msg') || 
+            $this->hasPermission('BAN', 'skip_msg') || 
+            $this->hasPermission('UNBAN', 'skip_msg') || 
+            $this->hasPermission('MUTE', 'skip_msg') || 
+            $this->hasPermission('UNMUTE', 'skip_msg')
+        ) {
+            $mod_perm = TRUE;
+        }
+
+        $del_perm = FALSE;
+        if($this->hasPermission('USER_D', 'skip_msg')) {
+            $del_perm = TRUE;
+        }
+
         // Scan users raw file
         if(trim($contents)) {
             $lines = explode("\n", trim($contents));
@@ -2449,7 +2741,9 @@ class WcChat {
 
                     // Parse Web link and avatar
                     if(strlen($udata) > 0 && strpos(base64_decode($udata), '|') !== FALSE) {
-                        list($tmp1, $tmp2, $tmp3, $tmp4, $tmp5, $tmp6) = explode('|', base64_decode($udata));
+                        list($tmp1, $tmp2, $tmp3, $tmp4, $tmp5, $tmp6) = 
+                            explode('|', base64_decode($udata));
+                            
                         $av = ($tmp1 ? 
                             $this->includeDir . 'files/avatars/' . base64_decode($tmp1) : 
                             INCLUDE_DIR_THEME . DEFAULT_AVATAR
@@ -2497,24 +2791,6 @@ class WcChat {
                         default: $status_title = 'Not Joined';
                     }
 
-                    // Parses permissions
-                    $edit_perm = FALSE;
-                    if($this->hasPermission('USER_E', 'skip_msg')) {
-                        $edit_perm = TRUE;
-                    }
-
-                    $mod_perm = FALSE;
-                    if(
-                        $this->hasPermission('MOD', 'skip_msg') || 
-                        $this->hasPermission('UNMOD', 'skip_msg') || 
-                        $this->hasPermission('BAN', 'skip_msg') || 
-                        $this->hasPermission('UNBAN', 'skip_msg') || 
-                        $this->hasPermission('MUTE', 'skip_msg') || 
-                        $this->hasPermission('UNMUTE', 'skip_msg')
-                    ) {
-                        $mod_perm = TRUE;
-                    }
-
                     // Is user a guest?
                     if($f != '0') {
                         // No guest, is online?
@@ -2533,8 +2809,12 @@ class WcChat {
                             // Parse Joined Status class
                             $joined_status_class = 'joined_on';
                     
-                            if(((time()-$l) >= IDLE_START)) { $joined_status_class = 'joined_idle'; }
-                            if($s == 2) { $joined_status_class = 'joined_na'; }
+                            if(((time()-$l) >= IDLE_START)) {
+                                $joined_status_class = 'joined_idle';
+                            }
+                            if($s == 2) {
+                                $joined_status_class = 'joined_na';
+                            }
                         } else {
                             // User is offline
                             $target_array = '_off';
@@ -2633,7 +2913,15 @@ class WcChat {
                                             $edit_perm,
                                             'No permission!'
                                         ),
-                                        'NAME' => $usr
+                                        'NAME' => $usr,
+                                        'DELETE_BT' => $this->popTemplate(
+                                            'wcchat.users.item.edit_form.delete_bt',
+                                            array(
+                                                'ID' => base64_encode($usr)
+                                            ),
+                                            $del_perm && 
+                                            $this->name != $usr
+                                        )
                                     ),
                                     $edit_perm || $mod_perm
                                 )
@@ -2662,7 +2950,7 @@ class WcChat {
 
         // Store autocomplete list in SESSION
         if($autocomplete) {
-            $_SESSION['autocomplete'] = ',' . $autocomplete;
+            $this->wcSetSession('autocomplete', ',' . $autocomplete);
         }
 
         $output = 
@@ -2687,7 +2975,12 @@ class WcChat {
             ); 
 
         // Sets a cookie to enlarge refresh delay if user is idling
-        if(!$this->myCookie('idle_refresh') && $visit === NULL && (time()-$this->uData[7]) > IDLE_START && REFRESH_DELAY_IDLE != 0) {
+        if(
+            !$this->myCookie('idle_refresh') && 
+            $visit === NULL && 
+            (time()-$this->uData[7]) > IDLE_START && 
+            REFRESH_DELAY_IDLE != 0
+        ) {
             $this->wcSetCookie('idle_refresh', REFRESH_DELAY_IDLE);
         }
 
@@ -2699,7 +2992,7 @@ class WcChat {
             $visit !== NULL || 
             $this->myGet('ilmod')
         ) {
-            $_SESSION['user_list_sfv'] = $sfv;
+            $this->wcSetSession('user_list_sfv', $sfv);
             return $output;
         }
     }
@@ -2783,7 +3076,8 @@ class WcChat {
                             );
                     } else {
                         $lastread = $this->handleLastRead('read', $room_name);
-                        $lastmod = filemtime($this->roomDir . base64_encode($room_name) . '.txt');
+                        $lastmod = $this->parseRoomLastMod($room_name);
+
                         $rooms .= 
                             $this->popTemplate(
                                 'wcchat.rooms.room',
@@ -2886,9 +3180,9 @@ class WcChat {
     private function parseThemes() {
     
         $options = '';
-        foreach(glob(__DIR__ . '/themes/*') as $file) {
+        foreach(glob($this->includeDirServer . 'themes/*') as $file) {
             $title = str_replace(
-                __DIR__ . '/themes/', 
+                $this->includeDirServer . 'themes/', 
                 '', 
                 $file
             );
@@ -2990,8 +3284,8 @@ class WcChat {
 
         // Initialize the displayed messages index
         $index = 0;
-        $output = $new = $first_elem = '';
-        $previous = $prev_unique_id = $skip_new = 0;
+        $output = $new = $first_elem = $first_elem_name = '';
+        $previous = $prev_unique_id = $skip_new = $first_elem_time = 0;
         $puser = '';
         $old_start = FALSE;        
         $today_date = gmdate('d-M', time() + ($this->uTimezone * 3600));
@@ -3018,6 +3312,16 @@ class WcChat {
             echo 'You do not have permission to access this room!';
             die();
         }
+        
+        // Get the first lastread at room visit if any (will be useful while loading older messages)
+        $lastread_new = (
+            (
+                $this->mySession('lastread_arch_' . $this->mySession('current_room')) && 
+                $older_index !== NULL
+            ) ? 
+            $this->mySession('lastread_arch_' . $this->mySession('current_room')) : 
+            $lastread
+        );
  
         // Scan the available post lines and populates the respective templates
 
@@ -3093,12 +3397,16 @@ class WcChat {
                     $index < CHAT_OLDER_MSG_STEP
                 )
             ) {
-            
-                // Sets a breakpoint for the "new messages" tag
+                
+                // Sets a breakpoint for the "new messages" tag (If previous nessage is new)
                 $new = '';
-                if($this->myGet('all') == 'ALL' && !$skip_new) {
+                if(($this->myGet('all') == 'ALL' || $older_index !== NULL) && !$skip_new) {
                     if($previous) {
-                        if($time <= $lastread && $previous > $lastread && $puser != base64_encode($this->name)) {
+                        if(
+                            $time <= $lastread_new && 
+                            $previous > $lastread_new && 
+                            $puser != base64_encode($this->name)
+                        ) {
                             $new = $this->popTemplate('wcchat.posts.new_msg_separator');
                             $skip_new = 1;
                         } else { $previous = $time; $puser = $user; }
@@ -3133,6 +3441,7 @@ class WcChat {
                         $this->mySession('global_start_point')
                     );
                     
+                    // Clear Screen Tag
                     $time_date2 = gmdate('d-M', $start_point + ($this->uTimezone * 3600));
                     $output = $this->popTemplate(
                         'wcchat.posts.self',
@@ -3266,11 +3575,13 @@ class WcChat {
                             
                             $index++;
                             
-                            if($this->myGet('all') == 'ALL') {
+                            if($this->myGet('all') == 'ALL' || $older_index !== NULL) {
                                 $first_elem = ($hidden ? 
                                     str_replace('|', '*|', $unique_id) : 
                                     $unique_id
                                 );
+                                $first_elem_time = $time;
+                                $first_elem_user = $user;
                             }
                         }
                     } else {
@@ -3310,11 +3621,13 @@ class WcChat {
                         ) . $new . $output;
                         
                         $index++;
-                        if($this->myGet('all') == 'ALL') {
+                        if($this->myGet('all') == 'ALL' || $older_index !== NULL) {
                             $first_elem = ($hidden ? 
                                 str_replace('|', '*|', $unique_id) : 
                                 $unique_id
                             );
+                            $first_elem_time = $time;
+                            $first_elem_user = $user;
                         }
                     }
                 }
@@ -3327,6 +3640,17 @@ class WcChat {
             ) {
                 break;
             }
+        }
+
+        // check if the very first element needs a "new messages" tag
+
+        if(
+            $first_elem_time > $lastread_new && 
+            $first_elem_name != base64_encode($this->name) && 
+            !$skip_new && 
+            $output
+        ) {
+            $output = $this->popTemplate('wcchat.posts.new_msg_separator') . $output;
         }
         
         return array($output, $index, $first_elem);
@@ -3622,7 +3946,7 @@ class WcChat {
      */
     private function checkTopicChanges() {
     
-        $lastmod_t = filemtime(TOPICL);
+        $lastmod_t = $this->parseFileMTime(TOPICL);
         $lastread_t = $this->handleLastRead(
             'read', 
             'topic_' . $this->mySession('current_room')
@@ -3645,7 +3969,7 @@ class WcChat {
     private function refreshRooms() {
     
         $lastread = $this->handleLastRead('read', 'rooms_lastread');
-        $lastmod = filemtime(ROOMS_LASTMOD);
+        $lastmod = $this->parseFileMTime(ROOMS_LASTMOD);
 
         // If changed, return the parsed html template
         if($lastread < $lastmod) {
@@ -3677,7 +4001,7 @@ class WcChat {
             return 'Can\'t display messages.';
         }
         $output_e = '';
-        $lastmod = filemtime(EVENTL);
+        $lastmod = $this->parseFileMTime(EVENTL);
         
         // Read last read point
         $lastread = $this->handleLastRead('read', 'events_');
@@ -3715,7 +4039,7 @@ class WcChat {
         }
         
         $output = '';
-        $lastmod = filemtime(MESSAGES_LOC);
+        $lastmod = $this->parseRoomLastMod();
         $older_index = $this->myGet('n');
         if(!$this->hasData($older_index)) { $older_index = NULL; }
 
@@ -3723,6 +4047,14 @@ class WcChat {
 
         // Halt if is no new room visit and lastread is not set (user might not be accepting cookies)
         if($this->myGet('all') != 'ALL' && !$lastread) { die(); }
+
+        // Store the first lastread to be used on older message loading
+        if($this->myGet('all') == 'ALL' && $lastread) {
+            $this->wcSetSession(
+                'lastread_arch_' . $this->mySession('current_room'), 
+                $lastread
+            );
+        }
 
         $previous = $skip_new = 0;
         $new = '';
@@ -3735,7 +4067,7 @@ class WcChat {
             $older_index === NULL && 
             !$this->myGet('loop')
         ) {
-            unset($_SESSION['archive']);
+            $this->wcUnsetSession('archive');
         }               
 
         // Reload messages if reset_msg tag exists
@@ -3750,7 +4082,7 @@ class WcChat {
             
             // If "load existing messages" is disabled, automatically set a global start point 
             if(!$this->mySession('global_start_point') && LOAD_EX_MSG === FALSE) {
-                $_SESSION['global_start_point'] = time();
+                $this->wcSetSession('global_start_point', time());
             }
             
             $this->handleLastRead('store');
@@ -3792,7 +4124,7 @@ class WcChat {
                             trim($this->readFile($next_archive_target))
                         );
                         $older_index = 'beginning';
-                        $_SESSION['archive'] = $next_archive_vol;
+                        $this->wcSetSession('archive', $next_archive_vol);
                     }  
                 }
                 list($output, $index, $first_elem) =
@@ -3817,7 +4149,7 @@ class WcChat {
         // Process RESET tag
         if($this->mySession('reset_msg')) {
             $output = 'RESET' . $output;
-            unset($_SESSION['reset_msg']);
+            $this->wcUnsetSession('reset_msg');
         }
 
         // Return output, also remove auto-scroll Javascript tags from retrieved older messages
@@ -3857,1392 +4189,10 @@ class WcChat {
 
         if($this->myGet('mode')) {
         
-            switch($this->myGet('mode')) {
-
-                // Resets older message loading
-                case 'reset_archive':
-                    unset($_SESSION['archive']);
-                break;
-                
-                // Auto-completes a user name
-                case 'name_autocomplete':
-                    $hint = $this->myGet('hint');
-                    
-                    if($this->hasData($hint)) {
-                        $words = explode(' ', trim($hint));
-                        $current_word = $words[count($words)-1];
-                        $users = $this->mySession('autocomplete');
-                        
-                        if(
-                            strpos(
-                                strtolower($users), 
-                                ',' . strtolower($current_word)
-                            ) !== FALSE
-                        ) {
-                            list($tmp, $tmp2) = explode(
-                                ',' . strtolower($current_word), 
-                                strtolower($users), 
-                                2
-                            );
-                            list($rem_name, $tmp3) = explode(',', $tmp2);
-                            echo $rem_name;   
-                        }
-                    }
-                break;
-                
-                // Processes User Edition
-                case 'upd_user':
-                    $output = '';
-                    $oname = $this->myPost('oname');
-        
-                    // Halt if target is a Moderator and user is not current nor Master Moderator
-                    if(!$this->isMasterMod && $this->getMod($oname) !== FALSE && $this->name != $oname && trim($oname, ' ')) {
-                        echo 'You cannot edit other moderator!';
-                        die();
-                    }
-                    
-                    // Halt if target user is invalid (happens if the user was renamed)
-                    if($this->userMatch($oname) === FALSE) {
-                        echo 'Invalid Target User (If you just renamed the user, close the form and retry after the name update)!';
-                        die();
-                    } 
-                    $udata = $this->userData($oname);
-                    
-                    // Process moderator request if target user is not a moderator already
-                    if($this->myPost('moderator') && $this->getMod($oname) === FALSE) {
-                        if($this->hasPermission('MOD', 'skip_msg')) {
-                        
-                            // User must have a password in order to be assigned as moderator
-                            if($udata[5]) {
-                                $this->writeFile(MODL, "\n" . base64_encode($oname), 'a');
-                                $output .= '- Successfully set ' . $oname . ' as moderator.' . "\n";
-                            } else {
-                                $output .= '- Cannot set ' . $oname . ' as moderator: Not using a password.MOD_OFF' . "\n";
-                            }
-                        }
-                    }
-                    
-                    // Process un-moderator request if target user is a moderator
-                    if(!$this->myPost('moderator') && $this->getMod($oname) !== FALSE) {
-                        if($this->hasPermission('UNMOD', 'skip_msg')) {
-                            if($oname && $this->getMod($oname) !== FALSE) {
-                                $this->writeFile(
-                                    MODL, 
-                                    str_replace("\n" . base64_encode($oname), '', $this->modList), 
-                                    'w', 
-                                    'allow_empty'
-                                );
-                                $output .= '- Successfully removed ' . $oname . ' moderator status.' . "\n";
-                            } else {
-                                $output .= '- ' . $oname . ': invalid moderator!' . "\n";
-                            }
-                        }
-                    }
-                    
-                    // Process mute request if target user is not muted already
-                    if($this->myPost('muted') && $this->getMuted($oname) === FALSE) {
-                        if($this->hasPermission('MUTE', 'skip_msg')) {
-                            $xpar = '';
-                            
-                            // Parse requested mute time if any
-                            if($this->myPost('muted_time')) {
-                            
-                                if(ctype_digit($this->myPost('muted_time'))) {
-                                    $xpar = ' ' . (time() + (60 * abs(intval($this->myPost('muted_time')))));
-                                }
-                            } else { 
-                                $xpar = ' 0';
-                            }
-                            
-                            $this->writeFile(
-                                MUTEDL, 
-                                preg_replace(
-                                    '/' . "\n" . base64_encode($oname) . ' ([0-9]+)/', 
-                                    '', 
-                                    $this->mutedList
-                                ) . "\n" . base64_encode($oname) . $xpar,
-                                'w'
-                            );
-                            $output .= '- Successfully muted ' . $oname . 
-                                (
-                                    $this->myPost('muted_time') ? 
-                                    ' for ' . abs(intval($this->myPost('muted_time'))) . ' minute(s)' :
-                                     ''
-                                ) . '.' . "\n"
-                            ;
-                        }
-                    }
-                    
-                    // Process unmute request if target user is muted
-                    if(!$this->myPost('muted') && $this->getMuted($oname) !== FALSE) {
-                        if($this->hasPermission('UNMUTE', 'skip_msg')) {
-                            $this->writeFile(
-                                MUTEDL, 
-                                preg_replace(
-                                    '/' . "\n" . base64_encode(trim($oname)) . ' ([0-9]+)/', 
-                                    '', 
-                                    $this->mutedList
-                                ),
-                                'w', 
-                                'allow_empty'
-                            );
-        
-                            $output .= '- Successfully unmuted ' . $oname . "\n";
-                        }
-                    }
-                  
-                    // Process ban request if target user is not banned already
-                    if($this->myPost('banned') && $this->getBanned($oname) === FALSE) {
-                        if($this->hasPermission('BAN', 'skip_msg')) {
-                            
-                            // Parse requested ban time if any
-                            $xpar = '';
-                            if($this->myPost('banned_time')) {                       
-                                if(ctype_digit($this->myPost('banned_time'))) {
-                                    $xpar = ' '.(time() + (60 * abs(intval($this->myPost('banned_time')))));
-                                }
-                            } else { $xpar = ' 0'; }
-                            
-                            $this->writeFile(
-                                BANNEDL, 
-                                preg_replace(
-                                    '/' . "\n" . base64_encode($oname) . ' ([0-9]+)/', 
-                                    '', 
-                                    $this->bannedList
-                                ) . "\n" . base64_encode($oname) . $xpar, 
-                                'w'
-                            );
-                            $output .= '- Successfully banned ' . $oname . 
-                                (
-                                    $this->myPost('banned_time') ? 
-                                    ' for ' . abs(intval($this->myPost('banned_time'))) . ' minute(s)' : 
-                                    ''
-                                ) . '.' . "\n"
-                            ;
-                        }
-                    }
-                    
-                    // Process unban request if target user is banned
-                    if(!$this->myPost('banned') && $this->getBanned($oname) !== FALSE) {
-                        if($this->hasPermission('UNBAN', 'skip_msg')) {
-                            $this->writeFile(
-                                BANNEDL, 
-                                preg_replace(
-                                    '/' . "\n" . base64_encode($oname) . ' ([0-9]+)/', 
-                                    '', 
-                                    $this->bannedList
-                                ), 
-                                'w', 
-                                'allow_empty'
-                            );
-                            $output .= '- Successfully unbanned '.$oname."\n";
-                        }
-                    }
-        
-                    $changes = 0; $name_err = FALSE;
-                    if($this->hasPermission('USER_E', 'skip_msg')) {
-                        if($this->myPost('name') != $oname) {
-                        
-                            // Check if new name already exists
-                            if($this->userMatch($this->myPost('name')) !== FALSE) {
-                                $output .= '- Cannot rename: '.$this->myPost('name').' already exists!';
-                                $name_err = TRUE;
-                            // Check if name is valid
-                            } elseif(
-                                strlen(trim($this->myPost('name'), ' ')) == 0 || 
-                                strlen(trim($this->myPost('name'))) > 30 || 
-                                preg_match("/[\?<>\$\{\}\"\: ]/i", $this->myPost('name'))
-                            ) {
-                                $output .= '- Invalid Nickname, too long (max = 30) OR 
-                                    containing invalid characters: ? < > $ { } " : space' . "\n";
-                                $name_err = TRUE;
-                                
-                            } else {
-                                // all ok, name will be renamed when the file is written
-                                $changes = 1;
-                                $output .= '- Name Renamed Successfully!'."\n";
-                            }
-                        }
-                        
-                        // Process web address request
-                        if($this->myPost('web') != $udata[2]) {
-                            if(filter_var($this->myPost('web'), FILTER_VALIDATE_URL)) {
-                                $udata[2] = $this->myPost('web');
-                                $changes = 1;
-                                $output .= '- Web Address Successfully set!' . "\n";
-                            } else {
-                                $output .= '- Invalid Web Address!';
-                            }                        
-                        }
-        
-                        // Process email address request
-                        if($this->myPost('email') != $udata[1]) {
-                            if(filter_var($this->myPost('email'), FILTER_VALIDATE_EMAIL)) {
-                                $udata[1] = $this->myPost('email');
-                                $changes = 1;
-                                $output .= '- Email Address Successfully set!' . "\n";
-                            } else {
-                                $output .= '- Invalid Web Address!';
-                            }
-                        }
-        
-                        // Process reset avatar request
-                        if($this->myPost('reset_avatar') && $udata[0]) {
-                            $udata[0] = '';
-                            $changes = 1;
-                            $output .= '- Avatar Successfully Reset!' . "\n";
-                        }
-        
-                        // Process reset password request
-                        if($this->myPost('reset_pass') && $udata[5]) {
-                            $udata[5] = '';
-                            $changes = 1;
-                            $output .= '- Password Successfully Reset!' . "\n";
-                        }
-        
-                        // Process password regenerate request
-                        if($this->myPost('regen_pass')) {
-                            $npass = $this->randNumb(8);
-                            $udata[5] = md5(md5($npass));
-                            $changes = 1;
-                            $output .= '- Password Successfully Re-generated: ' . $npass . "\n";
-                        }
-        
-                        if($changes) {
-                            $nstring = base64_encode($udata[0]) . '|' . 
-                                base64_encode($udata[1]) . '|' . 
-                                base64_encode($udata[2]) . '|' . 
-                                $udata[3] . '|' . 
-                                $udata[4] . '|' . 
-                                $udata[5]
-                            ;
-                            
-                            // If name is the same or name error exists, write with the name unchanged
-                            if($this->myPost('name') == $oname || $name_err) {
-                                $towrite = preg_replace(
-                                    '/(' . base64_encode($oname) . ')\|(.*?)\|/', 
-                                    '\\1|' . base64_encode($nstring) . '|', 
-                                    $this->userList
-                                );
-                                
-                            // If not, write with the new name
-                            } elseif(trim($this->myPost('name'), ' ')) {
-                                $towrite = preg_replace(
-                                    '/(' . base64_encode($oname) . ')\|(.*?)\|/', 
-                                    base64_encode($this->myPost('name')) . '|' . base64_encode($nstring) . '|', 
-                                    $this->userList
-                                );
-                                
-                                // Update the moderator, mute and ban lists
-                                if($this->getMod($oname) !== FALSE) {
-                                    $this->writeFile(
-                                        MODL, 
-                                        preg_replace(
-                                            '/^(' . base64_encode($oname) . ')$/im', 
-                                            base64_encode($this->myPost('name')), 
-                                            $this->modList
-                                        ), 
-                                        'w'
-                                    );
-                                }
-                                
-                                if($this->getMuted($oname) !== FALSE) {
-                                    $this->writeFile(
-                                        MUTEDL, 
-                                        preg_replace(
-                                            '/^' . base64_encode($oname) . ' ([0-9]+)$/im', 
-                                            base64_encode($this->myPost('name')) . ' \\1', 
-                                            $this->mutedList
-                                        ), 
-                                        'w'
-                                    );
-                                }
-                                
-                                if($this->getBanned($oname) !== FALSE) {
-                                    $this->writeFile(
-                                        BANNEDL, 
-                                        preg_replace(
-                                            '/^' . base64_encode($oname) . ' ([0-9]+)$/im', 
-                                            base64_encode($this->myPost('name')) . ' \\1',
-                                            $this->bannedList
-                                        ), 
-                                        'w'
-                                    );
-                                }
-                            }
-        
-                            $this->writeFile(USERL, $towrite, 'w');
-                        }
-                    }
-                    echo trim($output);
-                break;
-                
-                // Changes User Status (Available/Do Not Disturb)
-                case 'toggle_status':
-                    $current = $this->uData[8];
-        
-                    if($current == 1) {
-                        $this->writeFile(
-                            USERL, 
-                            $this->updateUser(NULL, 'update_status', 2), 
-                            'w'
-                        );
-                        echo 'Your status has been changed to: Do Not Disturb!';
-                    }
-                    
-                    if($current == 2) {
-                        $this->writeFile(
-                            USERL, 
-                            $this->updateUser(NULL, 'update_status', 1), 
-                            'w'
-                        );
-                        echo 'You status has been changed to: Available!';
-                    }
-                break;
-                
-                // Uploads an attachment
-                case 'attach_upl':
-                    // Process request if form element exists and has permission to attach and attachmemts are enabled
-                    if(
-                        $_FILES['attach']['tmp_name'] && 
-                        $this->hasPermission('ATTACH_UPL', 'skip_msg') && 
-                        ATTACHMENT_UPLOADS
-                    ) {
-                        sleep(1);
-                        // Strip special characters from name
-                        $dest_name = preg_replace(
-                            '/[^A-Za-z0-9 _\.]/', 
-                            '', 
-                            $_FILES['attach']['name']
-                        );
-                        
-                        if(strlen($dest_name) > 13) {
-                            $dest_name = substr($dest_name, strlen($dest_name) - 13, 13);
-                        }
-                        
-                        // Destination path
-                        $dest = 
-                            __DIR__ . 
-                            '/files/attachments/' . 
-                            base64_encode($this->name) . '_' . 
-                            dechex(time()). '_' . 
-                            $dest_name
-                        ;
-                        
-                        // Get file type by extention
-                        $type = $this->getFileExt($dest_name);
-                        $file_ok = TRUE;
-                        $allowed_types = explode(' ', trim(ATTACHMENT_TYPES, ' '));
-                        $allowed_types_img = array('jpg', 'jpeg', 'gif', 'png');
-                        
-                        // Meets filesize limit? Is an allowed type? Destination does not exist?
-                        if(
-                            $_FILES['attach']['size'] <= (ATTACHMENT_MAX_FSIZE * 1024) && 
-                            in_array($type, $allowed_types) && 
-                            !file_exists($dest)
-                        ) {            
-                            copy($_FILES['attach']['tmp_name'], $dest);
-                            unlink($_FILES['attach']['tmp_name']);
-                            
-                            if(in_array($type, $allowed_types_img)) {
-                                echo $this->parseImg($dest, 'ATTACH');
-                            } else {
-                                echo '[attach_' . 
-                                    base64_encode($this->name) . '_' . 
-                                    dechex(time()) . '_' . 
-                                    intval($_FILES['attach']['size'] / 1014) . '_' . 
-                                    $dest_name .']'
-                                ;
-                            }
-                        // Halt, file does not meet requirements
-                        } else {
-                            if(!file_exists($dest)) {
-                                echo 'Error: Invalid file (Allowed: ' . 
-                                    trim(
-                                        implode(', ', $allowed_types), 
-                                        ' '
-                                    ) . 
-                                    ' up to 1024KB)'
-                                ;
-                            } else {
-                                echo 'Error: File already exists!';
-                            }
-                        }
-                    }
-                break;
-                
-                // Recovers the account
-                case 'acc_rec':
-                    // Email exists? No pending recovery? Has permission? 
-                    if(
-                        $this->uEmail && 
-                        !file_exists($this->dataDir . 'tmp/rec_'.base64_encode($this->name)) && 
-                        $this->hasPermission('ACC_REC', 'skip_msg')
-                    ) {
-                        if(mail(
-                            $this->uEmail,
-                            'Account Recovery',
-                            "Someone (probably you) has requested an account recovery.\n
-                                Click the following link in order to reset your account password:\n\n" . 
-                                $this->myServer('HTTP_REFERER') . '?recover=' . $this->uPass . "&u=" . urlencode(base64_encode($this->name)) . 
-                                "\n\nIf you did not request this, please ignore it.",
-                            $this->mailHeaders(
-                                (trim(ACC_REC_EMAIL) ? trim(ACC_REC_EMAIL) : 'no-reply@' . $this->myServer('SERVER_NAME')),
-                                TITLE,
-                                $this->uEmail,
-                                $this->name
-                            )
-                        )) {
-                            echo 'A message was sent to the account email with recovery instructions.';
-                            touch($this->dataDir . 'tmp/rec_' . base64_encode($this->name));
-                        } else {
-                            echo 'Failed to send E-mail!';
-                        };
-                        
-                    // Does not meet requiments, check pending recovery
-                    } elseif(file_exists($this->dataDir . 'tmp/rec_' . base64_encode($this->name))) {
-                        echo 'A pending recovery already exists for this account.';
-                    }
-                break;
-                
-                // Updates Global Settings
-                case 'upd_gsettings':
-                    if(!$this->hasPermission('GSETTINGS')) { die(); }
-        
-                    // Set arrays with $_POST ids and batch process
-                    $arr = array();
-                    $gsettings_par = array(
-                        'TITLE', 'INCLUDE_DIR', 'REFRESH_DELAY', 'REFRESH_DELAY_IDLE', 'IDLE_START', 
-                        'OFFLINE_PING', 'CHAT_DSP_BUFFER', 'CHAT_STORE_BUFFER', 
-                        'CHAT_OLDER_MSG_STEP', 'ARCHIVE_MSG', 'BOT_MAIN_PAGE_ACCESS', 
-                        'ANTI_SPAM', 'IMAGE_MAX_DSP_DIM',  'IMAGE_AUTO_RESIZE_UNKN', 
-                        'VIDEO_WIDTH', 'VIDEO_HEIGHT', 'AVATAR_SIZE', 'DEFAULT_AVATAR', 
-                        'DEFAULT_ROOM', 'DEFAULT_THEME', 'INVITE_LINK_CODE', 'ACC_REC_EMAIL', 
-                        'ATTACHMENT_TYPES', 'ATTACHMENT_MAX_FSIZE', 'ATTACHMENT_MAX_POST_N'
-                    );
-        
-                    foreach($gsettings_par as $key => $value) {
-                        $arr[$value] = $this->myPost('gs_'.strtolower($value));
-                    }
-        
-                    $gsettings_perm = array(
-                        'GSETTINGS', 'ROOM_C', 'ROOM_E', 'ROOM_D', 'MOD', 'UNMOD', 
-                        'USER_E', 'TOPIC_E', 'BAN', 'UNBAN', 'MUTE', 'UNMUTE', 
-                        'MSG_HIDE', 'MSG_UNHIDE', 'POST', 'PROFILE_E', 'IGNORE', 
-                        'PM_SEND', 'LOGIN', 'ACC_REC', 'READ_MSG', 'ROOM_LIST', 
-                        'USER_LIST', 'ATTACH_UPL', 'ATTACH_DOWN'
-                    );
-        
-                    $gsettings_perm2 = array('MMOD', 'MOD', 'CUSER', 'USER', 'GUEST');
-        
-                    foreach($gsettings_perm as $key => $value) {
-                        $arr['PERM_'.$value] = '';
-                        foreach($gsettings_perm2 as $key2 => $value2) {
-                            if(
-                                $this->myPost(
-                                    strtolower($value2) . '_' . strtolower($value)
-                                ) == '1'
-                            ) {
-                                $arr['PERM_' . $value] .= ' '.$value2;
-                            }
-                        }
-                        $arr['PERM_'.$value] = trim($arr['PERM_' . $value], ' ');
-                    }
-                    
-                    // Halt if errors exist
-                    $error = '';
-                    if(
-                        !ctype_digit($this->myPost('gs_refresh_delay')) || 
-                        intval($this->myPost('gs_refresh_delay')) < 1
-                    ) {
-                        $error = '- "Refresh Delay" must be an integer >= 1' . "\n";
-                    }
-                    
-                    if(
-                        !ctype_digit($this->myPost('gs_refresh_delay_idle')) || 
-                        intval($this->myPost('gs_refresh_delay_idle')) < 0
-                    ) {
-                        $error .= '- "Refresh delay (idle)" must be an integer >= 0' . "\n";
-                    }
-                    
-                    if(
-                        !ctype_digit($this->myPost('gs_idle_start')) || 
-                        intval($this->myPost('gs_idle_start')) < 60
-                    ) {
-                        $error .= '- "Idle Start" must be an integer >= 60' . "\n";
-                    }
-                    
-                    if(
-                        !ctype_digit($this->myPost('gs_offline_ping')) || 
-                        intval($this->myPost('gs_offline_ping')) < 1
-                    ) {
-                        $error .= '- "Offline Ping" must be an integer >= 1' . "\n";
-                    }
-                            
-                    if(
-                        !ctype_digit($this->myPost('gs_anti_spam')) || 
-                        intval($this->myPost('gs_anti_spam')) < 0
-                    ) {
-                        $error .= '- "Anti-SPAM" must be an integer >= 0' . "\n";
-                    }
-                    
-                    if(
-                        !ctype_digit($this->myPost('gs_chat_older_msg_step')) || 
-                        intval($this->myPost('gs_chat_older_msg_step')) < 1
-                    ) {
-                        $error .= '- "Older Message Load Step" must be an integer >= 1' . "\n";
-                    }
-                    
-                    if(
-                        intval($this->myPost('gs_chat_dsp_buffer')) > intval($this->myPost('gs_chat_store_buffer')) || 
-                        !ctype_digit($this->myPost('gs_chat_dsp_buffer')) || 
-                        !ctype_digit($this->myPost('gs_chat_store_buffer'))
-                    ) {
-                        $error .= '- "Chat Store Buffer" must be >= "Chat Display Buffer"' . "\n";
-                    }
-                    
-                    if($this->myPost('gs_acc_rec_email')) {
-                        if(!filter_var($this->myPost('gs_acc_rec_email'), FILTER_VALIDATE_EMAIL)) {
-                            $error .= '- "Account Recovery Sender E-mail" is invalid!' . "\n";
-                        }
-                    }
-                    
-                    if(!file_exists($this->roomDir . base64_encode($this->myPost('gs_default_room')) . '.txt')) {
-                        $error .= '- "Default Room" is invalid' . "\n";
-                    }
-                    
-                    if(!file_exists(__DIR__ . '/themes/' . $this->myPost('gs_default_theme'))) {
-                        $error .= '- "Default Theme" is invalid' . "\n";
-                    }
-                    
-                    
-                    if($error) { echo trim($error); die(); }
-        
-                    // Update settings.php
-                    $res = $this->updateConf(
-                        array_merge(
-                            $arr,
-                            array(
-                                'LOAD_EX_MSG' => (($this->myPost('gs_load_ex_msg') == '1') ? 'TRUE' : 'FALSE'),
-                                'LIST_GUESTS' => (($this->myPost('gs_list_guests') == '1') ? 'TRUE' : 'FALSE'),
-                                'ARCHIVE_MSG' => (($this->myPost('gs_archive_msg') == '1') ? 'TRUE' : 'FALSE'),
-                                'BOT_MAIN_PAGE_ACCESS' => (
-                                    ($this->myPost('gs_bot_main_page_access') == '1') ? 'TRUE' : 'FALSE'
-                                ),
-                                'GEN_REM_THUMB' => (($this->myPost('gs_gen_rem_thumb') == '1') ? 'TRUE' : 'FALSE'),
-                                'ATTACHMENT_UPLOADS' => (
-                                    ($this->myPost('gs_attachment_uploads') == '1') ? 'TRUE' : 'FALSE'
-                                )        
-                            )
-                        )
-                    );
-        
-                    // Parse update return value and print
-                    if($res === TRUE) {
-                        echo 'Settings Successfully Updated!';
-                    } else {
-                        echo 'Nothing to update!';
-                    }
-                break;
-                
-                // Updates Ajax Components (Chat blocks that need to be refreshed periodically)
-                case 'update_components':
-                    $output = $this->parseUsers() . '[$]' . 
-                        $this->checkTopicChanges() . '[$]' . 
-                        $this->refreshRooms() . '[$]' . 
-                        (
-                            (filemtime($this->roomDir . 'hidden_' . base64_encode($this->mySession('current_room')) . '.txt') <= $this->catchWindow) ? 
-                            $this->checkHiddenMsg() : 
-                            ''
-                        ) . '[$]' . 
-                        $this->updateMsgOnceE() . '[$]' . 
-                        $this->mySession('alert_msg') . '[$]' .
-                        str_replace('[$]', base64_encode('[$]'), $this->updateMsg())
-                    ;
-                    if(trim($output, '[$]')) { echo $output; }
-        
-                    if($this->mySession('alert_msg')) { unset($_SESSION['alert_msg']); }
-                break;
-                
-                // Hides/Unhides a Posted Message
-                case 'toggle_msg':
-                    $id = $this->myGet('id');
-                    $id_hidden = str_replace('|', '*|', $id);
-                    $action = $output = '';
-                    $hard_mode = $soft_mode = FALSE;
-                    $cookie_name = 'hide_' . $id;
-                    
-                    // If message has not been hidden by a moderator, hide it (or allow soft hide)
-                    if(strpos($this->msgList, $id) !== FALSE) {
-                        $action = 'hide';
-                        // Check if action is being performed by: 
-                        // 1 - a normal user/moderator outside edit mode (soft hide, cookie only)
-                        // 2 - a moderator under edit mode (hard hide, all users)
-                        if(!$this->hasPermission('MSG_HIDE', 'skip_msg') || $this->mycookie('hide_edit') == 1) {
-                            if($this->myCookie($cookie_name, 'BOOL')) {
-                                $this->wcUnsetCookie($cookie_name);
-                                preg_match_all(
-                                    '/^' . preg_quote($id) . '\|(.*)$/im', 
-                                    $this->msgList,
-                                    $matches
-                                );
-                                $output = $this->parseBbcode($matches[1][0]);
-                            } else { 
-                                $this->wcSetCookie($cookie_name, 1);
-                                echo $this->popTemplate('wcchat.posts.hidden');
-                            }
-                            $soft_mode = TRUE;
-                        } else {
-                            // If cookie exists, ignore hard mode, undo soft mode first
-                            if($this->myCookie($cookie_name, 'BOOL')) {
-                                $this->wcUnsetCookie($cookie_name);
-                                preg_match_all(
-                                    '/^' . preg_quote($id) . '\|(.*)$/im', 
-                                    $this->msgList,
-                                    $matches
-                                );
-                                $output = $this->parseBbcode($matches[1][0]);
-                            } else {
-                                $this->writeFile(
-                                        MESSAGES_LOC, 
-                                        str_replace($id, $id_hidden, $this->msgList), 
-                                        'w'
-                                );
-                                   $hard_mode = TRUE;
-                                $output = $this->popTemplate('wcchat.posts.hidden_mod');
-                            }
-                        }
-        
-                    }
-        
-                    // If message has been hidden by a moderator, unhide it if current user is a moderator under edit mode
-                    if(strpos($this->msgList, $id_hidden) !== FALSE) {
-                        if(!$this->hasPermission('MSG_UNHIDE', 'skip_msg') || $this->mycookie('hide_edit') == 1) {
-                            echo ($this->isMod ? 
-                                'ERROR: This message can only be unhidden under edit mode!' : 
-                                'ERROR: This message was hidden by a moderator, cannot be unhidden!'
-                            );
-                            die();
-                        }
-                        $action = 'unhide'; $hard_mode = TRUE;
-                        preg_match_all(
-                            '/^' . preg_quote($id_hidden) . '\|(.*)$/im',
-                            $this->msgList,
-                            $matches
-                        );
-                        $this->writeFile(
-                            MESSAGES_LOC, 
-                            str_replace($id_hidden, $id, $this->msgList), 
-                            'w'
-                        );
-                        $output = $this->parseBbcode($matches[1][0]);
-                    }
-        
-                    if($hard_mode) {
-                        // Write message id, replace old value if exists
-                        if(strpos($this->hiddenMsgList, $id) === FALSE && $action == 'hide') {
-                            $this->writeFile(
-                                MESSAGES_HIDDEN, 
-                                ' ' . $id, 
-                                (
-                                    ((time() - filemtime(MESSAGES_HIDDEN)) > $this->catchWindow) ? 
-                                    'w' : 
-                                    'a'
-                                )
-                            );
-                        }
-                        if(strpos($this->hiddenMsgList, $id) !== FALSE && $action == 'unhide') {
-                            $this->writeFile(
-                                MESSAGES_HIDDEN, 
-                                str_replace(' ' . $id, '', $this->hiddenMsgList), 
-                                'w', 
-                                'allow_empty'
-                            );
-                        }
-                    }
-                    
-                    if($output) {
-                        echo str_replace(
-                            'wc_doscroll()',
-                            '',
-                            $output
-                        );
-                    }
-                break;
-                
-                // Retrieves Hidden Messages for the current room
-                case 'check_hidden_msg':
-                    echo $this->checkHiddenMsg();
-                break;
-                
-                // Refreshes Topic
-                case 'refreshtopic':
-                    echo $this->parseTopicContainer();
-                break;
-                
-                // Updates Room Name / Definitions
-                case 'update_rname':
-                    // Halt if no room edit permission
-                    if(!$this->hasPermission('ROOM_E')) { die(); }
-                    $oname = $this->myPost('oname');
-                    $nname = $this->myPost('nname');
-                    $wperm = $this->myPost('perm');
-                    $rperm = $this->myPost('rperm');
-                    $enc = base64_encode($oname);
-                    
-                    // Get room definitions
-                    $settings = $this->readFile($this->roomDir . 'def_' . $enc . '.txt');
-                    
-                    // $_operm = Write permission;
-                    // $_rperm = Read permission;
-                    // $_larch_vol = Last created archive volume;
-                    // $_larch_vol_msg_n = Last created archive volume message count;
-                    // $_tmp is unused in v1.4.10
-                    list($_wperm, $_rperm, $_larch_vol, $_larch_vol_msg_n, $_tmp) = explode('|', $settings, 5);
-                    $changes = 0;
-                    
-                    // Update permissions if changed
-                    if($_wperm != $wperm || $rperm != $_rperm) {
-                        file_put_contents(
-                            $this->roomDir . 'def_' . $enc . '.txt',
-                            $wperm .'|' . 
-                            $rperm . '|' . 
-                            $_larch_vol . '|' . 
-                            $_larch_vol_msg_n . '|' . 
-                            $_tmp
-                        );
-                        $changes++;
-                    }
-                    
-                    // Rename room if changed
-                    if($oname != $nname) {
-                        if(
-                            file_exists($this->roomDir . base64_encode($nname) . '.txt') || 
-                            !trim($nname, ' ') || 
-                            preg_match("/[\?<>\$\{\}\"\:\|,;]/i", $nname)
-                        ) {
-                            echo 'Room ' . $nname . ' already exists OR invalid room name (illegal: ? < > $ { } " : | , ;)';
-                            die();
-                        }
-                        
-                        rename(
-                            $this->roomDir . $enc . '.txt', 
-                            $this->roomDir . base64_encode($nname) . '.txt'
-                        );
-                        rename(
-                            $this->roomDir . 'def_' . $enc . '.txt', 
-                            $this->roomDir . 'def_' . base64_encode($nname) . '.txt'
-                        );
-                        rename(
-                            $this->roomDir . 'topic_' . $enc . '.txt', 
-                            $this->roomDir . 'topic_' . base64_encode($nname) . '.txt'
-                        );
-                        
-                        if(file_exists($this->roomDir . 'hidden_' . $enc . '.txt')) {
-                            rename(
-                                $this->roomDir . 'hidden_' . $enc . '.txt', 
-                                $this->roomDir . 'hidden_' . base64_encode($nname) . '.txt'
-                            );
-                        }
-                        
-                        // If the renamed room is the default, rename in settings as well
-                        if(trim($oname) == trim(DEFAULT_ROOM)) {
-                            file_put_contents(
-                                __DIR__ . '/settings.php',
-                                str_replace(
-                                    "'DEFAULT_ROOM', '" . str_replace("'", "\'", $oname) . "'",
-                                    "'DEFAULT_ROOM', '" . str_replace("'", "\'", $nname) . "'",
-                                    $this->readFile(__DIR__ . '/settings.php')
-                                )
-                            );
-                        }
-                        
-                        // If the renamed room is the current room, reset current room client/server variables
-                        if($this->mySession('current_room') == $oname) {
-                            $_SESSION['current_room'] = $nname;
-                            $this->wcSetCookie('current_room', $nname);
-                        }
-                        $changes++;
-                    }
-                    if($changes) {
-                        echo 'Room ' . $oname . ' Successfully updated!';
-                        touch(ROOMS_LASTMOD);
-                    }
-                break;
-                
-                // Deletes A Room
-                case 'delete_rname':
-                    // Halt if no permission to delete rooms
-                    if(!$this->hasPermission('ROOM_D')) { die(); }
-                    $changes = 0;
-                    $room_move = '';
-                    $oname = $this->myGet('oname');
-                    $enc = base64_encode($oname);
-                    
-                    // Room Name exists?
-                    if(trim($oname) && file_exists($this->roomDir . $enc . '.txt')) {
-                    
-                        // Halt if default room
-                        if(trim($oname) == DEFAULT_ROOM) {
-                            echo 'The Default Room cannot be deleted!';
-                            die();
-                        }
-                        // Delete room files
-                        unlink($this->roomDir . $enc . '.txt');
-                        unlink($this->roomDir . 'def_' . $enc.'.txt');
-                        unlink($this->roomDir . 'topic_' . $enc.'.txt');
-                        if(file_exists($this->roomDir . 'hidden_' . $enc . '.txt')) {
-                            unlink($this->roomDir . 'hidden_' . $enc . '.txt');
-                        }
-                        // If deleted room is current room, move user to the default room
-                        if($this->mySession('current_room') == $oname) {
-                            $_SESSION['current_room'] = DEFAULT_ROOM;
-                            $this->wcSetCookie('current_room', DEFAULT_ROOM);
-                            $room_move = 'RMV';
-                        }
-                        $changes++;
-                    }
-                    
-                    if($changes) {
-                        echo $room_move . 'Room ' . $oname . ' Successfully deleted!';
-                        // Rooms list has just changed, update modification time of the control file
-                        touch(ROOMS_LASTMOD);
-                    }
-                break;
-                
-                // Creates a Room
-                case 'croom':
-                    // Halt if no permission to create rooms
-                    if(!$this->hasPermission('ROOM_C')) { die(); }
-                    $room_name = $this->myGet('n');
-                    // Target room exists? Is room name valid?
-                    if(
-                        !file_exists($this->roomDir . base64_encode($room_name) . '.txt') && 
-                        trim($room_name, ' ') && 
-                        !preg_match("/[\?<>\$\{\}\"\:\|,;]/i", $room_name)
-                    ) {
-                        file_put_contents(
-                            $this->roomDir . base64_encode($room_name) . '.txt', 
-                            time() . '|*' . base64_encode($this->name) . '|created the room.' . "\n"
-                        );
-                        file_put_contents(
-                            $this->roomDir . 'def_' . base64_encode($room_name) . '.txt',
-                            '0|0|0|0|'
-                        );
-                        file_put_contents(
-                            $this->roomDir . 'topic_' . base64_encode($room_name) . '.txt', 
-                            ''
-                        );
-                        touch(ROOMS_LASTMOD);
-                        echo $this->parseRooms();
-        
-                    } else {
-                        // Room name is invalid
-                        echo 'Room ' . $room_name . ' already exists OR invalid room name 
-                            (illegal: <b>? < > $ { } " : | , ;</b>)!';
-                    }
-                break;
-                
-                // Changes to Another Room
-                case 'changeroom':
-                    $room_name = $this->myGet('n');
-                    $_SESSION['current_room'] = $room_name;
-                    $this->wcSetCookie('current_room', $room_name);
-        
-                    echo $this->parseRooms();
-                break;
-                
-                // Refreshes Room List
-                case 'refreshrooms':
-                    echo $this->refreshRooms();
-                break;
-                
-                // Resets Avatar
-                case 'reset_av':
-                    $efile = '';
-                    // If user avatar exists, strip its control timestamp
-                    if($this->uAvatar) {
-                        list($efile, $_time) = explode('?', $this->uAvatar); 
-                    }
-                    
-                    // If avatar exists, reset user value and delete image file
-                    if(file_exists(__DIR__ . '/files/avatars/' . $efile)) {
-                        $nstring = '|' . base64_encode($this->uEmail) . '|' . 
-                            base64_encode($this->uWeb) . '|' . 
-                            $this->uTimezone . '|' . 
-                            $this->uHourFormat . '|' . 
-                            $this->uPass
-                        ;
-                        $towrite = preg_replace(
-                            '/(' . base64_encode($this->name) . ')\|(.*?)\|/', 
-                            '\\1|' . base64_encode($nstring) . '|', 
-                            $this->userList
-                        );
-        
-                        $this->writeFile(USERL, $towrite, 'w');
-                        echo 'Avatar successfully reset!';
-                        unlink(__DIR__ . '/files/avatars/' . $efile);
-                    } else {
-                        echo 'No Avatar to reset!';
-                    }
-                break;
-                
-                // Uploads an avatar
-                case 'upl_avatar':
-                    // Process if form field has been supplied
-                    if(isset($_FILES['avatar']['tmp_name'])) {
-        
-                        $type = $this->getFileExt($_FILES['avatar']['name']);
-                        $allowed_types = array('jpeg', 'jpg', 'gif', 'png');
-        
-                        // Halt if type is not among allowed types
-                        if(!in_array($type, $allowed_types)) {
-                            echo 'Invalid Image Type (allowed: ' . trim(
-                                implode(', ', $allowed_types), 
-                                ' '
-                            ) . ')';
-                        } else {
-                            // Set avatar size to 25px if not set
-                            if(!AVATAR_SIZE) { $tn_size = 25; } else { $tn_size = AVATAR_SIZE; }
-                            
-                            // Set destination paths
-                            $dest = __DIR__ . 
-                                '/files/avatars/' . base64_encode($this->name) . '.' . 
-                                str_replace('image/', '', $_FILES['avatar']['type'])
-                            ;
-                            $dest_write = base64_encode($this->name) . '.' . 
-                                str_replace('image/', '', $_FILES['avatar']['type'])
-                            ;
-                            
-                            // Try to create a cropped thumbnail, halt otherwise
-                            if($this->thumbnailCreateCr($_FILES['avatar']['tmp_name'], $dest, $tn_size)) {
-                            
-                                unlink($_FILES['avatar']['tmp_name']);
-                                $nstring = base64_encode($dest_write . '?' . time()) . '|' . 
-                                    base64_encode($this->uEmail) . '|' . 
-                                    base64_encode($this->uWeb) . '|' . 
-                                    $this->uTimezone . '|' . 
-                                    $this->uHourFormat . '|' . 
-                                    $this->uPass
-                                ;
-        
-                                // Set user's avatar value
-                                $towrite = preg_replace(
-                                    '/(' . base64_encode($this->name) . ')\|(.*?)\|/', 
-                                    '\\1|' . base64_encode($nstring) . '|', 
-                                    $this->userList
-                                );
-        
-                                $this->writeFile(USERL, $towrite, 'w');
-                                echo 'Avatar successfully set!';
-                            }
-                        }
-                    }
-                break;
-                
-                // Create a new chat start point (For a Screen Cleanup)
-                case 'new_start_point':
-                    $this->wcSetCookie(
-                        'start_point_' . $this->mySession('current_room'), 
-                        time()
-                    );
-                break;
-                
-                case 'undo_start_point':
-                    $this->wcUnsetCookie(
-                        'start_point_' . $this->mySession('current_room')
-                    );
-                break;
-                
-                // Shows/Hides TimeStamps
-                case 'toggle_time':
-                    if($this->myCookie('hide_time')) {
-                        $this->wcUnsetCookie('hide_time');
-                    } else {
-                        $this->wcSetCookie('hide_time', '1');
-                    }
-                break;
-                
-                // Shows/Hides Edit Buttons/Links
-                case 'toggle_edit':
-                    if($this->myCookie('hide_edit')) {
-                        $this->wcUnsetCookie('hide_edit');
-                    } else {
-                        $this->wcSetCookie('hide_edit', '1');
-                    }
-                break;
-                
-                // Updates Topic Description
-                case 'upd_topic':
-                    if(!$this->hasPermission('TOPIC_E')) { die(); }
-                    
-                    $t = $this->myGET('t');
-
-                    if($t != $this->topic) {
-                        $this->writeFile(TOPICL, $t, 'w', 'allow_empty');
-                        echo $this->parseTopicContainer();
-                    }
-                break;
-                
-                // Checks if topic has changed
-                case 'check_topic_changes':
-                    echo $this->checkTopicChanges();
-                break;
-                
-                // Retrieves Password Form If Required (profile has a password set and current user doesn't have a match)
-                case 'get_pass_input':
-                    echo $this->popTemplate(
-                        'wcchat.join.password_required',
-                        array(
-                            'USER_NAME' => $this->name
-                        )
-                    );
-                break;
-                
-                // Compares Two Passwords (Supplied and Stored)
-                case 'cmppass':
-                    $pass = $this->myGet('pass');
-                    
-                    // Halt if password don't match, return a 0 to ajax caller
-                    if(md5(md5($pass)) != $this->uPass) {
-                    
-                        echo 0;
-                    
-                    } else {
-                    
-                        // Password ok, update server/client variables
-                        $this->wcSetCookie('chatpass', md5(md5($pass)));
-                        $_COOKIE['chatpass'] = md5(md5($pass));
-        
-                        echo 1;
-                        
-                        // Get rid of the pending account recovery file if exists
-                        if(file_exists($this->dataDir . 'tmp/rec_' . base64_encode($this->name))) {
-                            unlink($this->dataDir . 'tmp/rec_' . $u);
-                        }
-                    }                
-                break;
-                
-                // Processes/Writes a post message, also handles ignore action
-                case 'smsg':
-                    // Halt if no permission to post or no profile access
-                    if(!$this->hasPermission('POST')) { die(); }
-                    if(!$this->hasProfileAccess) {
-                        echo 'Account Access Denied!';
-                        die();
-                    }
-        
-                    if(strlen($this->myGet('t')) > 0) {
-        
-                        // Is ignore request?
-                        if(preg_match('#^(/ignore|/unignore)#i', $this->myGet('t'))) {
-        
-                            // Yes, is ignore request, does user has permission to ignore?
-                            if(!$this->hasPermission('IGNORE')) { die(); }
-        
-                            // Yes, has permission, process request
-                            $par = explode(' ', trim($this->myGet('t')), 2);
-                            switch($par[0]) {
-                                case '/ignore':
-                                    if($this->userMatch($par[1]) !== FALSE) {
-                                        $this->writeEvent('ignore', $par[1]);
-                                        $this->wcSetCookie(
-                                            'ign_' . $par[1], 
-                                            '1'
-                                        );
-                                        echo 'Successfully ignored ' . $par[1];
-                                    } else {
-                                        echo 'User ' . $par1 . ' does not exist.';
-                                    }
-                                break;
-                                
-                                case '/unignore':
-                                    if(
-                                        $this->userMatch($par[1]) !== FALSE && 
-                                        $this->myCookie('ign_' . base64_encode($par[1]))
-                                    ) {
-                                        $this->writeEvent('unignore', $par[1]);
-                                        $this->wcSetCookie(
-                                            'ign_' . $par[1], 
-                                            ''
-                                        );
-                                        echo 'Successfully unignored ' . $par[1];
-                                    } else {
-                                        echo 'User ' . $par1 . ' does not exist / Not being ignored.';
-                                    }
-                                break;
-                            }
-                            
-                        } else {
-        
-                            // No ignore, normal post
-        
-                            // Halt if banned or muted
-                            $muted_msg = $banned_msg = '';
-                            $muted = $this->getMuted($this->name);
-                            if($muted !== FALSE && $this->name) {
-                                $muted_msg = 'You have been set as mute'.
-                                    (
-                                        $muted ? 
-                                        ' (' . $this->parseIdle($muted, 1) . ' remaining)' : 
-                                        ''
-                                    ) . ', you cannot talk for the time being!'
-                                ;
-                            }
-                            
-                            if($this->isBanned !== FALSE) {
-                                $banned_msg = 'You are banned' . 
-                                (
-                                    intval($this->isBanned) ? 
-                                    ' (' . intval(($this->isBanned - time())) . ' seconds remaining)' : 
-                                    ''
-                                ) . '!';
-                            }
-                            
-                            if(!$muted_msg && !$banned_msg) {
-        
-                                // Not banned or muted, has permission?
-                                if(!$this->hasRoomPermission($this->mySession('current_room'), 'W')) {
-                                    echo 'You don\'t have permission to post messages here!'; die();
-                                }
-        
-                                // Check if last post is within anti-spam limit
-                                if((time() - $this->mySession('lastpost')) < ANTI_SPAM) {
-                                    echo 'Anti Spam: Please allow ' . ANTI_SPAM . 's between posted messages!';
-                                    die();
-                                }
-                                $name_prefix = '';
-                                $text = $this->myGet('t');
-        
-                                // Tag private message
-                                if(preg_match('#^(/me )#i', $text)) {
-                                    $name_prefix = '*';
-                                    $text = str_replace('/me ', '', $text);
-                                }
-        
-                                // Pre-process private message
-                                if(preg_match('#^(/pm )#i', $text)) {
-                                
-                                    if(!$this->hasPermission('PM_SEND')) { die(); }
-                                    list($target, $ntext) = explode(
-                                        ' ', 
-                                        str_replace('/pm ', '', $text), 
-                                        2
-                                    );
-                                    
-                                    if(strlen(trim($ntext)) > 0 && strlen(trim($target)) > 0) {
-                                        $target = trim($target, ' ');
-                                        
-                                        if($this->userMatch($target) === FALSE) {
-                                            echo 'User ' . $target . ' does not exist!';
-                                            die();
-                                        } else {
-                                            $user_status = $this->userData($target);
-                                            if(
-                                                (time() - $this->getPing($target)) <= $this->catchWindow && 
-                                                $user_status[8] == 2
-                                            ) {
-                                                echo 'User ' . $target . ' does not want to be disturbed at the moment!';
-                                                die();
-                                            }
-                                        }
-                                    } else {
-                                        echo 'Invalid Private Message Syntax ("/pm <user> <message>")';
-                                        die();
-                                    }
-                                    
-                                    $name_prefix = base64_encode($target) . '-';
-                                    $text = trim($ntext, ' ');
-                                }
-        
-                                // Check if posts contains images
-                                if(
-                                    !preg_match('/((http|ftp)+(s)?:\/\/[^<>\s]+)(.jpg|.jpeg|.png|.gif)([?0-9]*)/i', $text) && 
-                                    !preg_match('/\[IMG\](.*?)\[\/IMG\]/i', $text)
-                                ) {
-                                    $text = trim($text);
-                                } else {
-                                    // Image(s) detected, try parse to more detailed tags with information about the image(s)
-                                    $text = preg_replace_callback(
-                                        '/(?<!=\"|\[IMG\])((http|ftp)+(s)?:\/\/[^<>\s]+(\.jpg|\.jpeg|\.png|\.gif)([?0-9]*))/i',
-                                        array($this, 'parseImg'),
-                                        trim($text)
-                                    );
-                                    $text = preg_replace_callback(
-                                        '/\[IMG\](.*?)\[\/IMG\]/i',
-                                        array($this, 'parseImg'),
-                                        trim($text)
-                                    );
-                                }
-        
-                                // Check if the new post will overflow the store buffer, if yes, delete the oldest line (1st line)
-                                $source = $this->msgList;
-                                if(substr_count($source, "\n") >= CHAT_STORE_BUFFER) {
-                                    list($v1, $v2) = explode("\n", $source, 2);
-                                    $source = $v2;
-                                    
-                                    // Arquive discarded message if enabled
-                                    if(ARCHIVE_MSG === TRUE) {
-                                        if($this->roomLArchVol == 0) { $this->roomLArchVol = 1; }
-                                        $archive = str_replace(
-                                            '.txt', 
-                                            '.' . $this->roomLArchVol, 
-                                            MESSAGES_LOC
-                                        );
-                                        
-                                        // Check if current arquive is full, if yes, start a new arquive
-                                        if(($this->roomLArchVolMsgN + 1) > CHAT_STORE_BUFFER) {
-                                            $this->roomLArchVol++;
-                                            $this->roomLArchVolMsgN = 1;
-                                            $archive = str_replace(
-                                                '.txt', 
-                                                '.' . $this->roomLArchVol, 
-                                                MESSAGES_LOC
-                                            );
-                                            $this->writeFile(
-                                                ROOM_DEF_LOC, 
-                                                $this->roomWPerm . '|' . 
-                                                $this->roomRPerm . '|' . 
-                                                $this->roomLArchVol . '|' . 
-                                                $this->roomLArchVolMsgN . '|' . 
-                                                '',
-                                                'w'
-                                            );    
-                                        } else {
-                                            $this->roomLArchVolMsgN++;
-                                            $this->writeFile(
-                                                ROOM_DEF_LOC, 
-                                                $this->roomWPerm . '|' . 
-                                                $this->roomRPerm . '|' . 
-                                                $this->roomLArchVol . '|' . 
-                                                $this->roomLArchVolMsgN . '|' . 
-                                                '',
-                                                'w'
-                                            );
-                                        }
-                                        $this->writeFile($archive, $v1."\n", 'a');
-                                    }
-                                }
-        
-                                // Write and return the post parsed as html code
-                                $towrite = 
-                                    time() . '|' . 
-                                    $name_prefix . base64_encode($this->name) . '|' . 
-                                    strip_tags($text) . 
-                                    "\n"
-                                ;
-                                $this->writeFile(MESSAGES_LOC, $source . $towrite, 'w');
-                                touch(ROOMS_LASTMOD);
-                                list($output, $index, $first_elem) = $this->parseMsg(
-                                    array(trim($towrite)), 
-                                    0, 
-                                    'SEND'
-                                );
-                                $_SESSION['lastpost'] = time();
-                                echo $output;
-                            } else {
-                                echo ($banned_msg ? $banned_msg : $muted_msg);
-                            }
-                        }
-                    }
-                break;
-                
-                // Updates user settings
-                case 'updsett':
-                    // Halt if no profile access or no edit permission
-                    if(!$this->hasProfileAccess) { echo 'NO_ACCESS'; die(); }
-                    if(!$this->hasPermission('PROFILE_E', 'skip_msg')) { echo 'NO_ACCESS'; die(); }
-        
-                    $user_data = $this->userData();
-                    $email = $this->myPost('email');
-                    $web = $this->myPost('web');
-                    $timezone = $this->myPost('timezone');
-                    $hformat = $this->myPost('hformat');
-        
-                    // Halt if Email or Web Url are not valid
-                    if(
-                        (!filter_var($email, FILTER_VALIDATE_EMAIL) && trim($email)) || 
-                        (!filter_var($web, FILTER_VALIDATE_URL) && trim($web))
-                    ) {
-                        echo 'INVALID';
-                        die();
-                    }
-        
-                    if($this->myPost('resetp') == '1') {
-                        $pass = '';
-                        $this->wcUnsetCookie('chatpass');
-                    } else {
-                        $passe = md5(md5($this->myPost('pass')));
-                        $pass = ($this->myPost('pass') ? $passe : $this->uPass);
-                        if($this->myPost('pass')) {
-                            $this->wcUnsetCookie('chatpass');
-                        }
-                    }
-        
-                    $nstring = base64_encode($this->uAvatar) . '|' . 
-                        base64_encode($email) . '|' . 
-                        base64_encode($web) . '|' . 
-                        $timezone . '|' . 
-                        $hformat . '|' . 
-                        $pass
-                    ;
-        
-                    $towrite = preg_replace(
-                        '/(' . base64_encode($this->name) . ')\|(.*?)\|/', 
-                        '\\1|' . base64_encode($nstring) . '|', 
-                        $this->userList
-                    );
-        
-                    $this->writeFile(USERL, $towrite, 'w');
-        
-                    // Generate tags for javascript form manipulation
-                    if(
-                        $timezone != $this->uTimezone || 
-                        $hformat != $this->uHourFormat
-                    ) {
-                        echo 'RELOAD_MSG';
-                    }
-                    if($pass != '') { echo ' RESETP_CHECKBOX'; }
-                    if(
-                        $this->myPost('pass') && 
-                        $this->myPost('resetp') != '1'
-                    ) {
-                        echo ' RELOAD_PASS_FORM';
-                    }
-                break;
-                
-                // Writes an event message
-                case 'smsge':
-                    if($this->myGet('t')) {
-                        $towrite = $this->writeEvent(
-                            $this->myGet('t'), 
-                            '', 
-                            'RETURN_RAW_LINE'
-                        );
-                        $output = $this->parseMsgE(
-                            array(trim($towrite)), 
-                            0, 
-                            'SEND'
-                        );
-                        if($output) { echo $output; }
-                    }
-                break;
-                
-                // Retrieves User List
-                case 'updu':
-                    echo $this->parseUsers();
-                break;
-                
-                // Parses Event Messages
-                case 'updmsg_e':
-                    echo $this->updateMsgOnceE();
-                break;
-                
-                // Parses Chat Post Messages
-                case 'updmsg':
-                    echo $this->updateMsg();
-                break;
+		if(!preg_match('/[^A-Za-z0-9_]/i', $this->myGet('mode'))) {
+			include($this->includeDirServer . 'includes/wcajax.' . $this->myGet('mode') . '.php');
             }
+            
         }   
     }
 

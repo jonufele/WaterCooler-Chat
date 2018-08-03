@@ -482,6 +482,10 @@ H1 {
 	width: 25px;
 }
 
+#wc_ulist .form_box input[name="delete"] {
+	float: right;
+}
+
 
 /*--------------------------------------*/
 /*            ROOM LIST                 */

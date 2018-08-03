@@ -174,7 +174,7 @@ $templates['wcchat.toolbar.commands'] = '
 
 $templates['wcchat.toolbar.commands.gsettings'] = ' <a href="#" onclick="wc_toggle(\'wc_msg_container\'); wc_toggle(\'wc_global_settings\'); return false" title="Global Settings"><img src="{INCLUDE_DIR_THEME}images/gsett.png"></a>';
 
-$templates['wcchat.toolbar.commands.edit'] = ' <a href="#" onclick="wc_toggle_edit(\'{CALLER}\'); return false" title="Toggle Edit Mode On/Off"><img src="{INCLUDE_DIR_THEME}images/edtmode.png" id="wc_toggle_edit_icon"></a>';
+$templates['wcchat.toolbar.commands.edit'] = ' <a href="#" onclick="wc_toggle_edit(\'{CALLER}\', \'{PREFIX}\'); return false" title="Toggle Edit Mode On/Off"><img src="{INCLUDE_DIR_THEME}images/edtmode.png" id="wc_toggle_edit_icon"></a>';
 
 $templates['wcchat.toolbar.smiley.item'] = '<a href="#" OnClick="wc_bbcode(document.getElementById(\'{field}\'),\'{str_pat}\',\'\'); return false"><img src="{INCLUDE_DIR_THEME}images/smilies/{str_rep}" title="{title}"></a> ';
 
@@ -182,7 +182,7 @@ $templates['wcchat.toolbar.smiley.item.parsed'] = '<img src="{INCLUDE_DIR_THEME}
 
 $templates['wcchat.error_msg'] = '<div class="error_msg">{ERR}</div>';
 
-$templates['wcchat.toolbar.onload'] = 'onload="wc_updmsg(\'{CALLER}\', \'ALL\', {REFRESH_DELAY}, {CHAT_DSP_BUFFER}, \'{INCLUDE_DIR_THEME}\')"';
+$templates['wcchat.toolbar.onload'] = 'onload="wc_updmsg(\'{CALLER}\', \'ALL\', {REFRESH_DELAY}, {CHAT_DSP_BUFFER}, \'{INCLUDE_DIR_THEME}\', \'{PREFIX}\')"';
 
 $templates['wcchat.toolbar.onload_once'] = 'onload="wc_updmsg_once(\'{CALLER}\', \'ALL\', {CHAT_DSP_BUFFER}, \'{INCLUDE_DIR_THEME}\'); wc_updu(0, \'{CALLER}\', 0, \'ignore_lastmod\')"';
 
@@ -357,12 +357,14 @@ $templates['wcchat.users.item.edit_form'] = '
 			{PROFILE_DATA}
 		</div>
 		<div>
-			<input type="submit" value="Update">
+			<input type="submit" value="Update"> {DELETE_BT}
 		</div>
 		<input type="hidden" name="oname" value="{NAME}" class="usett_{ID}">
 	</form>
 	</div>
 </div>';
+
+$templates['wcchat.users.item.edit_form.delete_bt'] = '<input type="submit" name="delete" value="Delete" onclick="wc_del_user(\'{CALLER}\', \'{ID}\', event)">';
 
 $templates['wcchat.users.item.edit_form.moderator'] = '
 <div>
@@ -468,7 +470,7 @@ $templates['wcchat.posts.normal.pm_target'] = ' <img src="{INCLUDE_DIR_THEME}ima
 
 $templates['wcchat.posts.normal.pm_target.self'] = ' <img src="{INCLUDE_DIR_THEME}images/arrow.png"> {TITLE}';
 
-$templates['wcchat.posts.hide_icon'] = '<a href="#" onclick="wc_toggle_msg(\'{CALLER}\', \'{ID}\'); return false;"><img src="{INCLUDE_DIR_THEME}images/arrow{REVERSE}.png" id="wc_icon_{ID}" title="Hide/Unhide Message" class="hide_icon{OFF}"></a> ';
+$templates['wcchat.posts.hide_icon'] = '<a href="#" onclick="wc_toggle_msg(\'{CALLER}\', \'{ID}\', \'{PREFIX}\'); return false;"><img src="{INCLUDE_DIR_THEME}images/arrow{REVERSE}.png" id="wc_icon_{ID}" title="Hide/Unhide Message" class="hide_icon{OFF}"></a> ';
 
 $templates['wcchat.posts.hidden'] = '<i>This message is hidden.</i>';
 
@@ -578,7 +580,7 @@ $templates['wcchat.rooms.edit_form.edit_icon'] = ' <a href="#" onclick="wc_toggl
 #                  WCCHAT MODULES : THEMES
 # ============================================================================
 
-$templates['wcchat.themes'] = '<div class="themes"><select onchange="apply_theme(this.value)">{OPTIONS}</select></div>';
+$templates['wcchat.themes'] = '<div class="themes"><select onchange="apply_theme(this.value, \'{PREFIX}\')">{OPTIONS}</select></div>';
 
 $templates['wcchat.themes.option'] = '<option value="{VALUE}"{SELECTED}>{TITLE}</option>';
 
@@ -607,11 +609,11 @@ $templates['wcchat.global_settings'] = '
 		<fieldset>
 			<legend>CHAT PARAMETERS</legend>
 			<div>
-				Refresh Delay: <input type="text" id="gs_refresh_delay" value="{GS_REFRESH_DELAY}" class="gsett"> s<br>
+				Refresh Delay: <input type="text" id="gs_refresh_delay" value="{GS_REFRESH_DELAY}" class="gsett"> ms<br>
 				<span>Message Refresh Delay (do not set this too low to avoid server overload)</span>
 			</div>
 			<div>
-				Refresh Delay (Idle): <input type="text" id="gs_refresh_delay_idle" value="{GS_REFRESH_DELAY_IDLE}" class="gsett"> s<br>
+				Refresh Delay (Idle): <input type="text" id="gs_refresh_delay_idle" value="{GS_REFRESH_DELAY_IDLE}" class="gsett"> ms<br>
 				<span>0 = Disabled; Message Refresh Delay While Idling</span>
 			</div>
 			<div>
@@ -782,6 +784,14 @@ $templates['wcchat.global_settings'] = '
 					<td class="check"><input type="checkbox" value="1" id="cuser_user_e"{GS_CUSER_USER_E} class="gsett"></td>
 					<td class="check"><input type="checkbox" value="1" id="user_user_e"{GS_USER_USER_E} class="gsett"></td>
 					<td class="check"><input type="checkbox" value="1" id="guest_user_e"{GS_GUEST_USER_E} class="gsett"></td>
+				</tr>
+				<tr>
+					<td><img src="{INCLUDE_DIR_THEME}images/arrow.png"> Users: Delete</td>
+					<td class="check"><input type="checkbox" value="1" id="mmod_user_d"{GS_MMOD_USER_D} class="gsett"></td>
+					<td class="check"><input type="checkbox" value="1" id="mod_user_d"{GS_MOD_USER_D} class="gsett"></td>
+					<td class="check"><input type="checkbox" value="1" id="cuser_user_d"{GS_CUSER_USER_D} class="gsett"></td>
+					<td class="check"><input type="checkbox" value="1" id="user_user_d"{GS_USER_USER_D} class="gsett"></td>
+					<td class="check"><input type="checkbox" value="1" id="guest_user_d"{GS_GUEST_USER_D} class="gsett"></td>
 				</tr>
 				<tr>
 					<th class="first_col"></td>

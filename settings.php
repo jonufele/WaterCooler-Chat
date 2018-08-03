@@ -60,6 +60,7 @@ define('CHAT_OLDER_MSG_STEP', 20);
 define('LIST_GUESTS', TRUE);
 
 // Minimum ammount of time (seconds) between one user's posted messages (seconds, 0 = disabled)
+// Note: If microtime function is not available, disabling ANTI_SPAM may generate non-unique message ids
 define('ANTI_SPAM', 3);
 
 // Account recovey sender email;
@@ -135,6 +136,7 @@ define('PERM_ROOM_D', 'MMOD');
 define('PERM_MOD', 'MMOD');
 define('PERM_UNMOD', 'MMOD');
 define('PERM_USER_E', 'MMOD');
+define('PERM_USER_D', 'MMOD');
 
 define('PERM_TOPIC_E', 'MMOD MOD');
 define('PERM_BAN', 'MMOD MOD');
