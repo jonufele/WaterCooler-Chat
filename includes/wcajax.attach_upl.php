@@ -2,6 +2,8 @@
 
 // Uploads an attachment
 
+    if(!isset($this)) { die(); }
+
     // Process request if form element exists and has permission to attach and attachmemts are enabled
     if(
         $_FILES['attach']['tmp_name'] && 

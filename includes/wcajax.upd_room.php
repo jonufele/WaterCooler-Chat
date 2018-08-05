@@ -2,6 +2,8 @@
 
 // Updates Room Name / Definitions
 
+    if(!isset($this)) { die(); }
+
     // Halt if no room edit permission
     if(!$this->hasPermission('ROOM_E')) { die(); }
     $oname = $this->myPost('oname');

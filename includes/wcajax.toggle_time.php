@@ -2,6 +2,8 @@
 
 // Shows/Hides TimeStamps
 
+    if(!isset($this)) { die(); }
+
     if($this->myCookie('hide_time')) {
         $this->wcUnsetCookie('hide_time');
     } else {

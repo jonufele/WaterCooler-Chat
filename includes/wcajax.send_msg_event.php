@@ -2,6 +2,8 @@
 
 // Writes an event message
 
+    if(!isset($this)) { die(); }
+
     if($this->myGet('t')) {
         $towrite = $this->writeEvent(
             $this->myGet('t'), 

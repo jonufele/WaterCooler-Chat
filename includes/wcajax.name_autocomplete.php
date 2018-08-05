@@ -2,6 +2,8 @@
 
 // Auto-completes a user name
 
+    if(!isset($this)) { die(); }
+
     $hint = $this->myGet('hint');
     
     if($this->hasData($hint)) {

@@ -2,17 +2,25 @@
 
 // Updates Ajax Components (Chat blocks that need to be refreshed periodically)
 
+    if(!isset($this)) { die(); }
+
     $output = $this->parseUsers() . '[$]' . 
         $this->checkTopicChanges() . '[$]' . 
         $this->refreshRooms() . '[$]' . 
         (
-            (filemtime($this->roomDir . 'hidden_' . base64_encode($this->mySession('current_room')) . '.txt') <= $this->catchWindow) ? 
+            (
+                $this->parseFileMTime(
+                    $this->roomDir . 'hidden_' . 
+                    base64_encode($this->mySession('current_room')) . '.txt'
+                ) <= 
+                (time()+$this->catchWindow)
+            ) ? 
             $this->checkHiddenMsg() : 
             ''
         ) . '[$]' . 
-        $this->updateMsgOnceE() . '[$]' . 
+        $this->refreshMsgE() . '[$]' . 
         $this->mySession('alert_msg') . '[$]' .
-        str_replace('[$]', base64_encode('[$]'), $this->updateMsg())
+        str_replace('[$]', base64_encode('[$]'), $this->refreshMsg())
     ;
     if(trim($output, '[$]')) { echo $output; }
 

@@ -405,7 +405,7 @@ class WcChat {
        |  PGC/SESSION/SERVER HANDLING (8)             |
        |  SETTERS/GETTERS (10)                        |
        |  PARSER / INTERFACER (13)                    |
-       |  AJAX COMPONENTS (4)                         |
+       |  AJAX COMPONENTS (5)                         |
        |  AJAX PROCESSOR (1)                          |
        |  OTHER METHODS (3)                           |
        ===============================================*/
@@ -863,7 +863,6 @@ class WcChat {
        |  userMatch                               |
        |  userData                                |
        |  userLAct                                |
-       |  getUserCatchWindow                      |
        |  getCatchWindow                          |
        ===========================================*/
 
@@ -980,36 +979,23 @@ class WcChat {
         }
         return $time2;
     }
-
-    /**
-     * Retrieves a user's current catch Window (according to his/her idle status)
-     * 
-     * @since 1.4
-     * @param string $name
-     * @param int $last_act     
-     * @return int
-     */
-    private function getUserCatchWindow($name, $last_act) {
-        if((time()-$last_act) > IDLE_START && REFRESH_DELAY_IDLE != 0) {
-            return intval(REFRESH_DELAY_IDLE/1000) + OFFLINE_PING;
-        } else {
-            return intval(REFRESH_DELAY/1000) + OFFLINE_PING;
-        }    
-    }
     
     /**
      * Retrieves default catchWindow
      * 
      * @since 1.1
-     * @param string $forced_name
+     * @param string $forced_idle
      * @return int
      */
-    private function getCatchWindow($force_idle = NULL) {
-       return 
+    private function getCatchWindow($last_act = NULL, $force_idle = NULL) {
+    
+        if($last_act === NULL) { $last_act = $this->uData[7]; }         
+    
+        return 
         (
             (
                 (
-                    (time() - $this->uData[7]) > IDLE_START || 
+                    (time() - $last_act) > IDLE_START || 
                     $force_idle !== NULL
                 ) && 
                 REFRESH_DELAY_IDLE != 0
@@ -1181,7 +1167,7 @@ class WcChat {
 
         // Overwrite content if last modified time is higher than Idle catchWindow
         // (Enough time for all online users to get the update (Idle or not))
-        if((time()-$this->parseFileMTime(EVENTL)) > $this->getCatchWindow('FORCE_IDLE')) { 
+        if((time()-$this->parseFileMTime(EVENTL)) > $this->getCatchWindow(NULL, 'FORCE_IDLE')) { 
             $mode = 'w'; 
         } else { 
             $mode = 'a';
@@ -1277,8 +1263,9 @@ class WcChat {
 
         if($this->readFile($this->includeDirServer . 'settings.php') != $conf_bak) {
             return TRUE;
-        } else
-            return FALSE;    
+        } else {
+            return FALSE;
+        }
     }
     
     /**
@@ -1289,7 +1276,8 @@ class WcChat {
      */    
     private function updateCurrRoomLastMod() {
     
-        list($wperm, $rperm, $larch_vol, $larch_vol_msg_n, $last_mod) = explode('|', $this->roomDef);
+        list($wperm, $rperm, $larch_vol, $larch_vol_msg_n, $last_mod) = 
+            explode('|', $this->roomDef);
         
         $this->writeFile(
             ROOM_DEF_LOC,
@@ -1396,7 +1384,6 @@ class WcChat {
                 if(GEN_REM_THUMB) {
                     if(
                         $this->thumbnailCreateMed(
-                            $iname,
                             $image,
                             $w,
                             $h, 
@@ -1447,13 +1434,13 @@ class WcChat {
      * @param resource $source_image
      * @param int $w Image Width
      * @param int $h Image Height
-     * @param string $target_file
+     * @param string $target_image
      * @param int $thumbsize
      * @return bool
      */
     private function thumbnailCreateMed (
-        $original_image, $source_image, 
-        $w, $h, $target_image, $thumbsize
+        $source_image, $w, $h, $target_image,
+        $thumbsize
     )
     {
         if(!$source_image || !function_exists('gd_info')) { return FALSE; }
@@ -1495,7 +1482,7 @@ class WcChat {
      * 
      * @since 1.1
      * @param string $original_image Path
-     * @param string $target_file
+     * @param string $target_image
      * @param int $thumbsize
      * @return bool
      */
@@ -1638,7 +1625,7 @@ class WcChat {
                     unlink($this->dataDir . 'tmp/rec_' . $u);
                 } else {
                     $this->stopMsg = 'Failed to send E-mail!';
-                };
+                }
             }
         } elseif(
             $this->myGet('recover') && 
@@ -1995,8 +1982,9 @@ class WcChat {
                 return FALSE;
             }
         }
-        else
+        else {
             return FALSE;
+        }
     }
 
     /**
@@ -2021,8 +2009,9 @@ class WcChat {
                 return FALSE;
             }
         }
-        else
+        else {
             return FALSE;
+        }
     }
 
     /**
@@ -2080,7 +2069,7 @@ class WcChat {
      * Updates user's last activity/status tags
      * 
      * @since 1.1
-     * @param string $contents Raw User List
+     * @param array $user_row User data
      * @param string $mode
      * @param string|null $value Only Applies To "update_status" Mode
      * @return string
@@ -2796,7 +2785,7 @@ class WcChat {
                     // Is user a guest?
                     if($f != '0') {
                         // No guest, is online?
-                        if((time() - $last_ping) <= $this->getUserCatchWindow($usr, $l)) {
+                        if((time() - $last_ping) <= $this->getCatchWindow($l)) {
                             // Yes, it's an online user
                             $target_array = '_on'; 
 
@@ -3158,7 +3147,7 @@ class WcChat {
             );
 
         // Parse smiley codes to html
-        foreach($s1 as $key => $value)
+        foreach($s1 as $key => $value) {
             $out .=
                 $this->popTemplate('wcchat.toolbar.smiley.item',
                     array(
@@ -3168,6 +3157,7 @@ class WcChat {
                         'str_rep' => 'sm' . $key . '.gif'
                     )
                 );
+        }
 
         return($out);
 
@@ -3765,28 +3755,28 @@ class WcChat {
                 '<i>\\1</i>',
                 '<u>\\1</u>',
                 '<div style="margin: 10px">
-                    <img src="\\1" class="thumb" onload="wc_doscroll()">
+                    <img src="\\1" class="thumb" onload="wc_scroll()">
                 </div>',
                 '<div style="width: \\3px;" class="thumb_container">
-                    <img src="\\5" style="width: \\3px; height: \\4px;" class="thumb" onload="wc_doscroll()"><br>
+                    <img src="\\5" style="width: \\3px; height: \\4px;" class="thumb" onload="wc_scroll()"><br>
                     <img src="' . INCLUDE_DIR_THEME . 'images/attach.png">
                     <a href="' . ($down_perm ? $this->includeDir . 'files/attachments/\\5' : '#') . '" target="_blank" ' . $down_alert . '>\\1 x \\2</a>
                 </div>',
                 '<div style="width: \\3px;" class="thumb_container">
-                    <img src="' . $this->includeDir . 'files/thumb/tn_\\5.jpg" class="thumb" onload="wc_doscroll()"><br>
+                    <img src="' . $this->includeDir . 'files/thumb/tn_\\5.jpg" class="thumb" onload="wc_scroll()"><br>
                     <img src="' . INCLUDE_DIR_THEME . 'images/attach.png">
                     <a href="' . ($down_perm ? $this->includeDir . 'files/attachments/\\6' : '#') . '" target="_blank" ' . $down_alert . '>\\1 x \\2</a>
                 </div>',
                 '<div style="width: \\3px;" class="thumb_container">
-                    <img src="\\5" style="width: \\3px; height: \\4px;" class="thumb" onload="wc_doscroll()"><br>
+                    <img src="\\5" style="width: \\3px; height: \\4px;" class="thumb" onload="wc_scroll()"><br>
                     <a href="' . ($down_perm ? '\\5' : '#') . '" target="_blank" ' . $down_alert . '>\\1 x \\2</a>
                 </div>',
                 '<div style="width: \\3px;" class="thumb_container">
-                    <img src="' . $this->includeDir . 'files/thumb/tn_\\5.jpg" class="thumb" onload="wc_doscroll()"><br>
+                    <img src="' . $this->includeDir . 'files/thumb/tn_\\5.jpg" class="thumb" onload="wc_scroll()"><br>
                     <a href="' . ($down_perm ? '\\6' : '#') . '" target="_blank" ' . $down_alert.'>\\1 x \\2</a>
                 </div>',
                 '<div style="width: \\1px;" class="thumb_container">
-                    <img src="\\2" style="width: \\1px;" class="thumb" onload="wc_doscroll()"><br>
+                    <img src="\\2" style="width: \\1px;" class="thumb" onload="wc_scroll()"><br>
                     <a href="' . ($down_perm ? '\\2' : '#').'" target="_blank" ' . $down_alert . '>Unknown Dimensions</a>
                 </div>',
                 '<a href="\\1" target="_blank">\\2</a>',
@@ -3799,7 +3789,7 @@ class WcChat {
                 </div>',
                 '<div id="im_\\1">
                     <a href="#" onclick="wc_pop_vid(\'\\1\', ' . VIDEO_WIDTH . ', ' . VIDEO_HEIGHT . '); return false;">
-                    <img src="' . INCLUDE_DIR_THEME . 'images/video_cover.jpg" class="thumb" style="margin: 10px" onload="wc_doscroll()"></a>
+                    <img src="' . INCLUDE_DIR_THEME . 'images/video_cover.jpg" class="thumb" style="margin: 10px" onload="wc_scroll()"></a>
                 </div>
                 <div id="wc_video_\\1" class="closed"></div>',
                 '<a href="\\0" target="_blank" style="font-size:10px;font-family:tahoma">\\0</a>'
@@ -3868,24 +3858,29 @@ class WcChat {
         $ys = 60*60*24*365;
 
         $year = intval($timesec/$ys);
-        if($year >= 1)
+        if($year >= 1) {
             $timesec = $timesec%$ys;
+        }
 
         $month = intval($timesec/2628000);
-        if($month >= 1)
+        if($month >= 1) {
             $timesec = $timesec%2628000;
+        }
     
         $days = intval($timesec/86400);
-        if($days >= 1)
+        if($days >= 1) {
             $timesec = $timesec%86400;
+        }
 
         $hours = intval($timesec/3600);
-        if($hours >= 1)
+        if($hours >= 1) {
             $timesec = $timesec%3600;
+        }
 
         $minutes = intval($timesec/60);
-        if($minutes >= 1)
+        if($minutes >= 1) {
             $timesec = $timesec%60;
+        }
 
         $par_count = 0;
 
@@ -3909,8 +3904,9 @@ class WcChat {
             $str .= ' ' . $minutes . 'm';
             $par_count++;
         }
-        if($it < 60)
+        if($it < 60) {
             $str = $it . 's';
+        }
 
         return(trim($str));
     }
@@ -3937,7 +3933,8 @@ class WcChat {
        |  checkTopicChanges                       |
        |  refreshRooms                            |
        |  checkHiddenMsg                          |
-       |  updateMsgOnceE                          |
+       |  refreshMsgE                             |
+       |  refreshMsg                              |
        ===========================================*/
 
     /**
@@ -3997,7 +3994,7 @@ class WcChat {
      * @since 1.2
      * @return string|void Html Template
      */
-    private function updateMsgOnceE() {
+    private function refreshMsgE() {
     
         if(!$this->hasPermission('READ_MSG', 'skip_msg')) {
             return 'Can\'t display messages.';
@@ -4020,7 +4017,7 @@ class WcChat {
                 $output_e = $this->parseMsgE($lines, $lastread, 'RECEIVE');
             }
         }
-        if($output_e) return $output_e;
+        if($output_e) { return $output_e; }
     }
 
     /**
@@ -4029,15 +4026,13 @@ class WcChat {
      * @since 1.2
      * @return string|void Html Template
      */    
-    private function updateMsg() {
+    private function refreshMsg() {
     
         if($this->isBanned !== FALSE) {
             return 'You are banned!';
-            die();
         }
         if(!$this->hasPermission('READ_MSG', 'skip_msg')) {
             return 'Can\'t display messages.';
-            die();
         }
         
         $output = '';
@@ -4046,6 +4041,9 @@ class WcChat {
         if(!$this->hasData($older_index)) { $older_index = NULL; }
 
         $lastread = $this->handleLastRead('read');
+
+        // Reload messages if reset_msg tag exists
+        if($this->mySession('reset_msg')) { $_GET['all'] = 'ALL'; }
 
         // Halt if is no new room visit and lastread is not set (user might not be accepting cookies)
         if($this->myGet('all') != 'ALL' && !$lastread) { die(); }
@@ -4058,8 +4056,6 @@ class WcChat {
             );
         }
 
-        $previous = $skip_new = 0;
-        $new = '';
         $lines = array();
         $index = 0;
         
@@ -4070,10 +4066,7 @@ class WcChat {
             !$this->myGet('loop')
         ) {
             $this->wcUnsetSession('archive');
-        }               
-
-        // Reload messages if reset_msg tag exists
-        if($this->mySession('reset_msg')) { $_GET['all'] = 'ALL'; }
+        }
 
         // Parse post messages if new messages exist or new room visit or older index exists
         if(
@@ -4148,24 +4141,24 @@ class WcChat {
             }
         }
 
-        // Process RESET tag
-        if($this->mySession('reset_msg')) {
-            $output = 'RESET' . $output;
-            $this->wcUnsetSession('reset_msg');
-        }
-
         // Return output, also remove auto-scroll Javascript tags from retrieved older messages
         if(trim($output)) {
             $output = $older_controls.
             (
                 ($older_index !== NULL) ? 
                 str_replace(
-                    'wc_doscroll()', 
+                    'wc_scroll()', 
                     '', 
                     $output . $this->popTemplate('wcchat.posts.older.block_separator')
                 ) : 
                 $output
             );
+        }
+
+        // Process RESET tag
+        if($this->mySession('reset_msg')) {
+            $output = 'RESET' . $output;
+            $this->wcUnsetSession('reset_msg');
         }
 
         // Delay Older Message/New Room Visit Loading (In order to display the loader image)

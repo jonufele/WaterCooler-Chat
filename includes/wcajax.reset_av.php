@@ -2,6 +2,8 @@
 
 // Resets Avatar
 
+    if(!isset($this)) { die(); }
+
     $efile = '';
     // If user avatar exists, strip its control timestamp
     if($this->uAvatar) {

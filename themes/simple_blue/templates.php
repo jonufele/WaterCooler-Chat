@@ -132,7 +132,7 @@ $templates['wcchat.toolbar.bbcode'] = '
 <a href="#" onclick="wc_bbcode(document.getElementById(\'{FIELD}\'), \'[I]\', \'[/I]\'); return false;">
 	<img src="{INCLUDE_DIR_THEME}images/bbcode/i.png" title="italic">
 </a> 
-<a href="#" class="underline" onclick="wc_bbcode(document.getElementById(\'{FIELD}\'), \'[U]\', \'[/U]\'); return false;">
+<a href="#" onclick="wc_bbcode(document.getElementById(\'{FIELD}\'), \'[U]\', \'[/U]\'); return false;">
 	<img src="{INCLUDE_DIR_THEME}images/bbcode/u.png" title="underlined">
 </a> 
 <a href="#" onclick="wc_bbcode(document.getElementById(\'{FIELD}\'), \'[URL=&quot;http://&quot;]\', \'[/URL]\'); return false;">
@@ -161,7 +161,7 @@ $templates['wcchat.toolbar.bbcode.attachment_uploads'] = ' <a href="#" onclick="
 
 $templates['wcchat.toolbar.commands'] = '
 <div id="wc_commands">
-	<a href="#" onclick="wc_showcom(); return false" title="Commands">
+	<a href="#" onclick="wc_show_com(); return false" title="Commands">
 		<img src="{INCLUDE_DIR_THEME}images/cmd.png">
 	</a> 
 	<a href="#" onclick="wc_clear_screen(\'{CALLER}\', \'{INCLUDE_DIR_THEME}\'); return false" title="Clear Screen">
@@ -183,9 +183,9 @@ $templates['wcchat.toolbar.smiley.item.parsed'] = '<img src="{INCLUDE_DIR_THEME}
 
 $templates['wcchat.error_msg'] = '<div class="error_msg">{ERR}</div>';
 
-$templates['wcchat.toolbar.onload'] = 'onload="wc_updmsg(\'{CALLER}\', \'ALL\', {REFRESH_DELAY}, {CHAT_DSP_BUFFER}, \'{INCLUDE_DIR_THEME}\', \'{PREFIX}\')"';
+$templates['wcchat.toolbar.onload'] = 'onload="wc_refresh_msg(\'{CALLER}\', \'ALL\', {REFRESH_DELAY}, {CHAT_DSP_BUFFER}, \'{INCLUDE_DIR_THEME}\', \'{PREFIX}\')"';
 
-$templates['wcchat.toolbar.onload_once'] = 'onload="wc_updmsg_once(\'{CALLER}\', \'ALL\', {CHAT_DSP_BUFFER}, \'{INCLUDE_DIR_THEME}\'); wc_updu(0, \'{CALLER}\', 0, \'ignore_lastmod\')"';
+$templates['wcchat.toolbar.onload_once'] = 'onload="wc_refresh_msg_once(\'{CALLER}\', \'ALL\', {CHAT_DSP_BUFFER}, \'{INCLUDE_DIR_THEME}\'); wc_updu(0, \'{CALLER}\', 0, \'ignore_lastmod\')"';
 
 # ============================================================================
 #                  WCCHAT MODULES : TEXT INPUT
@@ -211,7 +211,7 @@ $templates['wcchat.settings'] = '
 			<input type="submit" name="Upload"> <a href="#" id="wc_av_reset" onclick="wc_reset_av(\'{CALLER}\'); return false;" class="{AV_RESET}">[Reset]</a>
 		</form>
 	</div>
-	<form action="?mode=updsett" onsubmit="wc_upd_settings(\'{CALLER}\', event, \'{INCLUDE_DIR_THEME}\');" method="POST">
+	<form action="?mode=upd_settings" onsubmit="wc_upd_settings(\'{CALLER}\', event, \'{INCLUDE_DIR_THEME}\');" method="POST">
 		<div>
 			Recover E-mail: <input type="text" id="wc_email" value="{USER_EMAIL}" autocomplete="off">
 		</div>
@@ -283,7 +283,7 @@ $templates['wcchat.join'] = '
 
 $templates['wcchat.join.inner'] = '
 <div id="wc_pass_input">{PASSWORD_REQUIRED}</div>
-<input type="submit" id="wc_join_bt" value="{MODE} as {USER_NAME}" onclick="wc_joinchat(\'{CALLER}\', \'join\', {REFRESH_DELAY});">{RECOVER}
+<input type="submit" id="wc_join_bt" value="{MODE} as {USER_NAME}" onclick="wc_join_chat(\'{CALLER}\', \'join\', {REFRESH_DELAY});">{RECOVER}
 {CUSER_LINK}';
 
 $templates['wcchat.join.inner.mode.join'] = 'Join Chat';
@@ -446,7 +446,7 @@ $templates['wcchat.posts.normal'] = '
 <div class="msg_item" id="js_{ID}">
 	<div class="msg{PM_SUFIX}">
 		{PM_TAG}
-		<img src="{AVATAR}" class="avatar_thumb" {WIDTH} onload="wc_doscroll()">
+		<img src="{AVATAR}" class="avatar_thumb" {WIDTH} onload="wc_scroll()">
 		<div class="msg_right_col">
 			{HIDE_ICON}
 			[<span class="user">{POPULATE_START}{USER}{POPULATE_END}{PM_TARGET}</span>]
@@ -495,7 +495,7 @@ $templates['wcchat.posts.older'] = '
 
 $templates['wcchat.posts.older.block_separator'] = '<hr>';
 
-$templates['wcchat.posts.new_msg_separator'] = '<div class="new_msg"><img src="{INCLUDE_DIR_THEME}images/new_msg_separator.png" onload="wc_doscroll()"></div>';
+$templates['wcchat.posts.new_msg_separator'] = '<div class="new_msg"><img src="{INCLUDE_DIR_THEME}images/new_msg_separator.png" onload="wc_scroll()"></div>';
 
 $templates['wcchat.posts.undo_clear_screen'] = 'Screen cleanup (<a href="#" onclick="wc_undo_clear_screen(\'{CALLER}\', \'{INCLUDE_DIR_THEME}\'); return false;">Undo</a>)';
 
@@ -533,7 +533,7 @@ $templates['wcchat.rooms.current_room'] = '
 
 $templates['wcchat.rooms.room'] = '
 <div class="room_item">
-	{NEW_MSG} <a href="#" onclick="wc_changeroom(\'{CALLER}\', this.innerHTML, \'{INCLUDE_DIR_THEME}\'); return false;">{TITLE}</a>
+	{NEW_MSG} <a href="#" onclick="wc_change_room(\'{CALLER}\', this.innerHTML, \'{INCLUDE_DIR_THEME}\'); return false;">{TITLE}</a>
 	{EDIT_BT}
 </div>
 {FORM}';
@@ -569,11 +569,11 @@ $templates['wcchat.rooms.edit_form'] = '
 				<option value="4"{SEL24}>User</option>
 			</select>
 		</div>
-		<input type="submit" value="Update" onclick="wc_update_rname(\'{CALLER}\', \'{ID}\')"> {DELETE_BT}
+		<input type="submit" value="Update" onclick="wc_upd_room(\'{CALLER}\', \'{ID}\')"> {DELETE_BT}
 	</div>
 </div>';
 
-$templates['wcchat.rooms.edit_form.delete_bt'] = '<input type="submit" value="Delete" onclick="wc_delete_rname(\'{CALLER}\', \'{ID}\', \'{INCLUDE_DIR_THEME}\')">';
+$templates['wcchat.rooms.edit_form.delete_bt'] = '<input type="submit" value="Delete" onclick="wc_del_room(\'{CALLER}\', \'{ID}\', \'{INCLUDE_DIR_THEME}\')">';
 
 $templates['wcchat.rooms.edit_form.edit_icon'] = ' <a href="#" onclick="wc_toggle(\'wc_edt_{ID}\'); return false;"><img src="{INCLUDE_DIR_THEME}images/edit.gif" class="edit_bt{OFF}"></a>';
 
@@ -581,7 +581,7 @@ $templates['wcchat.rooms.edit_form.edit_icon'] = ' <a href="#" onclick="wc_toggl
 #                  WCCHAT MODULES : THEMES
 # ============================================================================
 
-$templates['wcchat.themes'] = '<div class="themes"><select onchange="apply_theme(this.value, \'{PREFIX}\')">{OPTIONS}</select></div>';
+$templates['wcchat.themes'] = '<div class="themes"><select onchange="wc_apply_theme(this.value, \'{PREFIX}\')">{OPTIONS}</select></div>';
 
 $templates['wcchat.themes.option'] = '<option value="{VALUE}"{SELECTED}>{TITLE}</option>';
 

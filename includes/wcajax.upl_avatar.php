@@ -2,6 +2,8 @@
 
 // Uploads an avatar
 
+    if(!isset($this)) { die(); }
+
     // Process if form field has been supplied
     if(isset($_FILES['avatar']['tmp_name'])) {
 

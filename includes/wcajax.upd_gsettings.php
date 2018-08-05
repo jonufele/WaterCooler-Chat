@@ -2,6 +2,8 @@
 
 // Updates Global Settings
 
+    if(!isset($this)) { die(); }
+
     if(!$this->hasPermission('GSETTINGS')) { die(); }
 
     // Set arrays with $_POST ids and batch process

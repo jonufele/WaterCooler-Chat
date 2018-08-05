@@ -558,10 +558,6 @@ H1 {
 	text-decoration: none
 }
 
-#wc_toolbar a.underline {
-	text-decoration: underline;
-}
-
 #wc_toolbar .joined_status {
 	width: 10px;
 	margin-left: 5px;

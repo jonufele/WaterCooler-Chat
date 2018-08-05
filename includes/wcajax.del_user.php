@@ -1,5 +1,6 @@
 <?php
 
+    if(!isset($this)) { die(); }
 
     $output = '';
     $oname = base64_decode($this->myGET('id'));

@@ -2,6 +2,8 @@
 
 // Processes User Edition
 
+    if(!isset($this)) { die(); }
+
     $output = '';
     $oname = $this->myPost('oname');
 

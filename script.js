@@ -117,19 +117,19 @@ function wc_getCookie(name, prefix) {
 	}
 }
 
-function apply_theme(v, prefix) {
+function wc_apply_theme(v, prefix) {
 	wc_setCookie('wc_theme', v, 365, prefix);
 	location.reload();
 }
 
 function wc_post(e, c, r, lim)
 {
-	if(e.which == 13 || e.keyCode == 13) { wc_smsg(c, r, lim); }
+	if(e.which == 13 || e.keyCode == 13) { wc_send_msg(c, r, lim); }
 	if(e.which == 9 || e.keyCode == 9) {
 		e.preventDefault();
 		var text_input = document.getElementById('wc_text_input_field');
 		var http = getHTTPObject();
-		http.open("GET", c+"mode=name_autocomplete&hint="+text_input.value, true);
+		http.open("GET", c+"mode=name_autocomplete&hint="+encodeURIComponent(text_input.value), true);
 		http.onreadystatechange=function(){if(http.readyState==4){
 			if(http.responseText.length > 0) {
 				text_input.value = text_input.value + http.responseText;
@@ -147,7 +147,7 @@ function wc_pop_vid(id, w, h) {
 	wc_toggle('video_'+id);
 }
 
-function wc_showcom() {
+function wc_show_com() {
 
 	alert("COMMANDS\n\n/me <message> - self message\n/ignore <user> - Ignores a user\n/unignore <user> - Unignores user\n/pm <user> <message> - Sends a private message to user\n\nINPUT AUTO-COMPLETERS\n\nTAB - Hit tab while writing a user name to auto-complete\nPM - Click a user name in posts to auto complete the private message command\n\n(Replace \"<user>\" by the name of the user; [..] denotes an optional parameter.)");
 }
@@ -187,7 +187,7 @@ function wc_clear_screen(c, incdir) {
 	var http = getHTTPObject();
 	http.open("GET", c+"mode=new_start_point", true);
 	http.onreadystatechange=function(){if(http.readyState==4){
-		wc_updmsg_once(c, 'ALL', 0, incdir);
+		wc_refresh_msg_once(c, 'ALL', 0, incdir);
 	}}
  	http.send(null);
 }
@@ -197,7 +197,7 @@ function wc_undo_clear_screen(c, incdir) {
 	var http = getHTTPObject();
 	http.open("GET", c+"mode=undo_start_point", true);
 	http.onreadystatechange=function(){if(http.readyState==4){
-		wc_updmsg_once(c, 'ALL', 0, incdir);
+		wc_refresh_msg_once(c, 'ALL', 0, incdir);
 	}}
  	http.send(null);
 }
@@ -221,7 +221,7 @@ function wc_toggle_msg(c, id, prefix) {
     }
  
     if(conf || icon.src.search('arrow_r') != -1) {
-    	http.open("GET", c+"mode=toggle_msg&id="+id, true);
+    	http.open("GET", c+"mode=toggle_msg&id="+encodeURIComponent(id), true);
     	http.onreadystatechange=function(){if(http.readyState==4){
     		if(http.responseText.length > 0) {
     			if(http.responseText.search('ERROR') != -1) {
@@ -235,35 +235,13 @@ function wc_toggle_msg(c, id, prefix) {
     				}
     			}
     		}
-    		wc_refreshrooms(c, 'forced');
+    		wc_refresh_rooms(c, 'forced');
     	}}
      	http.send(null);
  	}
 }
 
-function wc_check_hidden_msg(c) {
-
-	var http = getHTTPObject();
-	http.open("GET", c+"mode=check_hidden_msg", true);
-	http.onreadystatechange=function(){if(http.readyState==4){
-		if(http.responseText.length > 0) {
-			arr = http.responseText.split(" ");
-			for(i = 0 ; i < arr.length ; i++) {
-				msg = document.getElementById(arr[i]);
-				icon = document.getElementById('wc_icon_' + arr[i]);
-				if(msg.innerHTML.search("hidden") == -1) {
-					msg.innerHTML = '<i>This message is hidden.</i>';
-					if(icon != null) {
-						icon.src = icon.src.replace("arrow", "arrow_r");
-					}
-				}
-			}
-		}
-	}}
- 	http.send(null);
-}
-
-function wc_update_rname(c, par) {
+function wc_upd_room(c, par) {
 
 	var formData = new FormData();
 	formData.append('oname', document.getElementById('wc_oname_'+par).value);
@@ -271,20 +249,20 @@ function wc_update_rname(c, par) {
 	formData.append('perm', document.getElementById('wc_perm_'+par).value);
 	formData.append('rperm', document.getElementById('wc_rperm_'+par).value);
 	var http = getHTTPObject();
-	http.open("POST", c+"mode=update_rname", true);
+	http.open("POST", c+"mode=upd_room", true);
 	http.onreadystatechange=function(){if(http.readyState==4){
 		if(http.responseText.length > 0) { alert(http.responseText); }
-		wc_refreshrooms(c, 'forced');
+		wc_refresh_rooms(c, 'forced');
 	}}
  	http.send(formData);
 }
 
-function wc_delete_rname(c, par, incdir) {
+function wc_del_room(c, par, incdir) {
 
 	if(confirm('Are you sure you want to delete this room and all its messages?')) {
 		var oname = document.getElementById('wc_oname_'+par).value;
 		var http = getHTTPObject();
-		http.open("GET", c+"mode=delete_rname&oname="+oname, true);
+		http.open("GET", c+"mode=del_room&oname="+encodeURIComponent(oname), true);
 		http.onreadystatechange=function(){if(http.readyState==4){
 			if(http.responseText.length > 0) {
 				if(http.responseText.search('RMV') != -1) {
@@ -293,10 +271,10 @@ function wc_delete_rname(c, par, incdir) {
 					alert(http.responseText);
 				}
 			}
-			wc_refreshrooms(c, 'forced');
+			wc_refresh_rooms(c, 'forced');
 			if(http.responseText.search('RMV') != -1) {
-				wc_refreshtopic(c);
-				wc_updmsg_once(c, 'ALL', 0, incdir);
+				wc_refresh_topic(c);
+				wc_refresh_msg_once(c, 'ALL', 0, incdir);
 			}
 		}}
  		http.send(null);
@@ -336,7 +314,7 @@ function wc_create_room(c)
 {
 	var n = document.getElementById('wc_room_name').value;
 	var http = getHTTPObject();
-	http.open("GET", c+"mode=croom&n="+n, true);
+	http.open("GET", c+"mode=create_room&n="+encodeURIComponent(n), true);
 	http.onreadystatechange=function(){if(http.readyState==4){
 		if(http.responseText.search("exists") != -1) { alert(http.responseText); } else {
 			document.getElementById('wc_room_list').innerHTML = http.responseText;
@@ -345,30 +323,30 @@ function wc_create_room(c)
  	http.send(null);
 }
 
-function wc_changeroom(c, n, incdir)
+function wc_change_room(c, n, incdir)
 {
 	var http = getHTTPObject();
-	http.open("GET", c+"mode=changeroom&n="+n, true);
+	http.open("GET", c+"mode=change_room&n="+encodeURIComponent(n), true);
 	http.onreadystatechange=function(){if(http.readyState==4){
 		document.getElementById('wc_room_list').innerHTML = http.responseText;
-		wc_updmsg_once(c, 'ALL', 0, incdir);
-		wc_refreshtopic(c);
+		wc_refresh_msg_once(c, 'ALL', 0, incdir);
+		wc_refresh_topic(c);
 	}}
 	http.send(null);
 }
 
 
-function wc_refreshtopic(c)
+function wc_refresh_topic(c)
 {
 	var http = getHTTPObject();
-	http.open("GET", c+"mode=refreshtopic", true);
+	http.open("GET", c+"mode=refresh_topic", true);
 	http.onreadystatechange=function(){if(http.readyState==4){
 		document.getElementById('wc_topic').innerHTML = http.responseText;
 	}}
 	http.send(null);
 }
 
-function wc_refreshrooms(c, forced)
+function wc_refresh_rooms(c, forced)
 {
 	var open = 0;
 	if(forced != 'forced') {
@@ -382,9 +360,11 @@ function wc_refreshrooms(c, forced)
 		}
 	}
  	var http = getHTTPObject();
-	http.open("GET", c+"mode=refreshrooms", true);
+	http.open("GET", c+"mode=refresh_rooms", true);
 	http.onreadystatechange=function(){if(http.readyState==4){
-		if(http.responseText.length > 0 && open == 0) { document.getElementById('wc_room_list').innerHTML = http.responseText; }
+		if(http.responseText.length > 0 && open == 0) {
+            document.getElementById('wc_room_list').innerHTML = http.responseText;
+        }
 	}}
 	http.send(null);
 }
@@ -397,7 +377,7 @@ function wc_upd_topic(c)
 	http.onreadystatechange=function(){if(http.readyState==4){
 		if(http.responseText.length > 0) {
 			document.getElementById('wc_topic').innerHTML = http.responseText;
-			wc_smsge(c, 'topic_update', 0);
+			wc_send_msg_event(c, 'topic_update', 0);
 		} else {
 			alert('Nothing To Update!');
 		}
@@ -422,7 +402,7 @@ function wc_reset_av(c)
 function wc_check_topic_changes(c, reload)
 {
 	var http = getHTTPObject();
-	http.open("GET", c+"mode=check_topic_changes&reload="+reload, true);
+	http.open("GET", c+"mode=check_topic_changes&reload="+encodeURIComponent(reload), true);
 	http.onreadystatechange=function(){if(http.readyState==4){
 		if(http.responseText.length > 0 && document.getElementById('wc_topic_editbox').className == 'closed') {
 			document.getElementById('wc_topic').innerHTML = http.responseText;
@@ -431,7 +411,7 @@ function wc_check_topic_changes(c, reload)
  	http.send(null);
 }
 
-function wc_smsg(c, refresh_delay, lim)
+function wc_send_msg(c, refresh_delay, lim)
 {
 	var http = getHTTPObject();
 	var obj = document.getElementById('wc_text_input_field');
@@ -441,7 +421,7 @@ function wc_smsg(c, refresh_delay, lim)
 	var t = obj.value;
 	obj.disabled = true;
 	var isScrolledToBottom = objDiv.scrollHeight - objDiv.clientHeight <= objDiv.scrollTop + 1;
-	http.open("GET", c+"mode=smsg&t="+encodeURIComponent(t), true);
+	http.open("GET", c+"mode=send_msg&t="+encodeURIComponent(t), true);
 	http.onreadystatechange=function(){if(http.readyState==4){
 		if(http.responseText.length > 0 && http.responseText.search("<div") != -1) {
 			var cont = document.createElement("div");
@@ -450,7 +430,7 @@ function wc_smsg(c, refresh_delay, lim)
 			wc_trim_chat(lim);
 		}
 		loader.className = 'closed';
-		wc_updu(1, c, 0, 0, 'ignore_lastmod');
+		wc_refresh_users(1, c, 0, 0, 'ignore_lastmod');
 		if(isScrolledToBottom) { objDiv.scrollTop = objDiv.scrollHeight; }
 
 		obj.value = '';
@@ -461,12 +441,12 @@ function wc_smsg(c, refresh_delay, lim)
 	http.send(null);
 }
 
-function wc_smsge(c, t, refresh_delay)
+function wc_send_msg_event(c, t, refresh_delay)
 {
 	var http = getHTTPObject();
 	var objDiv = document.getElementById('wc_msg_container');
 	var isScrolledToBottom = objDiv.scrollHeight - objDiv.clientHeight <= objDiv.scrollTop + 1;
-	http.open("GET", c+"mode=smsge&t="+t, true);
+	http.open("GET", c+"mode=send_msg_event&t="+encodeURIComponent(t), true);
 	http.onreadystatechange=function(){if(http.readyState==4){
 		if(http.responseText.length > 0) {
 			var cont = document.createElement("div");
@@ -478,10 +458,10 @@ function wc_smsge(c, t, refresh_delay)
  	http.send(null);
 }
 
-function wc_updu(n, c, j, visit, ilmod)
+function wc_refresh_users(n, c, j, visit, ilmod)
 {
 	var http = getHTTPObject();
-	http.open("GET", c+"mode=updu&new="+n+"&join="+j+"&ilmod="+ilmod+"&visit="+visit, true);
+	http.open("GET", c+"mode=refresh_users&new="+n+"&join="+j+"&ilmod="+ilmod+"&visit="+visit, true);
 	http.onreadystatechange=function(){if(http.readyState==4){
 		if(ilmod == 'ignore_lastmod') {
 			document.getElementById('wc_ulist').innerHTML = http.responseText;
@@ -554,7 +534,7 @@ function wc_upd_user(c, id, event)
 			}
 			if(s.search('Successfully') != -1) {
 				wc_toggle('wc_uedt_'+id);
-				wc_updu(0, c, 0, 0, 'ignore_lastmod');
+				wc_refresh_users(0, c, 0, 0, 'ignore_lastmod');
 			}
 			alert(s);
 		}
@@ -570,13 +550,13 @@ function wc_del_user(c, id, event)
 
 	if(conf) {
  		var http = getHTTPObject();
-		http.open("GET", c+"mode=del_user&id=" + id, true);
+		http.open("GET", c+"mode=del_user&id=" + encodeURIComponent(id), true);
 		http.onreadystatechange=function(){if(http.readyState==4){
 			if(http.responseText.length > 0) {
 				var s = http.responseText;
 				if(s.search('successfully') != -1) {
 					wc_toggle('wc_uedt_' + id);
-					wc_updu(0, c, 0, 0, 'ignore_lastmod');
+					wc_refresh_users(0, c, 0, 0, 'ignore_lastmod');
 				}
 				alert(s);
 			}
@@ -635,13 +615,15 @@ function wc_upd_settings(c, event, incdir)
 	formData.append('pass', pass);
 	formData.append('resetp', resetp);
 
-	http.open("POST", c+"mode=updsett", true);
+	http.open("POST", c+"mode=upd_settings", true);
 	http.onreadystatechange=function(){if(http.readyState==4){
 		wc_toggle('wc_settings_input');
 		if(document.getElementById('wc_join').className == 'closed') {
 			wc_toggle('wc_text_input');
 		}
-		if(http.responseText.search("RELOAD_MSG") != -1) { wc_updmsg_once(c, 'ALL', 0, incdir); }
+		if(http.responseText.search("RELOAD_MSG") != -1) {
+			wc_refresh_msg_once(c, 'ALL', 0, incdir);
+		}
 		if(http.responseText.search("RESETP_CHECKBOX") != -1) {
 			document.getElementById('wc_resetp_elem').className = '';
 			document.getElementById('wc_resetp').checked = false;
@@ -650,9 +632,15 @@ function wc_upd_settings(c, event, incdir)
 			document.getElementById('wc_resetp').checked = false;
 		}
 		if(http.responseText.search("RELOAD_PASS_FORM") != -1) {
-			if(document.getElementById('wc_text_input').className != 'closed') { wc_toggle('wc_text_input'); }
-			if(document.getElementById('wc_settings_icon').className != 'closed') { wc_toggle('wc_settings_icon'); }
-			if(document.getElementById('wc_join').className == 'closed') { wc_toggle('wc_join'); }
+			if(document.getElementById('wc_text_input').className != 'closed') {
+				wc_toggle('wc_text_input');
+			}
+			if(document.getElementById('wc_settings_icon').className != 'closed') {
+				wc_toggle('wc_settings_icon');
+			}
+			if(document.getElementById('wc_join').className == 'closed') {
+				wc_toggle('wc_join');
+			}
 			wc_get_pass_input(c);
 			join_bt.value = join_bt.value.replace('Join Chat', 'Login');
 		}
@@ -671,13 +659,13 @@ function wc_upd_settings(c, event, incdir)
 	http.send(formData);
 }
 
-function wc_updmsg_once(c, all, lim, incdir)
+function wc_refresh_msg_once(c, all, lim, incdir)
 {
 	var http = getHTTPObject();
 	var objDiv = document.getElementById('wc_msg_container');
 	if(all == 'ALL') { objDiv.innerHTML = '<div style="text-align: center"><img src="'+incdir+'images/loader.gif"></div>'; }
 	var prevpos = objDiv.scrollTop;
-	http.open("GET", c+"mode=updmsg&all="+all, true);
+	http.open("GET", c+"mode=refresh_msg&all="+all, true);
 	http.onreadystatechange=function(){if(http.readyState==4){
 		if(http.responseText.length > 0) {
 			if(all == 'ALL') {
@@ -696,12 +684,12 @@ function wc_updmsg_once(c, all, lim, incdir)
  	http.send(null);
 }
 
-function wc_updmsg_once_e(c)
+function wc_refresh_msg_once_event(c)
 {
 	var http = getHTTPObject();
 	var objDiv = document.getElementById('wc_msg_container');
 	var prevpos = objDiv.scrollTop;
-	http.open("GET", c+"mode=updmsg_e", true);
+	http.open("GET", c+"mode=refresh_msg_event", true);
 	http.onreadystatechange=function(){if(http.readyState==4){
 		if(http.responseText.length > 0) {
 			var cont = document.createElement("div");
@@ -713,7 +701,7 @@ function wc_updmsg_once_e(c)
  	http.send(null);
 }
 
-function wc_doscroll()
+function wc_scroll()
 {
 	var objDiv = document.getElementById('wc_msg_container');
 	objDiv.scrollTop = objDiv.scrollHeight;
@@ -740,11 +728,11 @@ function wc_trim_chat(lim)
 	}
 }
 
-function wc_update_components(c, incdir, lim) {
+function wc_refresh_components(c, incdir, lim) {
 
 	var objDiv = document.getElementById('wc_msg_container');
 	var http = getHTTPObject();
-	http.open("GET", c+"mode=update_components&reload=0&new=0&join=0&all=0&loop=1&ilmod=", true);
+	http.open("GET", c+"mode=refresh_components&reload=0&new=0&join=0&all=0&loop=1&ilmod=", true);
 	http.onreadystatechange=function(){if(http.readyState==4){
         if(http.responseText.length > 0) {
     		arr = http.responseText.split("[$]");
@@ -812,7 +800,7 @@ function wc_update_components(c, incdir, lim) {
     			} else {
     				alert('The room you were viewing was removed/renamed! We apologize for the inconvenience.');
     				document.getElementById('wc_msg_container').innerHTML = arr[6].slice(5);
-    				wc_refreshtopic(c);
+    				wc_refresh_topic(c);
     			}
     			wc_trim_chat(lim);
     			if(isScrolledToBottom) { objDiv.scrollTop = objDiv.scrollHeight; }
@@ -822,7 +810,7 @@ function wc_update_components(c, incdir, lim) {
  	http.send(null);
 }
 
-function wc_updmsg(c, all, refresh_delay, lim, incdir, prefix)
+function wc_refresh_msg(c, all, refresh_delay, lim, incdir, prefix)
 {
 	var http = getHTTPObject();
 	var prev;
@@ -833,7 +821,7 @@ function wc_updmsg(c, all, refresh_delay, lim, incdir, prefix)
 		objDiv.innerHTML = '<div style="text-align: center"><img src="'+incdir+'images/loader.gif"></div>';
 	}
 	var prevpos = objDiv.scrollTop;
-	http.open("GET", c+"mode=updmsg&all="+all, true);
+	http.open("GET", c+"mode=refresh_msg&all="+all, true);
 	http.onreadystatechange=function(){if(http.readyState==4){
 		if(http.responseText.length > 0) {
 			document.getElementById('wc_msg_container').innerHTML = http.responseText;
@@ -847,7 +835,7 @@ function wc_updmsg(c, all, refresh_delay, lim, incdir, prefix)
 	(function wc_theLoop () {
   		setTimeout(function wc_() {
 
-			wc_update_components(c, incdir, lim);
+			wc_refresh_components(c, incdir, lim);
 
 			if(document.cookie.search(prefix + '_idle_refresh=') != -1) {
 				var idle_refresh_cookie = wc_getCookie('idle_refresh', prefix);
@@ -954,7 +942,7 @@ function wc_show_older_msg(c, reset, incdir)
 		cont = older_container.innerHTML;
 		older_container.innerHTML = '<div style="text-align: center"><img src="'+incdir+'images/loader.gif"></div>' + cont;
 		var http = getHTTPObject();
-		http.open("GET", c+"mode=updmsg&n="+first_msg_id, true);
+		http.open("GET", c+"mode=refresh_msg&n="+encodeURIComponent(first_msg_id), true);
 		http.onreadystatechange=function(){if(http.readyState==4){ 
 			if(http.responseText.length > 0) {
 				older_container.innerHTML = http.responseText + cont;
@@ -966,7 +954,7 @@ function wc_show_older_msg(c, reset, incdir)
 	}
 }
 
-function wc_joinchat(c, t, refresh_delay)
+function wc_join_chat(c, t, refresh_delay)
 {
 	var passok = 0;
 	var pass = document.getElementById('wc_login_pass');
@@ -975,7 +963,7 @@ function wc_joinchat(c, t, refresh_delay)
 	var sett_input = document.getElementById('wc_settings_input');
 	if(pass !== null) { 
 		var http = getHTTPObject();
-		http.open("GET", c+"mode=cmppass&pass="+pass.value, true);
+		http.open("GET", c+"mode=cmp_pass&pass="+encodeURIComponent(pass.value), true);
 		http.onreadystatechange=function(){if(http.readyState==4){
 			passok = http.responseText;
 			if(passok == 1) {
@@ -986,8 +974,8 @@ function wc_joinchat(c, t, refresh_delay)
 		}}
  		http.send(null);
 	} else {
-		wc_updu(1, c, 1, 0, 'ignore_lastmod');
-		wc_smsge(c, t, refresh_delay);
+		wc_refresh_users(1, c, 1, 0, 'ignore_lastmod');
+		wc_send_msg_event(c, t, refresh_delay);
 		wc_check_topic_changes(c, 1);
 
 		wc_toggle('wc_text_input');

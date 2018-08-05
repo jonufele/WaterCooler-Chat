@@ -2,6 +2,8 @@
 
 // Updates Topic Description
 
+    if(!isset($this)) { die(); }
+
     if(!$this->hasPermission('TOPIC_E')) { die(); }
     
     $t = $this->myGET('t');

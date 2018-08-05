@@ -2,6 +2,8 @@
 
 // Changes User Status (Available/Do Not Disturb)
 
+    if(!isset($this)) { die(); }
+
     $current = $this->uData[8];
 
     if($current == 1) {

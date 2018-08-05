@@ -2,6 +2,8 @@
 
 // Processes/Writes a post message, also handles ignore action
 
+    if(!isset($this)) { die(); }
+
     // Halt if no permission to post or no profile access
     if(!$this->hasPermission('POST')) { die(); }
     if(!$this->hasProfileAccess) {

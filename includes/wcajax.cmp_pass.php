@@ -2,6 +2,8 @@
 
 // Compares Two Passwords (Supplied and Stored)
 
+    if(!isset($this)) { die(); }
+
     $pass = $this->myGet('pass');
     
     // Halt if password don't match, return a 0 to ajax caller

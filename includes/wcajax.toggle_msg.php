@@ -2,6 +2,8 @@
 
 // Hides/Unhides a Posted Message
 
+    if(!isset($this)) { die(); }
+
     $id = $this->myGet('id');
     $id_hidden = str_replace('|', '*|', $id);
     $action = $output = '';
@@ -83,7 +85,7 @@
                 MESSAGES_HIDDEN, 
                 ' ' . $id, 
                 (
-                    ((time() - filemtime(MESSAGES_HIDDEN)) > $this->catchWindow) ? 
+                    ((time() - $this->parseFileMTime(MESSAGES_HIDDEN)) > $this->catchWindow) ? 
                     'w' : 
                     'a'
                 )

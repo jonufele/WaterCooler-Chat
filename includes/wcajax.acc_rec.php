@@ -2,6 +2,8 @@
 
 // Recovers the account
 
+    if(!isset($this)) { die(); }
+
     // Email exists? No pending recovery? Has permission? 
     if(
         $this->uEmail && 

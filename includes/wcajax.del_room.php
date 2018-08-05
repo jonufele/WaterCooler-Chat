@@ -2,6 +2,8 @@
 
 // Deletes A Room
 
+    if(!isset($this)) { die(); }
+
     // Halt if no permission to delete rooms
     if(!$this->hasPermission('ROOM_D')) { die(); }
     $changes = 0;

@@ -2,9 +2,12 @@
 
 // Creates a Room
 
+    if(!isset($this)) { die(); }
+
     // Halt if no permission to create rooms
     if(!$this->hasPermission('ROOM_C')) { die(); }
-    $room_name = $this->myGet('n');
+
+    $room_name = urldecode($this->myGet('n'));
     // Target room exists? Is room name valid?
     if(
         !file_exists($this->roomDir . base64_encode($room_name) . '.txt') && 

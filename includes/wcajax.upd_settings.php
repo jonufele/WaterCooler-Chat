@@ -2,6 +2,8 @@
 
 // Updates user settings
 
+    if(!isset($this)) { die(); }
+
     // Halt if no profile access or no edit permission
     if(!$this->hasProfileAccess) { echo 'NO_ACCESS'; die(); }
     if(!$this->hasPermission('PROFILE_E', 'skip_msg')) { echo 'NO_ACCESS'; die(); }
