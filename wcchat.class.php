@@ -16,11 +16,25 @@
 
 ------------------------------------------------
 
- _POST getter: $this->myPost($id)
- _GET getter: $this->myGet($id)
- _COOKIE getter: $this->myCookie($id)
- _SERVER getter: $this->myServer($id)
- _SESSION getter: $this->mySession($id)
+ - POST/GET/COOKIE getters:
+ $this->myPost($id)
+ $this->myGet($id) / $this->myCookie($id)
+ 
+ - SESSION/SERVER getters:
+ $this->mySession($id)
+ $this->myServer($id)
+
+ - COOKIE/SESSION setters:
+ $this->wcSetCookie($id, $value)
+ $this->wcSetSession($id, $value)
+
+ - COOKIE/SESSION un-setters:
+ $this->wcUnsetCookie($id)
+ $this->wcUnsetSession($id)
+
+ - filemtime / microtime parsers:
+ $this->parseFileMTime($file_path)
+ $this->parseMicroTime()
 
 ------------------------------------------------
 
@@ -368,6 +382,14 @@ class WcChat {
     private $includeDirServer;
 
     /**
+     * Cookie expire period (days)
+     *
+     * @since 1.4
+     * @var int
+     */
+    private $cookieExpire = 365;
+
+    /**
      * Construct
      * 
      */
@@ -405,7 +427,7 @@ class WcChat {
        |  PGC/SESSION/SERVER HANDLING (8)             |
        |  SETTERS/GETTERS (10)                        |
        |  PARSER / INTERFACER (13)                    |
-       |  AJAX COMPONENTS (5)                         |
+       |  AJAX COMPONENTS (6)                         |
        |  AJAX PROCESSOR (1)                          |
        |  OTHER METHODS (3)                           |
        ===============================================*/
@@ -1849,7 +1871,7 @@ class WcChat {
         setcookie(
             $this->parseCookieName($this->wcPrefix . '_' . $name), 
             $value,
-            time() + (86400*365), 
+            time() + (86400 * $this->cookieExpire), 
             '/'
         );
     }
@@ -2129,7 +2151,7 @@ class WcChat {
     }
     
     /**
-     * Gets mirotime
+     * Gets microtime (If not available uses time() instead)
      * 
      * @since 1.4
      * @return int
@@ -2459,7 +2481,7 @@ class WcChat {
                 ),
                 'USER_LIST' => $this->popTemplate(
                     'wcchat.users', 
-                    array('ULIST' => $this->parseUsers('VISIT'))
+                    array('ULIST' => $this->refreshUsers('VISIT'))
                 ),
                 'THEMES' => $this->parseThemes()
             )
@@ -2584,122 +2606,18 @@ class WcChat {
      * Generates the user list (Ajax Component)
      * 
      * @since 1.2
-     * @param int|null $visit Specifies a new user visit (To update user status)
+     * @param array $contents pre-processed user data
+     * @param bool mod_perm
+     * @param bool edit_perm
+     * @param bool del_perm                    
+     * @param int|null $visit Specifies a new user visit
      * @return string Html Template
      */
-    private function parseUsers($visit = NULL) {
-
-        // Store user ping
-        $this->setPing();
-
-        if($this->isBanned !== FALSE) { return 'You are banned!'; }
-        if(!$this->hasPermission('USER_LIST', 'skip_msg')) {
-            return 'Can\'t display users.';
-        }
+    private function parseUsers($contents, $mod_perm, $edit_perm, $del_perm, $visit = NULL) {
        
         $_on = $_off = $_lurker = array();
         $uid = $this->name;
         $autocomplete = '';
-
-        $contents = $this->userList;
-        $user_row = $original_row = $this->userMatch($this->name, NULL, 'RETURN_MATCH');
-        $changes = FALSE;
-
-        // Reset user status on a new visit or update guest user listing if enabled
-        if($visit != NULL) {
-            if($this->hasProfileAccess) {
-                $user_row = $this->updateUser($user_row, 'update_status', 0);
-                $changes = TRUE;
-            }
-
-            // If LIST_GUESTS is disabled, only process user if he/she joined the chat at least once in the past
-            // Note: A user is not considered part of the guest group if he/she is logged to an unprotected name, but
-            // to be listed, needs to join the chat (unless LIST_GUESTS is enabled)
-            if(
-                $this->isLoggedIn && 
-                (
-                    LIST_GUESTS === TRUE || 
-                    (
-                        LIST_GUESTS === FALSE && 
-                        $this->uData[6] != '0'
-                    )
-                )
-            ) {
-                if($this->userMatch($this->name) === FALSE) {
-                    if($this->name != 'Guest') {
-                        $contents .= "\n" . 
-                            base64_encode($this->name) . '|' . 
-                            $this->userDataString . 
-                            '|0|' . 
-                            time() . 
-                            '|0'
-                        ;
-                    }
-                } else {
-                    $user_row = $this->updateUser($user_row, 'user_visit');
-                }
-                $changes = TRUE;
-            }
-        }
-
-        // Creates New User/Update user last activity on join, also update status 
-        if($this->myGet('join') == '1') {
-            if($this->userMatch($uid) === FALSE) {
-                if($this->name != 'Guest') {
-                    $contents .= "\n" . 
-                        base64_encode($uid) . '|' . 
-                        $this->userDataString . '|' . 
-                        time(). '|' . 
-                        time(). '|1'
-                    ;
-                }
-            } else {
-                $user_row = $this->updateUser($user_row, 'user_join');
-            }
-            $user_row = $this->updateUser($user_row, 'update_status', 1);
-            $changes = TRUE;
-        }
-
-        // Update user last activity on new message
-        if($this->myGet('new') == '1') {
-            $user_row = $this->updateUser($user_row, 'new_message');
-            $changes = TRUE;
-        }
-
-        // Write changes
-        if($changes) {
-            if($user_row !== FALSE) {
-                $contents = str_replace(
-                    trim(implode('|', $original_row)),
-                    trim(implode('|', $user_row)),
-                    trim($contents)
-                );
-            }
-            $this->writeFile(USERL, trim($contents), 'w');
-        }
-
-        // Parses permissions
-        $edit_perm = FALSE;
-        if($this->hasPermission('USER_E', 'skip_msg')) {
-            $edit_perm = TRUE;
-        }
-
-        $mod_perm = FALSE;
-        if(
-            $this->hasPermission('MOD', 'skip_msg') || 
-            $this->hasPermission('UNMOD', 'skip_msg') || 
-            $this->hasPermission('BAN', 'skip_msg') || 
-            $this->hasPermission('UNBAN', 'skip_msg') || 
-            $this->hasPermission('MUTE', 'skip_msg') || 
-            $this->hasPermission('UNMUTE', 'skip_msg')
-        ) {
-            $mod_perm = TRUE;
-        }
-
-        $del_perm = FALSE;
-        if($this->hasPermission('USER_D', 'skip_msg')) {
-            $del_perm = TRUE;
-        }
 
         // Scan users raw file
         if(trim($contents)) {
@@ -2710,7 +2628,7 @@ class WcChat {
                     $usr = ($usr ? base64_decode($usr) : '');
 
                     // Store the name autocomplete list (to be used in input)
-                    if($visit != NULL) {
+                    if($visit !== NULL) {
                         $autocomplete .= $usr . ',';
                     }
 
@@ -2965,27 +2883,7 @@ class WcChat {
                 )
             ); 
 
-        // Sets a cookie to enlarge refresh delay if user is idling
-        if(
-            !$this->myCookie('idle_refresh') && 
-            $visit === NULL && 
-            (time()-$this->uData[7]) > IDLE_START && 
-            REFRESH_DELAY_IDLE != 0
-        ) {
-            $this->wcSetCookie('idle_refresh', REFRESH_DELAY_IDLE);
-        }
-
-        // Return user list if changes exist
-        $sfv = strtoupper(dechex(crc32(trim($output))));
-        if(
-            ($sfv != $this->mySession('user_list_sfv')) || 
-            !$this->mySession('user_list_sfv') || 
-            $visit !== NULL || 
-            $this->myGet('ilmod')
-        ) {
-            $this->wcSetSession('user_list_sfv', $sfv);
-            return $output;
-        }
+         return $output;
     }
 
     /**
@@ -3189,7 +3087,14 @@ class WcChat {
                 );
             }
         }
-        return $this->popTemplate('wcchat.themes', array('OPTIONS' => $options));
+        
+        return $this->popTemplate(
+            'wcchat.themes', 
+            array(
+                'OPTIONS' => $options, 
+                'COOKIE_EXPIRE' => $this->cookieExpire
+            )
+        );
     }
 
     /**
@@ -3855,7 +3760,7 @@ class WcChat {
         }
 
         $str = '';
-        $ys = 60*60*24*365;
+        $ys = 60 * 60 * 24 * 365;
 
         $year = intval($timesec/$ys);
         if($year >= 1) {
@@ -3935,6 +3840,7 @@ class WcChat {
        |  checkHiddenMsg                          |
        |  refreshMsgE                             |
        |  refreshMsg                              |
+       |  refreshUsers                            |
        ===========================================*/
 
     /**
@@ -4165,6 +4071,150 @@ class WcChat {
         if(($older_index !== NULL) || $this->myGet('all') == 'ALL') { sleep(1); }
         
         return $output;
+    }
+
+    /**
+     * Updates/Refreshes Screen User List (Ajax Component)
+     * 
+     * @param string|null $visit New user visit tag provided by ajax caller     
+     * @since 1.4
+     * @return string|void Html Template
+     */
+    private function refreshUsers($visit = NULL) {
+
+        // Store user ping
+        $this->setPing();
+
+        if($this->isBanned !== FALSE) { return 'You are banned!'; }
+        if(!$this->hasPermission('USER_LIST', 'skip_msg')) {
+            return 'Can\'t display users.';
+        }
+
+        $contents = $this->userList;
+        $user_row = $original_row = $this->userMatch($this->name, NULL, 'RETURN_MATCH');
+        $changes = FALSE;
+
+        // Reset user status on a new visit or update guest user listing if enabled
+        if($visit != NULL) {
+            if($this->hasProfileAccess) {
+                $user_row = $this->updateUser($user_row, 'update_status', 0);
+                $changes = TRUE;
+            }
+
+            // If LIST_GUESTS is disabled, only process user if he/she joined the chat at least once in the past
+            // Note: A user is not considered part of the guest group if he/she is logged to an unprotected name, but
+            // to be listed, needs to join the chat (unless LIST_GUESTS is enabled)
+            if(
+                $this->isLoggedIn && 
+                (
+                    LIST_GUESTS === TRUE || 
+                    (
+                        LIST_GUESTS === FALSE && 
+                        $this->uData[6] != '0'
+                    )
+                )
+            ) {
+                if($this->userMatch($this->name) === FALSE) {
+                    if($this->name != 'Guest') {
+                        $contents .= "\n" . 
+                            base64_encode($this->name) . '|' . 
+                            $this->userDataString . 
+                            '|0|' . 
+                            time() . 
+                            '|0'
+                        ;
+                    }
+                } else {
+                    $user_row = $this->updateUser($user_row, 'user_visit');
+                }
+                $changes = TRUE;
+            }
+        }
+
+        // Creates New User/Update user last activity on join, also update status 
+        if($this->myGet('join') == '1') {
+            if($this->userMatch($this->name) === FALSE) {
+                if($this->name != 'Guest') {
+                    $contents .= "\n" . 
+                        base64_encode($this->name) . '|' . 
+                        $this->userDataString . '|' . 
+                        time(). '|' . 
+                        time(). '|1'
+                    ;
+                }
+            } else {
+                $user_row = $this->updateUser($user_row, 'user_join');
+            }
+            $user_row = $this->updateUser($user_row, 'update_status', 1);
+            $changes = TRUE;
+        }
+
+        // Update user last activity on new message
+        if($this->myGet('new') == '1') {
+            $user_row = $this->updateUser($user_row, 'new_message');
+            $changes = TRUE;
+        }
+
+        // Write changes
+        if($changes) {
+            if($user_row !== FALSE) {
+                $contents = str_replace(
+                    trim(implode('|', $original_row)),
+                    trim(implode('|', $user_row)),
+                    trim($contents)
+                );
+            }
+            $this->writeFile(USERL, trim($contents), 'w');
+        }
+
+        // Parses permissions
+        $edit_perm = FALSE;
+        if($this->hasPermission('USER_E', 'skip_msg')) {
+            $edit_perm = TRUE;
+        }
+
+        $mod_perm = FALSE;
+        if(
+            $this->hasPermission('MOD', 'skip_msg') || 
+            $this->hasPermission('UNMOD', 'skip_msg') || 
+            $this->hasPermission('BAN', 'skip_msg') || 
+            $this->hasPermission('UNBAN', 'skip_msg') || 
+            $this->hasPermission('MUTE', 'skip_msg') || 
+            $this->hasPermission('UNMUTE', 'skip_msg')
+        ) {
+            $mod_perm = TRUE;
+        }
+
+        $del_perm = FALSE;
+        if($this->hasPermission('USER_D', 'skip_msg')) {
+            $del_perm = TRUE;
+        }
+
+        $output = $this->parseUsers(
+            $contents, $mod_perm, $edit_perm, $del_perm, $visit
+        );
+
+        // Sets a cookie to enlarge refresh delay if user is idling
+        if(
+            !$this->myCookie('idle_refresh') && 
+            $visit === NULL && 
+            (time()-$this->uData[7]) > IDLE_START && 
+            REFRESH_DELAY_IDLE != 0
+        ) {
+            $this->wcSetCookie('idle_refresh', REFRESH_DELAY_IDLE);
+        }
+
+        // Return user list if changes exist
+        $sfv = strtoupper(dechex(crc32(trim($output))));
+        if(
+            ($sfv != $this->mySession('user_list_sfv')) || 
+            !$this->mySession('user_list_sfv') || 
+            $visit !== NULL || 
+            $this->myGet('ilmod')
+        ) {
+            $this->wcSetSession('user_list_sfv', $sfv);
+            return $output;
+        }
     }
 
       /*===========================================

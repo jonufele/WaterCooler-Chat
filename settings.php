@@ -4,8 +4,8 @@
  * Settings
  * 
  * @package WaterCooler Chat
- * @author João Ferreira <jflei@sapo.pt>
- * @copyright (c) 2018, João Ferreira
+ * @author Joao Ferreira <jflei@sapo.pt>
+ * @copyright (c) 2018, Joao Ferreira
  * @since 1.1
  */
 

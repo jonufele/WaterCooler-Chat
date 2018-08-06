@@ -117,8 +117,8 @@ function wc_getCookie(name, prefix) {
 	}
 }
 
-function wc_apply_theme(v, prefix) {
-	wc_setCookie('wc_theme', v, 365, prefix);
+function wc_apply_theme(v, prefix, expire_days) {
+	wc_setCookie('wc_theme', v, expire_days, prefix);
 	location.reload();
 }
 

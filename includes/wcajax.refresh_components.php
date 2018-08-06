@@ -4,7 +4,7 @@
 
     if(!isset($this)) { die(); }
 
-    $output = $this->parseUsers() . '[$]' . 
+    $output = $this->refreshUsers() . '[$]' . 
         $this->checkTopicChanges() . '[$]' . 
         $this->refreshRooms() . '[$]' . 
         (
