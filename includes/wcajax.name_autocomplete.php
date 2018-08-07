@@ -8,7 +8,7 @@
     
     if($this->hasData($hint)) {
         $words = explode(' ', trim($hint));
-        $current_word = $words[count($words)-1];
+        $current_word = str_replace('@', '', $words[count($words)-1]);
         $users = $this->mySession('autocomplete');
         
         if(

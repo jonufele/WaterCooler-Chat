@@ -106,12 +106,13 @@ function wc_setCookie(cname, cvalue, exdays, prefix) {
 
 function wc_getCookie(name, prefix) {
 	cookies = document.cookie;
-	if(cookies.search(name + '=') != -1) {
+	cname = prefix + '_' + name;
+	if(cookies.search(cname + '=') != -1) {
 		var par = cookies.replace(' ', '').split(';');
 		n = par.length;
 		for(i=0; i < n ; i++) {
-			if(par[i].search(name + '=') != -1) {
-				return par[i].replace(prefix + '_' + name + '=', '');
+			if(par[i].search(cname + '=') != -1) {
+				return par[i].replace(cname + '=', '');
 			}
 		}
 	}

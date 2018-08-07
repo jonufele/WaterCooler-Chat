@@ -1009,19 +1009,11 @@ class WcChat {
      * @param string $forced_idle
      * @return int
      */
-    private function getCatchWindow($last_act = NULL, $force_idle = NULL) {
-    
-        if($last_act === NULL) { $last_act = $this->uData[7]; }         
+    private function getCatchWindow() {         
     
         return 
         (
-            (
-                (
-                    (time() - $last_act) > IDLE_START || 
-                    $force_idle !== NULL
-                ) && 
-                REFRESH_DELAY_IDLE != 0
-            ) ? 
+            REFRESH_DELAY_IDLE != 0 ? 
             intval(REFRESH_DELAY_IDLE/1000) : 
             intval(REFRESH_DELAY/1000)
         ) + 
@@ -1189,7 +1181,7 @@ class WcChat {
 
         // Overwrite content if last modified time is higher than Idle catchWindow
         // (Enough time for all online users to get the update (Idle or not))
-        if((time()-$this->parseFileMTime(EVENTL)) > $this->getCatchWindow(NULL, 'FORCE_IDLE')) { 
+        if((time()-$this->parseFileMTime(EVENTL)) > $this->catchWindow) { 
             $mode = 'w'; 
         } else { 
             $mode = 'a';
@@ -2703,7 +2695,7 @@ class WcChat {
                     // Is user a guest?
                     if($f != '0') {
                         // No guest, is online?
-                        if((time() - $last_ping) <= $this->getCatchWindow($l)) {
+                        if((time() - $last_ping) <= $this->catchWindow) {
                             // Yes, it's an online user
                             $target_array = '_on'; 
 
