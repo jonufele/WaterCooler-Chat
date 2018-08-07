@@ -446,7 +446,7 @@ $templates['wcchat.posts.normal'] = '
 <div class="msg_item" id="js_{ID}">
 	<div class="msg{PM_SUFIX}">
 		{PM_TAG}
-		<img src="{AVATAR}" class="avatar_thumb" {WIDTH} onload="wc_scroll()">
+		<img src="{AVATAR}" class="avatar_thumb" {WIDTH} onload="wc_scroll(\'{ALL}\')">
 		<div class="msg_right_col">
 			{HIDE_ICON}
 			[<span class="user">{POPULATE_START}{USER}{POPULATE_END}{PM_TARGET}</span>]
@@ -495,7 +495,7 @@ $templates['wcchat.posts.older'] = '
 
 $templates['wcchat.posts.older.block_separator'] = '<hr>';
 
-$templates['wcchat.posts.new_msg_separator'] = '<div class="new_msg"><img src="{INCLUDE_DIR_THEME}images/new_msg_separator.png" onload="wc_scroll()"></div>';
+$templates['wcchat.posts.new_msg_separator'] = '<div class="new_msg"><img src="{INCLUDE_DIR_THEME}images/new_msg_separator.png" onload="wc_scroll(\'{ALL}\')"></div>';
 
 $templates['wcchat.posts.undo_clear_screen'] = 'Screen cleanup (<a href="#" onclick="wc_undo_clear_screen(\'{CALLER}\', \'{INCLUDE_DIR_THEME}\'); return false;">Undo</a>)';
 

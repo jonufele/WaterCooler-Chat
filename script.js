@@ -702,11 +702,11 @@ function wc_refresh_msg_once_event(c)
  	http.send(null);
 }
 
-function wc_scroll()
+function wc_scroll(all)
 {
 	var objDiv = document.getElementById('wc_msg_container');
 	var isScrolledToBottom = objDiv.scrollHeight - objDiv.clientHeight <= objDiv.scrollTop + 1;
-	if(isScrolledToBottom) { objDiv.scrollTop = objDiv.scrollHeight; }
+	if(isScrolledToBottom || all == 'ALL') { objDiv.scrollTop = objDiv.scrollHeight; }
 }
 
 function wc_trim_chat(lim)

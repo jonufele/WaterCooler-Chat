@@ -3384,6 +3384,7 @@ class WcChat {
                             $output = $this->popTemplate(
                                 'wcchat.posts.normal',
                                 array(
+                                    'ALL' => ($action != 'SEND' ? $this->myGet('ALL') : 'ALL'),
                                     'PM_SUFIX' => ($pm_target !== FALSE ? '_pm' : ''),
                                     'PM_TAG' => $this->popTemplate(
                                         'wcchat.posts.normal.pm_tag', 
@@ -3645,6 +3646,8 @@ class WcChat {
             '' : 
             'onclick="alert(\'Your usergroup does not have permission to download arquives / full size images!\'); return false;"'
         );
+        
+        $all = ($this->myGet('mode') != 'send_msg' ? $this->myGet('all') : 'ALL');
 
         $replace =
             array(
@@ -3652,28 +3655,28 @@ class WcChat {
                 '<i>\\1</i>',
                 '<u>\\1</u>',
                 '<div style="margin: 10px">
-                    <img src="\\1" class="thumb" onload="wc_scroll()">
+                    <img src="\\1" class="thumb" onload="wc_scroll(\''.$all.'\')">
                 </div>',
                 '<div style="width: \\3px;" class="thumb_container">
-                    <img src="\\5" style="width: \\3px; height: \\4px;" class="thumb" onload="wc_scroll()"><br>
+                    <img src="\\5" style="width: \\3px; height: \\4px;" class="thumb" onload="wc_scroll(\''.$all.'\')"><br>
                     <img src="' . INCLUDE_DIR_THEME . 'images/attach.png">
                     <a href="' . ($down_perm ? $this->includeDir . 'files/attachments/\\5' : '#') . '" target="_blank" ' . $down_alert . '>\\1 x \\2</a>
                 </div>',
                 '<div style="width: \\3px;" class="thumb_container">
-                    <img src="' . $this->includeDir . 'files/thumb/tn_\\5.jpg" class="thumb" onload="wc_scroll()"><br>
+                    <img src="' . $this->includeDir . 'files/thumb/tn_\\5.jpg" class="thumb" onload="wc_scroll(\''.$all.'\')"><br>
                     <img src="' . INCLUDE_DIR_THEME . 'images/attach.png">
                     <a href="' . ($down_perm ? $this->includeDir . 'files/attachments/\\6' : '#') . '" target="_blank" ' . $down_alert . '>\\1 x \\2</a>
                 </div>',
                 '<div style="width: \\3px;" class="thumb_container">
-                    <img src="\\5" style="width: \\3px; height: \\4px;" class="thumb" onload="wc_scroll()"><br>
+                    <img src="\\5" style="width: \\3px; height: \\4px;" class="thumb" onload="wc_scroll(\''.$all.'\')"><br>
                     <a href="' . ($down_perm ? '\\5' : '#') . '" target="_blank" ' . $down_alert . '>\\1 x \\2</a>
                 </div>',
                 '<div style="width: \\3px;" class="thumb_container">
-                    <img src="' . $this->includeDir . 'files/thumb/tn_\\5.jpg" class="thumb" onload="wc_scroll()"><br>
+                    <img src="' . $this->includeDir . 'files/thumb/tn_\\5.jpg" class="thumb" onload="wc_scroll(\''.$all.'\')"><br>
                     <a href="' . ($down_perm ? '\\6' : '#') . '" target="_blank" ' . $down_alert.'>\\1 x \\2</a>
                 </div>',
                 '<div style="width: \\1px;" class="thumb_container">
-                    <img src="\\2" style="width: \\1px;" class="thumb" onload="wc_scroll()"><br>
+                    <img src="\\2" style="width: \\1px;" class="thumb" onload="wc_scroll(\''.$all.'\')"><br>
                     <a href="' . ($down_perm ? '\\2' : '#').'" target="_blank" ' . $down_alert . '>Unknown Dimensions</a>
                 </div>',
                 '<a href="\\1" target="_blank">\\2</a>',
@@ -3686,7 +3689,7 @@ class WcChat {
                 </div>',
                 '<div id="im_\\1">
                     <a href="#" onclick="wc_pop_vid(\'\\1\', ' . VIDEO_WIDTH . ', ' . VIDEO_HEIGHT . '); return false;">
-                    <img src="' . INCLUDE_DIR_THEME . 'images/video_cover.jpg" class="thumb" style="margin: 10px" onload="wc_scroll()"></a>
+                    <img src="' . INCLUDE_DIR_THEME . 'images/video_cover.jpg" class="thumb" style="margin: 10px" onload="wc_scroll(\''.$all.'\')"></a>
                 </div>
                 <div id="wc_video_\\1" class="closed"></div>',
                 '<a href="\\0" target="_blank" style="font-size:10px;font-family:tahoma">\\0</a>'
@@ -4045,7 +4048,7 @@ class WcChat {
             (
                 ($older_index !== NULL) ? 
                 str_replace(
-                    'wc_scroll()', 
+                    array('wc_scroll(\'\')', 'wc_scroll(\'ALL\')'), 
                     '', 
                     $output . $this->popTemplate('wcchat.posts.older.block_separator')
                 ) : 
