@@ -705,7 +705,8 @@ function wc_refresh_msg_once_event(c)
 function wc_scroll()
 {
 	var objDiv = document.getElementById('wc_msg_container');
-	objDiv.scrollTop = objDiv.scrollHeight;
+	var isScrolledToBottom = objDiv.scrollHeight - objDiv.clientHeight <= objDiv.scrollTop + 1;
+	if(isScrolledToBottom) { objDiv.scrollTop = objDiv.scrollHeight; }
 }
 
 function wc_trim_chat(lim)
