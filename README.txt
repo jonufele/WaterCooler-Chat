@@ -40,6 +40,7 @@
     - Attachment uploads
     - Smart archive system
     - Shared Chat Across the websites hosted on the same server
+    - Private Conversation Rooms
 
 
 ===========================================================================
@@ -48,7 +49,7 @@
 
    1 - Copy package contents to your webserver
 
-   2 - Load the chat on your browser.
+   2 - Load the chat index.php on your browser (load the index.php first, even if you're going to embed on another page).
 
    3 - In case you see broken images, define INCLUDE_DIR constant in "settings.php" - relative path to chat directory from web root (on the very first run, the system will attempt to do this automatically)
 
@@ -79,6 +80,7 @@
       |- attachments
       |- avatars
       |- thumb
+   |- includes             - Includes directory (Includes, Ajax server side)
    |- themes               - Themes
       |- "theme_name"
 	 |+ images         - Theme images (templates, bbcode, smilies)
@@ -108,8 +110,6 @@
   - To remove the copyright note, you must make a donation to the project (See below).
 
   - It is recommended to rename the data directory (or move it outside the web root) to ensure user's privacy. (don't forget to rename on settings.php as well)
-
-  - While loading older messages, one block contains less messages than the others, this is normal, it means the end of the archive has been reached, if more archives exist, the loading can continue.
 
 
 ============================================================================

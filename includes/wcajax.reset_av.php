@@ -6,21 +6,19 @@
 
     $efile = '';
     // If user avatar exists, strip its control timestamp
-    if($this->uAvatar) {
-        list($efile, $_time) = explode('?', $this->uAvatar); 
+    if($this->uData['avatar']) {
+        list($efile, $_time) = explode('?', $this->uData['avatar']); 
     }
     
     // If avatar exists, reset user value and delete image file
     if(file_exists($this->includeDirServer . 'files/avatars/' . $efile)) {
-        $nstring = '|' . base64_encode($this->uEmail) . '|' . 
-            base64_encode($this->uWeb) . '|' . 
-            $this->uTimezone . '|' . 
-            $this->uHourFormat . '|' . 
-            $this->uPass
-        ;
+        $nstring = $this->parseUDataString(
+            array('avatar' => '')
+        );
+        
         $towrite = preg_replace(
             '/(' . base64_encode($this->name) . ')\|(.*?)\|/', 
-            '\\1|' . base64_encode($nstring) . '|', 
+            '\\1|' . $nstring . '|', 
             $this->userList
         );
 

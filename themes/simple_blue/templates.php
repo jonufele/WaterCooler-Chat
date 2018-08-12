@@ -40,7 +40,7 @@ $templates['wcchat'] = '
 		<div class="left_col">
 			{TOPIC}
 			{STATIC_MSG}
-			{POSTS}{GSETTINGS}
+			{POSTS}{GSETTINGS}{INFO}
 			{TOOLBAR}
 			{TEXT_INPUT}
 			{SETTINGS}
@@ -95,6 +95,13 @@ $templates['wcchat.topic.box.partial'] = '
 </div>';
 
 $templates['wcchat.topic.edit_bt'] = ' <a href="#" class="edit" onclick="wc_toggle(\'wc_topic_con\'); wc_toggle(\'wc_topic_editbox\'); return false;"><img src="{INCLUDE_DIR_THEME}images/edit.gif" class="edit_bt{OFF}"></a>';
+
+$templates['wcchat.topic.pm_room'] = '
+<div class="pm">
+    <b>Private Conversation</b><br>
+    <img src="{AVATAR}" class="avatar"> {NAME}&nbsp;&nbsp;&nbsp;
+    <img src="{AVATAR2}" class="avatar"> {NAME2}
+</div>';
 
 # ============================================================================
 #                  WCCHAT MODULES : STATIC MSG
@@ -161,7 +168,7 @@ $templates['wcchat.toolbar.bbcode.attachment_uploads'] = ' <a href="#" onclick="
 
 $templates['wcchat.toolbar.commands'] = '
 <div id="wc_commands">
-	<a href="#" onclick="wc_show_com(); return false" title="Commands">
+	<a href="#" onclick="wc_toggle(\'wc_msg_container\'); wc_toggle(\'wc_info\'); return false" title="Information">
 		<img src="{INCLUDE_DIR_THEME}images/cmd.png">
 	</a> 
 	<a href="#" onclick="wc_clear_screen(\'{CALLER}\', \'{INCLUDE_DIR_THEME}\'); return false" title="Clear Screen">
@@ -334,11 +341,19 @@ $templates['wcchat.users.joined'] = '{USERS}';
 
 
 $templates['wcchat.users.item'] = '
-<div class="user_item" {NAME_STYLE} id="wc_user_{ID}">
-		<img src="{AVATAR}" {WIDTH} class="{JOINED_CLASS}" title="{STATUS_TITLE}">
-		{NAME}{MOD_ICON}{MUTED_ICON}{LINK}{IDLE}{EDIT_BT}
+<div class="user_item{PM_CLASS}" {NAME_STYLE} id="wc_user_{ID}">
+		{NEW_MSG}<img src="{AVATAR}" {WIDTH} class="{JOINED_CLASS}" title="{STATUS_TITLE}">
+		{PM_S}{NAME}{PM_E}{MOD_ICON}{MUTED_ICON}{LINK}{IDLE}{EDIT_BT}
 </div>
 {EDIT_FORM}';
+
+$templates['wcchat.users.item.new_msg.on'] = '{PM_S}<img src="{INCLUDE_DIR_THEME}images/nmsg.png" title="Private conversation has new messages" class="new_msg_icon">{PM_E}';
+
+$templates['wcchat.users.item.new_msg.off'] = '{PM_S}<img src="{INCLUDE_DIR_THEME}images/nmsg_off_small.png" title="Private conversation has no new messages" class="new_msg_icon_small">{PM_E}';
+
+$templates['wcchat.users.item.pm_s'] = '<a href="#" onclick="wc_change_room(\'{CALLER}\', \'{ROOM_NAME}\', \'{INCLUDE_DIR_THEME}\', {NEW}); return false;">';
+
+$templates['wcchat.users.item.pm_e'] = '</a>';
 
 $templates['wcchat.users.item.edit_bt'] = ' <a href="#wc_user_{ID}" onclick="wc_toggle(\'wc_uedt_{ID}\');"><img src="{INCLUDE_DIR_THEME}images/edit.gif" class="edit_bt{OFF}"></a>';
 
@@ -433,13 +448,14 @@ $templates['wcchat.posts'] = '<div id="wc_msg_container"></div>';
 $templates['wcchat.posts.self'] = '
 <div class="msg_item{SKIP_ON_OLDER_LOAD}" id="js_{ID}">
 	<div class="msg">
+	   <div class="self">
 		{HIDE_ICON}
 		<span class="timestamp" style="{STYLE}">
 			{TIMESTAMP}
-		</span> 
+		</span><br> 
 		<i><b>{USER}</b> <span id="{ID}">{MSG}</span></i>
-		</span>
-	</div>
+	   </div>
+    </div>
 </div>';
 
 $templates['wcchat.posts.normal'] = '
@@ -479,11 +495,12 @@ $templates['wcchat.posts.hidden_mod'] = '<i><img src="{INCLUDE_DIR_THEME}images/
 
 $templates['wcchat.posts.event'] = '
 <div class="msg">
-	<span class="timestamp" style="{STYLE}">
-		{TIMESTAMP}
-	</span> 
-	<i>{MSG}</i>
-	</span>
+    <div class="event">
+	   <span class="timestamp" style="{STYLE}">
+	   	   {TIMESTAMP}
+	   </span><br> 
+	   <i>{MSG}</i>
+	</div>
 </div>';
 
 $templates['wcchat.posts.older'] = '
@@ -495,11 +512,13 @@ $templates['wcchat.posts.older'] = '
 
 $templates['wcchat.posts.older.block_separator'] = '<hr>';
 
-$templates['wcchat.posts.new_msg_separator'] = '<div class="new_msg"><img src="{INCLUDE_DIR_THEME}images/new_msg_separator.png" onload="wc_scroll(\'{ALL}\')"></div>';
+$templates['wcchat.posts.new_msg_separator'] = '<div class="new_msg"><img src="{INCLUDE_DIR_THEME}images/new_msg_separator.png" onload="wc_scroll(\'ALL\')"></div>';
 
 $templates['wcchat.posts.undo_clear_screen'] = 'Screen cleanup (<a href="#" onclick="wc_undo_clear_screen(\'{CALLER}\', \'{INCLUDE_DIR_THEME}\'); return false;">Undo</a>)';
 
 $templates['wcchat.posts.global_clear_screen'] = 'New Chat Visit';
+
+$templates['wcchat.posts.curr_user_ref'] = '<span class="curr_user_ref">{NAME}</span>';
 
 # ============================================================================
 #                  CHAT ROOMS
@@ -533,7 +552,7 @@ $templates['wcchat.rooms.current_room'] = '
 
 $templates['wcchat.rooms.room'] = '
 <div class="room_item">
-	{NEW_MSG} <a href="#" onclick="wc_change_room(\'{CALLER}\', this.innerHTML, \'{INCLUDE_DIR_THEME}\'); return false;">{TITLE}</a>
+	{NEW_MSG} <a href="#" onclick="wc_change_room(\'{CALLER}\', this.innerHTML, \'{INCLUDE_DIR_THEME}\', 0); return false;">{TITLE}</a>
 	{EDIT_BT}
 </div>
 {FORM}';
@@ -615,7 +634,7 @@ $templates['wcchat.global_settings'] = '
 			</div>
 			<div>
 				Refresh Delay (Idle): <input type="text" id="gs_refresh_delay_idle" value="{GS_REFRESH_DELAY_IDLE}" class="gsett"> ms<br>
-				<span>0 = Disabled; Message Refresh Delay While Idling</span>
+				<span>0 = Disabled; Message Refresh Delay While Idling, if on, catch window will be wider (events will stay longer, logouts will be slower)</span>
 			</div>
 			<div>
 				Idle Start: <input type="text" id="gs_idle_start" value="{GS_IDLE_START}" class="gsett"> s<br>
@@ -927,6 +946,14 @@ $templates['wcchat.global_settings'] = '
 					<td class="check"><input type="checkbox" value="1" id="guest_pm_send"{GS_GUEST_PM_SEND} class="gsett"></td>
 				</tr>
 				<tr>
+					<td><img src="{INCLUDE_DIR_THEME}images/arrow.png"> Private Message Room: Start</td>
+					<td class="check"><input type="checkbox" value="1" id="mmod_pm_room"{GS_MMOD_PM_ROOM} class="gsett"></td>
+					<td class="check"><input type="checkbox" value="1" id="mod_pm_room"{GS_MOD_PM_ROOM} class="gsett"></td>
+					<td class="check"><input type="checkbox" value="1" id="cuser_pm_room"{GS_CUSER_PM_ROOM} class="gsett"></td>
+					<td class="check"><input type="checkbox" value="1" id="user_pm_room"{GS_USER_PM_ROOM} class="gsett"></td>
+					<td class="check"><input type="checkbox" value="1" id="guest_pm_room"{GS_GUEST_PM_ROOM} class="gsett"></td>
+				</tr>
+				<tr>
 					<th class="first_col"></td>
 					<th>Master<br>Moderator</td>
 					<th>Moderator</td>
@@ -993,6 +1020,131 @@ $templates['wcchat.global_settings'] = '
 			<input type="submit" value="Update Settings"> <input type="submit" name="cancel" value="Cancel" onclick="wc_toggle(\'wc_msg_container\'); wc_toggle(\'wc_global_settings\'); return false">
 		</div>
 	</form>
+</div>';
+
+# ============================================================================
+#                  INFORMATION
+# ============================================================================
+
+$templates['wcchat.info'] = '
+<div id="wc_info" class="closed">
+    <div class="header">
+        Information <span>
+            <a href="#" onclick="wc_toggle(\'wc_msg_container\'); wc_toggle(\'wc_info\'); return false">[Close]</a>
+        </span>
+    </div>
+    <div class="header2">Commands</div>
+    <div>
+        <ul>
+            <li>/me <i>message</i> - <span>self message</span></li>
+            <li>/ignore <i>user</i> - <span>Ignores a user</span></li>
+            <li>/unignore <i>user</i> - <span>Unignores user</span></li>
+            <li>/pm <i>user</i> <i>message</i> - <span>Sends a private message to user</span></li>
+        </ul>
+        <span>(Replace "<i>user</i>" by the name of the user)</span>
+    </div>
+    <div class="header2">Input Auto Completers</div>
+    <div>
+        <ul>
+            <li>TAB - <span>Hit tab while writing a user name to auto-complete</span></li>
+            <li>PM - <span>Click a user name in posts to auto complete the private message command</span></li>
+        </ul>
+    </div>
+    <div class="header2">User References</div>
+    <div>
+        Add the prefix "@" to a user name to create a reference, the respective user will see it highlighted in the message.<br>
+        <span>Example: @Mary -> <span class="curr_user_ref">Mary</span> (Names are case sensitive)</span>
+    </div>
+    <div class="header2">Event Messages</div>
+    <div>
+        <ul>
+            <li>Event messages are <b>room independent</b> <span>(Users get them, no matter where they are)</span></li>
+            <li>Event messages are temporary, after some seconds, the event buffer is reset.</li>
+            <li>Changing the topic on a private conversation room only sends an event message to the other participant</li>
+            <li>Changing the topic on a public room sends the event to all users</li>
+            <li>Changing the topic on a private room sends the event to all users with read access to that room</li>
+        </ul>
+    </div>
+    <div class="header2">Conversations</div>
+    <div>
+        <ul>
+            <li>To initiate a conversation, simply click the user name (joining the chat is mandatory). <span>(You will be asked for a confirmation, after that, the conversation starts automatically)</span></li>
+            <li>Users are notified of new conversations through a new message icon above the avatar.</li>
+            <li>To respond to a conversation, simple click the icon above the avatar or the user name.</li>
+            <li>Users which have initiated conversations will always display the message icon above the avatar <span>(Unless they are currently in conversation)</span></li>
+            <li>Conversations work like normal rooms, the only difference is the privacy.</li>
+        </ul>
+    </div>
+    <div class="header2">Archival; Read/Write Buffers</div>
+        <div>
+            <ul>
+                <li>By Default, all messages that drop from <b>store buffer</b> are stored in separate archives.</li>
+                <li>The archived messages are available for users to load.</li>
+                <li>The <b>read buffer</b> prevents the screen from going over 100 messages by default <span>(When loading older messages there\'s no limit for the number of messages displayed on the screen)</span></li>
+                <li>The store buffer is used to store the most recent messages <span>(Up to 500 messages by default, if archival is not enabled, all messages that drop from this buffer will be lost)</span></li>
+                <li>By cleaning the screen, a new initial read point is created <span>(and loading will always start from there, unless you undo the operation)</span></li>
+            </ul>
+        </div>
+    <div>
+    </div>
+
+    <div class="header2">User Types</div>
+    <div>
+        <ul>
+            <li>
+                <b>Guest</b>
+                <ul>
+                    <li>In terms of listing - <span>Users listed as guests are users that chose a name, but never joined the chat.</span></li>
+                    <li>In terms of UserGroup - <span>Users that didn\'t choose a name, or are yet to provide a valid password.</span></li>
+                </ul>
+            </li>
+            <li><b>User</b> - <span>All users that chose a name and have access to that profile (password protected or not).</span></li>
+            <li><b>Certified User</b> - <span>Users that have a password protected profile.</span></li>
+            <li><b>Moderator</b> - <span>User that have access to moderator tools, manually set by the master moderator.</span></li>
+            <li><b>Master Moderator</b> - <span>First user to login with a password. (founder)</span></li>
+        </ul>
+    </div>
+    <div class="header2">Symbols</div>
+    <div>
+        <ul>
+            <li><img src="{INCLUDE_DIR_THEME}images/arrow.png"> - Hides a message <span>(Hides for all users if user is a moderator under edit mode)</span></li>
+            <li><img src="{INCLUDE_DIR_THEME}images/arrow_r.png"> - Un-Hides a message <span>(Won\'t work if the message was globally hidden by a moderator)</span></li>
+            <li><img src="{INCLUDE_DIR_THEME}images/attach.png"> - Item is an uploaded attachment</li>
+            <li><img src="{INCLUDE_DIR_THEME}images/ignored.png"> - User is ignored (cookie)</li>
+            <li><img src="{INCLUDE_DIR_THEME}images/muted.png"> - User has been muted by a moderator</li>
+            <li><img src="{INCLUDE_DIR_THEME}images/nmsg.png"> - Room/Conversation has new messages</li>
+            <li><img src="{INCLUDE_DIR_THEME}images/nmsg_off.png"> - Room/Conversation does not have new messages</li>
+            <li><img src="{INCLUDE_DIR_THEME}images/mod.png"> - User is a moderator</li>
+            <li><img src="{INCLUDE_DIR_THEME}images/cmd.png"> - Toolbar: Information</li>
+            <li><img src="{INCLUDE_DIR_THEME}images/clr.png"> - Toolbar: Clear Screen</li>
+            <li><img src="{INCLUDE_DIR_THEME}images/ts.png"> - Toolbar: Clear Screen</li>
+            <li><img src="{INCLUDE_DIR_THEME}images/gsett.png"> - Toolbar: Global Settings</li>
+            <li><img src="{INCLUDE_DIR_THEME}images/edtmode.png"> - ToolBar: Edit Mode</li>
+            <li><img src="{INCLUDE_DIR_THEME}images/settings_icon.png" style="width: 20px"> - Profile: Settings</li>
+            <li><img src="{INCLUDE_DIR_THEME}images/upl.png" style="width: 20px"> - Profile: Attachment Uploads</li>
+            <li><img src="{INCLUDE_DIR_THEME}images/joined_on.png" style="width: 10px"> - Profile available status <span>(green bar above user avatar)</span></li>
+            <li><img src="{INCLUDE_DIR_THEME}images/joined_off.png" style="width: 10px"> - Profile do not disturb status <span>(red bar above user avatar; Under this mode user will not accept conversations / private messages)</span></li>
+        </ul>
+    </div>
+    <div class="header2">Notes</div>
+    <div>
+        <ul>
+            <li>While <b>loading older messages</b>, one block contains less messages than the others, this is normal, it means the end of the archive has been reached, if more archives exist, the loading can continue.
+            <li><b>No new messages on an updated room</b>: the activity was from a user being ignored
+            <li>Types of <b>Private objects</b>:
+                <ol>
+                    <li><i>/pm</i>: <span>Quick messages sent to a specific user on a specific room.</span></li>
+                    <li><i>Private Conversation room</i>: <span>Private room dedicated to a conversation between two users (just like the normal rooms, but with privacy, both participants can change the topic).</span></li>
+                    <li><i>Private Room</i>: <span>Room restrict to a certain user group (Read/Write)</span></li>
+                </ol>
+            </li>
+            <li>Actions such as <b>profile edition</b>, <b>user moderation</b>, <b>topic update</b>, <b>room management</b>, <b>global settings edition</b>, <b>room switch</b> and <b>message reading</b> do not require the user to join the chat.</li>
+            <li>By joining, a user is granted access to <b>text message box</b>, <b>uploads</b> and can <b>initiate private conversations</b>.</li>
+            <li>When a user logs in to a password protected profile (not in use), the profile statistics do not update unless a correct password is supplied.</li>
+            <li>Uploading attachments generates a BBcode tag which that can be used in the input text box next to other text</li>
+            <li>Offline users last activity time refers to the last known chat activity (visit/join/posts), not the logout time.</li>
+        </ul>
+    </div>
 </div>';
 
 ?>

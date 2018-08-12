@@ -148,11 +148,6 @@ function wc_pop_vid(id, w, h) {
 	wc_toggle('video_'+id);
 }
 
-function wc_show_com() {
-
-	alert("COMMANDS\n\n/me <message> - self message\n/ignore <user> - Ignores a user\n/unignore <user> - Unignores user\n/pm <user> <message> - Sends a private message to user\n\nINPUT AUTO-COMPLETERS\n\nTAB - Hit tab while writing a user name to auto-complete\nPM - Click a user name in posts to auto complete the private message command\n\n(Replace \"<user>\" by the name of the user; [..] denotes an optional parameter.)");
-}
-
 function wc_toggle_status(c) {
 
 	var src = document.getElementById('wc_joined_status_c');
@@ -225,8 +220,8 @@ function wc_toggle_msg(c, id, prefix) {
     	http.open("GET", c+"mode=toggle_msg&id="+encodeURIComponent(id), true);
     	http.onreadystatechange=function(){if(http.readyState==4){
     		if(http.responseText.length > 0) {
-    			if(http.responseText.search('ERROR') != -1) {
-    				alert(http.responseText);
+    			if(http.responseText.indexOf('ERROR') == 0) {
+    				alert(wc_parse_error(http.responseText));
     			} else {
     				msg.innerHTML = http.responseText;
     				if(icon.src.search("arrow_r") != -1) {
@@ -317,23 +312,36 @@ function wc_create_room(c)
 	var http = getHTTPObject();
 	http.open("GET", c+"mode=create_room&n="+encodeURIComponent(n), true);
 	http.onreadystatechange=function(){if(http.readyState==4){
-		if(http.responseText.search("exists") != -1) { alert(http.responseText); } else {
+		if(http.responseText.search("ERROR") != -1) { alert(wc_parse_error(http.responseText)); } else {
 			document.getElementById('wc_room_list').innerHTML = http.responseText;
 		}
 	}}
  	http.send(null);
 }
 
-function wc_change_room(c, n, incdir)
+function wc_change_room(c, n, incdir, new_conv)
 {
-	var http = getHTTPObject();
-	http.open("GET", c+"mode=change_room&n="+encodeURIComponent(n), true);
-	http.onreadystatechange=function(){if(http.readyState==4){
-		document.getElementById('wc_room_list').innerHTML = http.responseText;
-		wc_refresh_msg_once(c, 'ALL', 0, incdir);
-		wc_refresh_topic(c);
-	}}
-	http.send(null);
+	if(new_conv == 1) {
+		var conf = confirm('This will initiate a private conversation with this user, are you sure?');
+	} else {
+		var conf = true;
+	}
+
+	if(conf) {
+		var http = getHTTPObject();
+		http.open("GET", c+"mode=change_room&n="+encodeURIComponent(n), true);
+		http.onreadystatechange=function(){if(http.readyState==4){
+			if(http.responseText.indexOf('ERROR') == 0) {
+				alert(wc_parse_error(http.responseText));
+			} else {
+				document.getElementById('wc_room_list').innerHTML = http.responseText;
+				wc_refresh_msg_once(c, 'ALL', 0, incdir);
+				wc_refresh_topic(c);
+				wc_refresh_users(0, c, 0, 0, 'ignore_lastmod');
+			}
+		}}
+		http.send(null);
+	}
 }
 
 
@@ -618,7 +626,6 @@ function wc_upd_settings(c, event, incdir)
 
 	http.open("POST", c+"mode=upd_settings", true);
 	http.onreadystatechange=function(){if(http.readyState==4){
-		wc_toggle('wc_settings_input');
 		if(document.getElementById('wc_join').className == 'closed') {
 			wc_toggle('wc_text_input');
 		}
@@ -629,8 +636,10 @@ function wc_upd_settings(c, event, incdir)
 			document.getElementById('wc_resetp_elem').className = '';
 			document.getElementById('wc_resetp').checked = false;
 		} else {
-			document.getElementById('wc_resetp_elem').className = 'closed';
-			document.getElementById('wc_resetp').checked = false;
+			if(http.responseText.length == 0) {
+				document.getElementById('wc_resetp_elem').className = 'closed';
+				document.getElementById('wc_resetp').checked = false;
+			}
 		}
 		if(http.responseText.search("RELOAD_PASS_FORM") != -1) {
 			if(document.getElementById('wc_text_input').className != 'closed') {
@@ -646,10 +655,10 @@ function wc_upd_settings(c, event, incdir)
 			join_bt.value = join_bt.value.replace('Join Chat', 'Login');
 		}
 		if(http.responseText.search("NO_ACCESS") == -1) {
-			if(http.responseText.search("INVALID") != -1) {
-				document.getElementById('wc_settings_input').className = '';
-				alert('Invalid Email/Web');
+			if(http.responseText.length > 0 && http.responseText.indexOf('ERROR') == 0) {
+				alert(wc_parse_error(http.responseText));
 			} else {
+				document.getElementById('wc_settings_input').className = 'closed';
 				alert('Settings successfully updated!');
 			}
 		} else {
@@ -670,7 +679,8 @@ function wc_refresh_msg_once(c, all, lim, incdir)
 	http.onreadystatechange=function(){if(http.readyState==4){
 		if(http.responseText.length > 0) {
 			if(all == 'ALL') {
-				document.getElementById('wc_msg_container').innerHTML = http.responseText;
+				var tmp = http.responseText.replace("wc_scroll('0')", "wc_scroll('ALL')");
+				document.getElementById('wc_msg_container').innerHTML = tmp.replace("wc_scroll('')", "wc_scroll('ALL')");
 			} else { 
 				var cont = document.createElement("div");
 				cont.innerHTML = http.responseText;
@@ -705,8 +715,7 @@ function wc_refresh_msg_once_event(c)
 function wc_scroll(all)
 {
 	var objDiv = document.getElementById('wc_msg_container');
-	var isScrolledToBottom = objDiv.scrollHeight - objDiv.clientHeight <= objDiv.scrollTop + 1;
-	if(isScrolledToBottom || all == 'ALL') { objDiv.scrollTop = objDiv.scrollHeight; }
+	if(all == 'ALL') { objDiv.scrollTop = objDiv.scrollHeight; }
 }
 
 function wc_trim_chat(lim)
@@ -794,7 +803,12 @@ function wc_refresh_components(c, incdir, lim) {
     			if(arr[6].indexOf("RESET") == -1) {
     				if(http.responseText != 'You are banned!') {
     					var cont = document.createElement("div");
-    					cont.innerHTML = arr[6];
+					if(isScrolledToBottom) {
+						var tmp = arr[6].replace("wc_scroll('0')", "wc_scroll('ALL')");
+    						cont.innerHTML = tmp.replace("wc_scroll('')", "wc_scroll('ALL')");
+					} else {
+						cont.innerHTML = arr[6];
+					}
     					document.getElementById('wc_msg_container').appendChild(cont);
     				} else {
     					document.getElementById('wc_msg_container').innerHTML = arr[6];
@@ -823,7 +837,7 @@ function wc_refresh_msg(c, all, refresh_delay, lim, incdir, prefix)
 		objDiv.innerHTML = '<div style="text-align: center"><img src="'+incdir+'images/loader.gif"></div>';
 	}
 	var prevpos = objDiv.scrollTop;
-	http.open("GET", c+"mode=refresh_msg&all="+all, true);
+	http.open("GET", c+"mode=refresh_msg&all="+all+"&new_visit=1", true);
 	http.onreadystatechange=function(){if(http.readyState==4){
 		if(http.responseText.length > 0) {
 			document.getElementById('wc_msg_container').innerHTML = http.responseText;
@@ -987,4 +1001,9 @@ function wc_join_chat(c, t, refresh_delay)
 		wc_toggle('wc_joined_status_c');
 		input.focus();
 	}
+}
+
+function wc_parse_error(msg) {
+	if(msg.indexOf('ERROR: ') == 0) { msg = msg.replace('ERROR: ', '', msg); }
+	return msg;
 }

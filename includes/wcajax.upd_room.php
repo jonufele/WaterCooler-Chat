@@ -13,25 +13,21 @@
     $enc = base64_encode($oname);
     
     // Get room definitions
-    $settings = $this->readFile($this->roomDir . 'def_' . $enc . '.txt');
-    
-    // $_operm = Write permission;
-    // $_rperm = Read permission;
-    // $_larch_vol = Last created archive volume;
-    // $_larch_vol_msg_n = Last created archive volume message count;
-    // $_tmp is unused in v1.4.10
-    list($_wperm, $_rperm, $_larch_vol, $_larch_vol_msg_n, $_tmp) = explode('|', $settings, 5);
+    $room_def = $this->getRoomDef($oname);
     $changes = 0;
     
     // Update permissions if changed
-    if($_wperm != $wperm || $rperm != $_rperm) {
-        file_put_contents(
+    if($room_def['wPerm'] != $wperm || $room_def['rPerm'] != $rperm) {
+        $this->writeFile(
             $this->roomDir . 'def_' . $enc . '.txt',
-            $wperm .'|' . 
-            $rperm . '|' . 
-            $_larch_vol . '|' . 
-            $_larch_vol_msg_n . '|' . 
-            $_tmp
+            $this->parseRDataString(
+                array(
+                    'wPerm' => $wperm,
+                    'rPerm' => $rperm
+                ),
+                $room_def
+            ),
+            'w'
         );
         $changes++;
     }
@@ -43,10 +39,16 @@
             !trim($nname, ' ') || 
             preg_match("/[\?<>\$\{\}\"\:\|,;]/i", $nname)
         ) {
-            echo 'Room ' . $nname . ' already exists OR invalid room name'.
+            echo 'ERROR: Room ' . $nname . ' already exists OR invalid room name'.
               "\n".
               '(illegal char.: ? < > $ { } " : | , ;)'
             ;
+            die();
+        }
+        
+            // Halt if name contains "pm_" (reserved for user pm rooms)
+        if(strpos($nname, 'pm_') !== FALSE) {
+            echo 'ERROR: Room name cannot contain the string "pm_"';
             die();
         }
         

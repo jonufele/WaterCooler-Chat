@@ -8,6 +8,13 @@
     if(!$this->hasPermission('ROOM_C')) { die(); }
 
     $room_name = urldecode($this->myGet('n'));
+    
+    // Halt if name contains "pm_" (reserved for user pm rooms)
+    if(strpos($room_name, 'pm_') !== FALSE) {
+        echo 'ERROR: Room name cannot contain the string "pm_"';
+        die();
+    }
+    
     // Target room exists? Is room name valid?
     if(
         !file_exists($this->roomDir . base64_encode($room_name) . '.txt') && 
@@ -31,7 +38,7 @@
 
     } else {
         // Room name is invalid
-        echo 'Room ' . $room_name . ' already exists OR invalid room name' . "\n" . 
+        echo 'ERROR: Room ' . $room_name . ' already exists OR invalid room name' . "\n" . 
             '(illegal char.: ? < > $ { } " : | , ;)!';
     }
 

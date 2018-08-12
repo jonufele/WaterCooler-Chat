@@ -33,7 +33,8 @@ define('INCLUDE_DIR', '');
 // Message Refresh Delay (miliseconds, do not set too low to avoid server overload)
 define('REFRESH_DELAY', 5000);
 
-// Message Refresh Delay while idling (miliseconds); 0 = Disabled
+// Message Refresh Delay while idling (miliseconds); 0 = Disabled; if on, catch window
+// will be wider (event buffer will keep contents longer, logout detection will be slower) 
 define('REFRESH_DELAY_IDLE', 30000);
 
 // Minimum period of time (seconds) to be considered idle
@@ -152,6 +153,7 @@ define('PERM_ATTACH_DOWN', 'MMOD MOD CUSER USER GUEST');
 define('PERM_PROFILE_E', 'MMOD MOD CUSER USER');
 define('PERM_IGNORE', 'MMOD MOD CUSER USER');
 define('PERM_PM_SEND', 'MMOD MOD CUSER USER');
+define('PERM_PM_ROOM', 'MMOD MOD CUSER USER');
 
 define('PERM_ACC_REC', 'GUEST');
 define('PERM_LOGIN', 'GUEST');

@@ -26,7 +26,7 @@
                     if($this->userMatch($par[1]) !== FALSE) {
                         $this->writeEvent('ignore', $par[1]);
                         $this->wcSetCookie(
-                            'ign_' . $par[1], 
+                            'ign_' . base64_encode($par[1]), 
                             '1'
                         );
                         echo 'Successfully ignored ' . $par[1];
@@ -41,13 +41,12 @@
                         $this->myCookie('ign_' . base64_encode($par[1]))
                     ) {
                         $this->writeEvent('unignore', $par[1]);
-                        $this->wcSetCookie(
-                            'ign_' . $par[1], 
-                            ''
+                        $this->wcUnsetCookie(
+                            'ign_' . base64_encode($par[1])
                         );
                         echo 'Successfully unignored ' . $par[1];
                     } else {
-                        echo 'User ' . $par1 . ' does not exist / Not being ignored.';
+                        echo 'User ' . $par[1] . ' does not exist / Not being ignored.';
                     }
                 break;
             }
@@ -58,12 +57,11 @@
 
             // Halt if banned or muted
             $muted_msg = $banned_msg = '';
-            $muted = $this->getMuted($this->name);
-            if($muted !== FALSE && $this->name) {
+            if($this->isMuted !== FALSE && $this->name) {
                 $muted_msg = 'You have been set as mute'.
                     (
-                        $muted ? 
-                        ' (' . $this->parseIdle($muted, 1) . ' remaining)' : 
+                        $this->isMuted ? 
+                        ' (' . $this->parseIdle($this->isMuted, 1) . ' remaining)' : 
                         ''
                     ) . ', you cannot talk for the time being!'
                 ;
@@ -92,6 +90,15 @@
                 }
                 $name_prefix = '';
                 $text = $this->myGet('t');
+                
+                if($this->isPmRoom) {
+                    $target = $this->getPmRoomTarget($this->mySession('current_room'));
+                    $target_data = $this->userData($target);
+                    if($target_data['status'] == 2) {
+                        echo 'User does not want to be disturbed at the moment!';
+                        die();
+                    }
+                }
 
                 // Tag private message
                 if(preg_match('#^(/me )#i', $text)) {
@@ -101,6 +108,11 @@
 
                 // Pre-process private message
                 if(preg_match('#^(/pm )#i', $text)) {
+                
+                    if($this->isPmRoom) {
+                        echo 'You are already on a private message room, no need for the /pm command!';
+                        die();
+                    }
                 
                     if(!$this->hasPermission('PM_SEND')) { die(); }
                     list($target, $ntext) = explode(
@@ -119,7 +131,7 @@
                             $user_status = $this->userData($target);
                             if(
                                 (time() - $this->getPing($target)) <= $this->catchWindow && 
-                                $user_status[8] == 2
+                                $user_status['status'] == 2
                             ) {
                                 echo 'User ' . $target . ' does not want to be disturbed at the moment!';
                                 die();
@@ -162,40 +174,32 @@
                     
                     // Arquive discarded message if enabled
                     if(ARCHIVE_MSG === TRUE) {
-                        if($this->roomLArchVol == 0) { $this->roomLArchVol = 1; }
+                        if($this->rData['lArchVol'] == 0) { $this->rData['lArchVol'] = 1; }
                         $archive = str_replace(
                             '.txt', 
-                            '.' . $this->roomLArchVol, 
+                            '.' . $this->rData['lArchVol'], 
                             MESSAGES_LOC
                         );
                         
                         // Check if current arquive is full, if yes, start a new arquive
-                        if(($this->roomLArchVolMsgN + 1) > CHAT_STORE_BUFFER) {
-                            $this->roomLArchVol++;
-                            $this->roomLArchVolMsgN = 1;
+                        if(($this->rData['lArchVolMsgN'] + 1) > CHAT_STORE_BUFFER) {
+                            $this->rData['lArchVol']++;
+                            $this->rData['lArchVolMsgN'] = 1;
                             $archive = str_replace(
                                 '.txt', 
-                                '.' . $this->roomLArchVol, 
+                                '.' . $this->rData['lArchVol'], 
                                 MESSAGES_LOC
                             );
                             $this->writeFile(
                                 ROOM_DEF_LOC, 
-                                $this->roomWPerm . '|' . 
-                                $this->roomRPerm . '|' . 
-                                $this->roomLArchVol . '|' . 
-                                $this->roomLArchVolMsgN . '|' . 
-                                '',
+                                $this->parseRDataString(NULL, $this->rData),
                                 'w'
                             );    
                         } else {
-                            $this->roomLArchVolMsgN++;
+                            $this->rData['lArchVolMsgN']++;
                             $this->writeFile(
-                                ROOM_DEF_LOC, 
-                                $this->roomWPerm . '|' . 
-                                $this->roomRPerm . '|' . 
-                                $this->roomLArchVol . '|' . 
-                                $this->roomLArchVolMsgN . '|' . 
-                                '',
+                                ROOM_DEF_LOC,
+                                $this->parseRDataString(NULL, $this->rData),
                                 'w'
                             );
                         }

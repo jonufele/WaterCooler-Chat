@@ -9,7 +9,7 @@
     $action = $output = '';
     $hard_mode = $soft_mode = FALSE;
     $cookie_name = 'hide_' . $id;
-    
+
     // If message has not been hidden by a moderator, hide it (or allow soft hide)
     if(strpos($this->msgList, $id) !== FALSE) {
         $action = 'hide';
@@ -103,7 +103,7 @@
     
     if($output) {
         echo str_replace(
-            'wc_doscroll()',
+            'wc_scroll()',
             '',
             $output
         );

@@ -113,8 +113,18 @@ H1 {
 	font-weight: bold;
 }
 
+#wc_topic .pm {
+	font-weight: normal;
+}
+
 #wc_topic .edit_bt_off {
 	display: none;
+}
+
+#wc_topic .avatar {
+	padding: 1px;
+	border: 1px solid #60779b;
+	width: 15px
 }
 
 #wc_topic a.edit {
@@ -262,6 +272,22 @@ H1 {
 #wc_msg_container .msg .msg_body,
 #wc_msg_container .msg_pm .msg_body {
 	margin-top: 5px;
+	line-height: 1.5em; 
+}
+
+#wc_msg_container .msg .event,
+#wc_msg_container .msg .self {
+	margin-left: 10px;
+}
+
+#wc_msg_container .msg .event {
+	color: #64267c;
+}
+
+#wc_msg_container .msg .curr_user_ref,
+#wc_msg_container .msg_pm .curr_user_ref {
+	background-color: #dee7f4;
+	padding: 3px;
 }
 
 #wc_msg_container .load_older_controls {
@@ -391,57 +417,93 @@ H1 {
 }
 
 
-#wc_ulist .user_item {
+#wc_ulist .user_item,
+#wc_ulist .user_item_pm {
 	font-size: 12px;
 	margin: 3px;
 }
 
+#wc_ulist .user_item_pm {
+	background-color: #ced6e2;
+	border-right: 2px solid #a8b3c4;
+}
 
-#wc_ulist .user_item img {
+#wc_ulist .user_item a,
+#wc_ulist .user_item_pm a {
+	text-decoration: none;
+}
+
+#wc_ulist .user_item a:hover,
+#wc_ulist .user_item_pm a:hover {
+	text-decoration: underline;
+}
+
+#wc_ulist .user_item img,
+#wc_ulist .user_item_pm img {
 	padding: 1px;
 	border: 1px solid #60779b;
 	margin-right: 5px;
 }
 
-#wc_ulist .user_item img.joined_on {
+#wc_ulist .user_item img.joined_on,
+#wc_ulist .user_item_pm img.joined_on {
 	padding: 1px;
 	border: 1px solid #7f8cac;
 	border-top: 2px solid #08a52a;
 }
 
-#wc_ulist .user_item img.joined_idle {
+#wc_ulist .user_item img.joined_idle,
+#wc_ulist .user_item_pm img.joined_idle {
 	padding: 1px;
 	border: 1px solid #7f8cac;
 	border-top: 2px solid #f28900;
 }
 
-#wc_ulist .user_item img.joined_na {
+#wc_ulist .user_item img.joined_na,
+#wc_ulist .user_item_pm img.joined_na {
 	padding: 1px;
 	border: 1px solid #7f8cac;
 	border-top: 2px solid #c10707;
 }
 
 #wc_ulist .user_item img.web,
-#wc_ulist .user_item img.edit_bt {
+#wc_ulist .user_item img.edit_bt,
+#wc_ulist .user_item_pm img.web,
+#wc_ulist .user_item_pm img.edit_bt {
 	padding: 1px;
 	border: 0;
 	vertical-align: middle;
 }
 
-#wc_ulist .user_item img.edit_bt_off { 
+#wc_ulist .user_item img.edit_bt_off,
+#wc_ulist .user_item_pm img.edit_bt_off { 
 	padding: 1px;
 	border: 0;
 	display: none;
 }
 
-#wc_ulist .user_item img.joined_icon {
+#wc_ulist .user_item img.joined_icon,
+#wc_ulist .user_item_pm img.joined_icon {
 	width: 10px;
 	border: 0;
 }
 
+#wc_ulist .user_item img.new_msg_icon,
+#wc_ulist .user_item_pm img.new_msg_icon {
+	position: absolute;
+	border: 0;
+}
+
+#wc_ulist .user_item img.new_msg_icon_small,
+#wc_ulist .user_item_pm img.new_msg_icon_small {
+	position: absolute;
+	border: 0;
+}
 
 #wc_ulist .user_item .moderator_icon,
-#wc_ulist .user_item .muted_icon {
+#wc_ulist .user_item .muted_icon,
+#wc_ulist .user_item_pm .moderator_icon,
+#wc_ulist .user_item_pm .muted_icon {
 	vertical-align: middle;
 	width: 10px;
 	border: 0;
@@ -466,6 +528,8 @@ H1 {
 
 #wc_ulist .form_box {
 	padding: 20px;
+	z-index: 3;
+	position: absolute;
 }
 
 #wc_ulist .form_box div {
@@ -532,6 +596,12 @@ H1 {
 
 #wc_rooms #wc_room_create {
 	font-size: 10px;
+}
+
+
+#wc_rooms .form_box {
+	position: absolute;
+	z-index:3;
 }
 
 #wc_rooms .form_box input[id="wc_room_name"] {
@@ -722,4 +792,52 @@ H1 {
 	padding-bottom: 10px;
 	font-size: 9px;
 	text-align: center;
+}
+
+/*--------------------------------------*/
+/*            INFORMATION               */
+/*--------------------------------------*/
+
+#wcchat #wc_info {
+	height: 400px;
+	border-right: 1px dotted #a28299;
+	border-left: 1px dotted #a28299;
+	overflow: auto;
+	font-size: 12px;
+	padding: 15px;
+}
+
+#wc_info .header {
+	text-align: center;
+	font-size: 20px;
+	margin: 10px;
+}
+
+#wc_info .header2 {
+	font-weight: bold;
+	border-bottom: 1px dotted #5b5c7c;
+}
+
+
+#wc_info div {
+	margin: 10px;
+	line-height: 1.5em;
+}
+
+#wc_info span {
+	font-size: 10px;
+	color:#5b5c7c
+}
+
+#wc_info fieldset {
+	border-top: 1px dotted #5b5c7c;
+}
+
+#wc_info fieldset legend {
+	font-weight: bold;
+}
+
+#wc_info .curr_user_ref {
+	background-color: #dee7f4;
+	padding: 3px;
 }

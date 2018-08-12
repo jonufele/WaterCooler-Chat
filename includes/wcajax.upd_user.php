@@ -25,7 +25,7 @@
         if($this->hasPermission('MOD', 'skip_msg')) {
         
             // User must have a password in order to be assigned as moderator
-            if($udata[5]) {
+            if($udata['pass']) {
                 $this->writeFile(MODL, "\n" . base64_encode($oname), 'a');
                 $output .= '- Successfully set ' . $oname . ' as moderator.' . "\n";
             } else {
@@ -177,9 +177,9 @@
         }
         
         // Process web address request
-        if($this->myPost('web') != $udata[2]) {
+        if($this->myPost('web') != $udata['web']) {
             if(filter_var($this->myPost('web'), FILTER_VALIDATE_URL)) {
-                $udata[2] = $this->myPost('web');
+                $udata['web'] = $this->myPost('web');
                 $changes = 1;
                 $output .= '- Web Address Successfully set!' . "\n";
             } else {
@@ -188,9 +188,9 @@
         }
 
         // Process email address request
-        if($this->myPost('email') != $udata[1]) {
+        if($this->myPost('email') != $udata['email']) {
             if(filter_var($this->myPost('email'), FILTER_VALIDATE_EMAIL)) {
-                $udata[1] = $this->myPost('email');
+                $udata['email'] = $this->myPost('email');
                 $changes = 1;
                 $output .= '- Email Address Successfully set!' . "\n";
             } else {
@@ -199,15 +199,15 @@
         }
 
         // Process reset avatar request
-        if($this->myPost('reset_avatar') && $udata[0]) {
-            $udata[0] = '';
+        if($this->myPost('reset_avatar') && $udata['avatar']) {
+            $udata['avatar'] = '';
             $changes = 1;
             $output .= '- Avatar Successfully Reset!' . "\n";
         }
 
         // Process reset password request
-        if($this->myPost('reset_pass') && $udata[5]) {
-            $udata[5] = '';
+        if($this->myPost('reset_pass') && $udata['pass']) {
+            $udata['pass'] = '';
             $changes = 1;
             $output .= '- Password Successfully Reset!' . "\n";
         }
@@ -215,25 +215,22 @@
         // Process password regenerate request
         if($this->myPost('regen_pass')) {
             $npass = $this->randNumb(8);
-            $udata[5] = md5(md5($npass));
+            $udata['pass'] = md5(md5($npass));
             $changes = 1;
             $output .= '- Password Successfully Re-generated: ' . $npass . "\n";
         }
 
         if($changes) {
-            $nstring = base64_encode($udata[0]) . '|' . 
-                base64_encode($udata[1]) . '|' . 
-                base64_encode($udata[2]) . '|' . 
-                $udata[3] . '|' . 
-                $udata[4] . '|' . 
-                $udata[5]
-            ;
+            $nstring = $this->parseUDataString(
+                NULL,
+                $udata
+            );
             
             // If name is the same or name error exists, write with the name unchanged
             if($this->myPost('name') == $oname || $name_err) {
                 $towrite = preg_replace(
                     '/^(' . base64_encode($oname) . ')\|(.*?)\|/m', 
-                    '\\1|' . base64_encode($nstring) . '|', 
+                    '\\1|' . $nstring . '|', 
                     $this->userList
                 );
                 
@@ -281,6 +278,64 @@
                         'w'
                     );
                 }
+                
+                // Rename pm room files
+                $users = explode("\n", trim($this->readFile(USERL)));
+                foreach($users as $k => $v) {
+                    list($user_name, $tmp) = explode('|', trim($v), 2);
+                    if($user_name != base64_encode($this->myPost('name'))) {
+                    
+                        $old_pm_room_name = $this->parsePmRoomName(
+                            $oname, 
+                            base64_decode($user_name)
+                        );
+                        $pm_room_name = $this->parsePmRoomName(
+                            $this->myPost('name'), 
+                            base64_decode($user_name)
+                        );    
+                        
+                        if(file_exists(
+                                $this->roomDir . 
+                                base64_encode($old_pm_room_name) . '.txt'
+                        )) {
+                            rename(
+                                $this->roomDir . 
+                                base64_encode($old_pm_room_name) . '.txt',
+                                $this->roomDir . 
+                                base64_encode($pm_room_name) . '.txt'
+                            );
+                        }
+                        
+                        foreach(
+                            glob(
+                                $this->roomDir . 
+                                '*_' . base64_encode($old_pm_room_name) . '.txt'
+                            ) as $file
+                        ) {
+                            rename(
+                                $file,
+                                str_replace(
+                                    base64_encode($old_pm_room_name),
+                                    base64_encode($pm_room_name),
+                                    $file
+                                )
+                            );
+                        }
+                    }
+                }
+                
+                // Check if current room needs to be updated
+                
+                $pm_room_name_self = $this->parsePmRoomName(
+                    $this->name, 
+                    $oname
+                );
+                
+                if($this->mySession('current_room') == $pm_room_name_self) {
+                    $this->wcSetSession('current_room', $pm_room_name_self);
+                    $this->wcSetCookie('current_room', $pm_room_name_self);    
+                }
+                touch(ROOMS_LASTMOD);
             }
 
             $this->writeFile(USERL, $towrite, 'w');

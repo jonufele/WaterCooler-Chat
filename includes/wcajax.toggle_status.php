@@ -4,7 +4,7 @@
 
     if(!isset($this)) { die(); }
 
-    $current = $this->uData[8];
+    $current = $this->uData['status'];
 
     if($current == 1) {
         $this->writeFile(

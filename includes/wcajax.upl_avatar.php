@@ -33,18 +33,16 @@
             if($this->thumbnailCreateCr($_FILES['avatar']['tmp_name'], $dest, $tn_size)) {
             
                 unlink($_FILES['avatar']['tmp_name']);
-                $nstring = base64_encode($dest_write . '?' . time()) . '|' . 
-                    base64_encode($this->uEmail) . '|' . 
-                    base64_encode($this->uWeb) . '|' . 
-                    $this->uTimezone . '|' . 
-                    $this->uHourFormat . '|' . 
-                    $this->uPass
-                ;
+                $nstring =  $this->parseUDataString(
+                    array(
+                        'avatar' => $dest_write . '?' . time()  
+                    )
+                );
 
                 // Set user's avatar value
                 $towrite = preg_replace(
                     '/^(' . base64_encode($this->name) . ')\|(.*?)\|/m', 
-                    '\\1|' . base64_encode($nstring) . '|', 
+                    '\\1|' . $nstring . '|', 
                     $this->userList
                 );
 

@@ -7,7 +7,7 @@
     $pass = $this->myGet('pass');
     
     // Halt if password don't match, return a 0 to ajax caller
-    if(md5(md5($pass)) != $this->uPass) {
+    if(md5(md5($pass)) != $this->uData['pass']) {
     
         echo 0;
     
