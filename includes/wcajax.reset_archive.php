@@ -4,6 +4,6 @@
 
     if(!isset($this)) { die(); }
 
-    $this->wcUnsetSession('archive');
+    WcPgc::wcUnsetSession('archive');
 
 ?>

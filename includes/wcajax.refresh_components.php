@@ -4,26 +4,26 @@
 
     if(!isset($this)) { die(); }
 
-    $output = $this->refreshUsers() . '[$]' . 
-        $this->checkTopicChanges() . '[$]' . 
-        $this->refreshRooms() . '[$]' . 
+    $output = $this->user->getListChanges() . '[$]' . 
+        $this->room->getTopicChanges() . '[$]' . 
+        $this->room->getListChanges() . '[$]' . 
         (
             (
-                $this->parseFileMTime(
-                    $this->roomDir . 'hidden_' . 
-                    base64_encode($this->mySession('current_room')) . '.txt'
+                WcTime::parseFileMTime(
+                    self::$roomDir . 'hidden_' . 
+                    base64_encode(WcPgc::mySession('current_room')) . '.txt'
                 ) <= 
-                (time()+$this->catchWindow)
+                (time()+self::$catchWindow)
             ) ? 
-            $this->checkHiddenMsg() : 
+            $this->room->getHiddenMsg() : 
             ''
         ) . '[$]' . 
-        $this->refreshMsgE() . '[$]' . 
-        $this->mySession('alert_msg') . '[$]' .
-        str_replace('[$]', base64_encode('[$]'), $this->refreshMsg())
+        $this->room->getNewMsgE() . '[$]' . 
+        WcPgc::mySession('alert_msg') . '[$]' .
+        str_replace('[$]', '', $this->room->getNewMsg())
     ;
     if(trim($output, '[$]')) { echo $output; }
 
-    if($this->mySession('alert_msg')) { $this->wcUnsetSession('alert_msg'); }
+    if(WcPgc::mySession('alert_msg')) { WcPgc::wcUnsetSession('alert_msg'); }
 
 ?>

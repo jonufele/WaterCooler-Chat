@@ -5,14 +5,14 @@
     if(!isset($this)) { die(); }
 
     // Halt if no permission to delete rooms
-    if(!$this->hasPermission('ROOM_D')) { die(); }
+    if(!$this->user->hasPermission('ROOM_D')) { die(); }
     $changes = 0;
     $room_move = '';
-    $oname = $this->myGet('oname');
+    $oname = WcPgc::myGet('oname');
     $enc = base64_encode($oname);
     
     // Room Name exists?
-    if(trim($oname) && file_exists($this->roomDir . $enc . '.txt')) {
+    if(trim($oname) && file_exists(self::$roomDir . $enc . '.txt')) {
     
         // Halt if default room
         if(trim($oname) == DEFAULT_ROOM) {
@@ -20,16 +20,16 @@
             die();
         }
         // Delete room files
-        unlink($this->roomDir . $enc . '.txt');
-        unlink($this->roomDir . 'def_' . $enc.'.txt');
-        unlink($this->roomDir . 'topic_' . $enc.'.txt');
-        if(file_exists($this->roomDir . 'hidden_' . $enc . '.txt')) {
-            unlink($this->roomDir . 'hidden_' . $enc . '.txt');
+        unlink(self::$roomDir . $enc . '.txt');
+        unlink(self::$roomDir . 'def_' . $enc.'.txt');
+        unlink(self::$roomDir . 'topic_' . $enc.'.txt');
+        if(file_exists(self::$roomDir . 'hidden_' . $enc . '.txt')) {
+            unlink(self::$roomDir . 'hidden_' . $enc . '.txt');
         }
         // If deleted room is current room, move user to the default room
-        if($this->mySession('current_room') == $oname) {
-            $this->wcSetSession('current_room', DEFAULT_ROOM);
-            $this->wcSetCookie('current_room', DEFAULT_ROOM);
+        if(WcPgc::mySession('current_room') == $oname) {
+            WcPgc::wcSetSession('current_room', DEFAULT_ROOM);
+            WcPgc::wcSetCookie('current_room', DEFAULT_ROOM);
             $room_move = 'RMV';
         }
         $changes++;

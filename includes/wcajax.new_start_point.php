@@ -4,8 +4,8 @@
 
     if(!isset($this)) { die(); }
 
-    $this->wcSetCookie(
-        'start_point_' . $this->mySession('current_room'), 
+    WcPgc::wcSetCookie(
+        'start_point_' . WcPgc::mySession('current_room'), 
         time()
     );
 

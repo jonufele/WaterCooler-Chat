@@ -4,10 +4,10 @@
 
     if(!isset($this)) { die(); }
 
-    if($this->myCookie('hide_time')) {
-        $this->wcUnsetCookie('hide_time');
+    if(WcPgc::myCookie('hide_time')) {
+        WcPgc::wcUnsetCookie('hide_time');
     } else {
-        $this->wcSetCookie('hide_time', '1');
+        WcPgc::wcSetCookie('hide_time', '1');
     }
 
 ?>

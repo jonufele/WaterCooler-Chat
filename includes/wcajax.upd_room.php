@@ -5,22 +5,22 @@
     if(!isset($this)) { die(); }
 
     // Halt if no room edit permission
-    if(!$this->hasPermission('ROOM_E')) { die(); }
-    $oname = $this->myPost('oname');
-    $nname = $this->myPost('nname');
-    $wperm = $this->myPost('perm');
-    $rperm = $this->myPost('rperm');
+    if(!$this->user->hasPermission('ROOM_E')) { die(); }
+    $oname = WcPgc::myPost('oname');
+    $nname = WcPgc::myPost('nname');
+    $wperm = WcPgc::myPost('perm');
+    $rperm = WcPgc::myPost('rperm');
     $enc = base64_encode($oname);
     
     // Get room definitions
-    $room_def = $this->getRoomDef($oname);
+    $room_def = $this->room->getDef($oname);
     $changes = 0;
     
     // Update permissions if changed
     if($room_def['wPerm'] != $wperm || $room_def['rPerm'] != $rperm) {
-        $this->writeFile(
-            $this->roomDir . 'def_' . $enc . '.txt',
-            $this->parseRDataString(
+        WcFile::writeFile(
+            self::$roomDir . 'def_' . $enc . '.txt',
+            $this->room->parseDefString(
                 array(
                     'wPerm' => $wperm,
                     'rPerm' => $rperm
@@ -35,7 +35,7 @@
     // Rename room if changed
     if($oname != $nname) {
         if(
-            file_exists($this->roomDir . base64_encode($nname) . '.txt') || 
+            file_exists(self::$roomDir . base64_encode($nname) . '.txt') || 
             !trim($nname, ' ') || 
             preg_match("/[\?<>\$\{\}\"\:\|,;]/i", $nname)
         ) {
@@ -53,41 +53,41 @@
         }
         
         rename(
-            $this->roomDir . $enc . '.txt', 
-            $this->roomDir . base64_encode($nname) . '.txt'
+            self::$roomDir . $enc . '.txt', 
+            self::$roomDir . base64_encode($nname) . '.txt'
         );
         rename(
-            $this->roomDir . 'def_' . $enc . '.txt', 
-            $this->roomDir . 'def_' . base64_encode($nname) . '.txt'
+            self::$roomDir . 'def_' . $enc . '.txt', 
+            self::$roomDir . 'def_' . base64_encode($nname) . '.txt'
         );
         rename(
-            $this->roomDir . 'topic_' . $enc . '.txt', 
-            $this->roomDir . 'topic_' . base64_encode($nname) . '.txt'
+            self::$roomDir . 'topic_' . $enc . '.txt', 
+            self::$roomDir . 'topic_' . base64_encode($nname) . '.txt'
         );
         
-        if(file_exists($this->roomDir . 'hidden_' . $enc . '.txt')) {
+        if(file_exists(self::$roomDir . 'hidden_' . $enc . '.txt')) {
             rename(
-                $this->roomDir . 'hidden_' . $enc . '.txt', 
-                $this->roomDir . 'hidden_' . base64_encode($nname) . '.txt'
+                self::$roomDir . 'hidden_' . $enc . '.txt', 
+                self::$roomDir . 'hidden_' . base64_encode($nname) . '.txt'
             );
         }
         
         // If the renamed room is the default, rename in settings as well
         if(trim($oname) == trim(DEFAULT_ROOM)) {
             file_put_contents(
-                $this->includeDirServer . 'settings.php',
+                self::$includeDirServer . 'settings.php',
                 str_replace(
                     "'DEFAULT_ROOM', '" . str_replace("'", "\'", $oname) . "'",
                     "'DEFAULT_ROOM', '" . str_replace("'", "\'", $nname) . "'",
-                    $this->readFile($this->includeDirServer . 'settings.php')
+                    WcFile::readFile(self::$includeDirServer . 'settings.php')
                 )
             );
         }
         
         // If the renamed room is the current room, reset current room client/server variables
-        if($this->mySession('current_room') == $oname) {
-            $this->wcSetSession('current_room', $nname);
-            $this->wcSetCookie('current_room', $nname);
+        if(WcPgc::mySession('current_room') == $oname) {
+            WcPgc::wcSetSession('current_room', $nname);
+            WcPgc::wcSetCookie('current_room', $nname);
         }
         $changes++;
     }

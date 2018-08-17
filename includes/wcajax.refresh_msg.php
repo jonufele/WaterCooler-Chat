@@ -1,9 +1,9 @@
 <?php
 
-// Parses Chat Post Messages
+// Gets new Chat Post Messages
 
     if(!isset($this)) { die(); }
 
-    echo $this->refreshMsg();
+    echo $this->room->getNewMsg();
 
 ?>

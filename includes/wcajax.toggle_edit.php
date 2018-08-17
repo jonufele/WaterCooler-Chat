@@ -4,10 +4,10 @@
 
     if(!isset($this)) { die(); }
 
-    if($this->myCookie('hide_edit')) {
-        $this->wcUnsetCookie('hide_edit');
+    if(WcPgc::myCookie('hide_edit')) {
+        WcPgc::wcUnsetCookie('hide_edit');
     } else {
-        $this->wcSetCookie('hide_edit', '1');
+        WcPgc::wcSetCookie('hide_edit', '1');
     }
 
 ?>

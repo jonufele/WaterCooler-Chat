@@ -4,6 +4,6 @@
 
     if(!isset($this)) { die(); }
 
-    echo $this->refreshRooms();
+    echo $this->room->getListChanges();
 
 ?>

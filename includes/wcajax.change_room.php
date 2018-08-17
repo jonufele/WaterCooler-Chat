@@ -4,32 +4,32 @@
 
     if(!isset($this)) { die(); }
 
-    $room_name = html_entity_decode($this->myGet('n'));
+    $room_name = html_entity_decode(WcPgc::myGet('n'));
 
     if(
         strpos($room_name, 'pm_') !== FALSE && 
-        !file_exists($this->roomDir . base64_encode($room_name) . '.txt')
+        !file_exists(self::$roomDir . base64_encode($room_name) . '.txt')
     ) {
         if(
-            $this->hasPermission('PM_ROOM', 'skip_msg') && 
-            !$this->isMuted && 
-            !$this->isBanned
+            $this->user->hasPermission('PM_ROOM', 'skip_msg') && 
+            !$this->user->isMuted && 
+            !$this->user->isBanned
         ) {
             
             // Check if user status is set to not disturb
-            $target = $this->getPmRoomTarget($room_name);
-            $user_data = $this->userData($target);
+            $target = $this->room->getConvTarget($room_name);
+            $user_data = $this->user->getData($target);
             if(
-                (time() - $this->getPing($target)) <= $this->catchWindow && 
+                (time() - $this->user->getPing($target)) <= self::$catchWindow && 
                 $user_data['status'] == 2
             ) {
                 echo 'ERROR: User does not want to be disturbed at the moment!';
                 die();
             } else {
                 // Check if current user is joined
-                if($this->isLoggedIn && $this->uData['status'] != 0) {
+                if($this->user->isLoggedIn && $this->user->data['status'] != 0) {
                     file_put_contents(
-                        $this->roomDir . base64_encode($room_name) . '.txt',
+                        self::$roomDir . base64_encode($room_name) . '.txt',
                         time() . '|*' . base64_encode('Private Conversation Room') . '| has been created.' . "\n"
                     );    
                 } else {
@@ -43,9 +43,9 @@
         }
     }
 
-    $this->handleLastRead('store');
-    $this->wcSetSession('current_room', $room_name);
-    $this->wcSetCookie('current_room', $room_name);
-    echo $this->parseRooms();
+    WcTime::handleLastRead('store');
+    WcPgc::wcSetSession('current_room', $room_name);
+    WcPgc::wcSetCookie('current_room', $room_name);
+    echo $this->room->parseList();
 
 ?>

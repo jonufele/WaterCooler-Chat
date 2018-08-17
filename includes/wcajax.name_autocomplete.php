@@ -4,12 +4,12 @@
 
     if(!isset($this)) { die(); }
 
-    $hint = $this->myGet('hint');
+    $hint = WcPgc::myGet('hint');
     
-    if($this->hasData($hint)) {
+    if(WcUtils::hasData($hint)) {
         $words = explode(' ', trim($hint));
         $current_word = str_replace('@', '', $words[count($words)-1]);
-        $users = $this->mySession('autocomplete');
+        $users = WcPgc::mySession('autocomplete');
         
         if(
             strpos(

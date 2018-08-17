@@ -7,7 +7,7 @@
     // Process request if form element exists and has permission to attach and attachmemts are enabled
     if(
         $_FILES['attach']['tmp_name'] && 
-        $this->hasPermission('ATTACH_UPL', 'skip_msg') && 
+        $this->user->hasPermission('ATTACH_UPL', 'skip_msg') && 
         ATTACHMENT_UPLOADS
     ) {
         sleep(1);
@@ -24,15 +24,15 @@
         
         // Destination path
         $dest = 
-            $this->includeDirServer . 
+            self::$includeDirServer . 
             'files/attachments/' . 
-            base64_encode($this->name) . '_' . 
+            base64_encode($this->user->name) . '_' . 
             dechex(time()). '_' . 
             $dest_name
         ;
         
         // Get file type by extention
-        $type = $this->getFileExt($dest_name);
+        $type = WcFile::getFileExt($dest_name);
         $file_ok = TRUE;
         $allowed_types = explode(' ', trim(ATTACHMENT_TYPES, ' '));
         $allowed_types_img = array('jpg', 'jpeg', 'gif', 'png');
@@ -47,10 +47,10 @@
             unlink($_FILES['attach']['tmp_name']);
             
             if(in_array($type, $allowed_types_img)) {
-                echo $this->parseImg($dest, 'ATTACH');
+                echo WcImg::parseImg($dest, 'ATTACH');
             } else {
                 echo '[attach_' . 
-                    base64_encode($this->name) . '_' . 
+                    base64_encode($this->user->name) . '_' . 
                     dechex(time()) . '_' . 
                     intval($_FILES['attach']['size'] / 1014) . '_' . 
                     $dest_name .']'

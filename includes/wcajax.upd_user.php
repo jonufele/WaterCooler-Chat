@@ -5,28 +5,32 @@
     if(!isset($this)) { die(); }
 
     $output = '';
-    $oname = $this->myPost('oname');
+    $oname = WcPgc::myPost('oname');
 
     // Halt if target is a Moderator and user is not current nor Master Moderator
-    if(!$this->isMasterMod && $this->getMod($oname) !== FALSE && $this->name != $oname && trim($oname, ' ')) {
+    if(!$this->user->isMasterMod && 
+        $this->user->getMod($oname) !== FALSE && 
+        $this->user->name != $oname && 
+        trim($oname, ' ')
+    ) {
         echo 'You cannot edit other moderator!';
         die();
     }
     
     // Halt if target user is invalid (happens if the user was renamed)
-    if($this->userMatch($oname) === FALSE) {
+    if($this->user->match($oname) === FALSE) {
         echo 'Invalid Target User (If you just renamed the user, close the form and retry after the name update)!';
         die();
     } 
-    $udata = $this->userData($oname);
+    $udata = $this->user->getData($oname);
     
     // Process moderator request if target user is not a moderator already
-    if($this->myPost('moderator') && $this->getMod($oname) === FALSE) {
-        if($this->hasPermission('MOD', 'skip_msg')) {
+    if(WcPgc::myPost('moderator') && $this->user->getMod($oname) === FALSE) {
+        if($this->user->hasPermission('MOD', 'skip_msg')) {
         
             // User must have a password in order to be assigned as moderator
             if($udata['pass']) {
-                $this->writeFile(MODL, "\n" . base64_encode($oname), 'a');
+                WcFile::writeFile(MODL, "\n" . base64_encode($oname), 'a');
                 $output .= '- Successfully set ' . $oname . ' as moderator.' . "\n";
             } else {
                 $output .= '- Cannot set ' . $oname . ' as moderator: Not using a password.MOD_OFF' . "\n";
@@ -35,12 +39,12 @@
     }
     
     // Process un-moderator request if target user is a moderator
-    if(!$this->myPost('moderator') && $this->getMod($oname) !== FALSE) {
-        if($this->hasPermission('UNMOD', 'skip_msg')) {
-            if($oname && $this->getMod($oname) !== FALSE) {
-                $this->writeFile(
+    if(!WcPgc::myPost('moderator') && $this->user->getMod($oname) !== FALSE) {
+        if($this->user->hasPermission('UNMOD', 'skip_msg')) {
+            if($oname && $this->user->getMod($oname) !== FALSE) {
+                WcFile::writeFile(
                     MODL, 
-                    str_replace("\n" . base64_encode($oname), '', $this->modList), 
+                    str_replace("\n" . base64_encode($oname), '', $this->user->modList), 
                     'w', 
                     'allow_empty'
                 );
@@ -52,33 +56,33 @@
     }
     
     // Process mute request if target user is not muted already
-    if($this->myPost('muted') && $this->getMuted($oname) === FALSE) {
-        if($this->hasPermission('MUTE', 'skip_msg')) {
+    if(WcPgc::myPost('muted') && $this->user->getMuted($oname) === FALSE) {
+        if($this->user->hasPermission('MUTE', 'skip_msg')) {
             $xpar = '';
             
             // Parse requested mute time if any
-            if($this->myPost('muted_time')) {
+            if(WcPgc::myPost('muted_time')) {
             
-                if(ctype_digit($this->myPost('muted_time'))) {
-                    $xpar = ' ' . (time() + (60 * abs(intval($this->myPost('muted_time')))));
+                if(ctype_digit(WcPgc::myPost('muted_time'))) {
+                    $xpar = ' ' . (time() + (60 * abs(intval(WcPgc::myPost('muted_time')))));
                 }
             } else { 
                 $xpar = ' 0';
             }
             
-            $this->writeFile(
+            WcFile::writeFile(
                 MUTEDL, 
                 preg_replace(
                     '/' . "\n" . base64_encode($oname) . ' ([0-9]+)/', 
                     '', 
-                    $this->mutedList
+                    $this->user->mutedList
                 ) . "\n" . base64_encode($oname) . $xpar,
                 'w'
             );
             $output .= '- Successfully muted ' . $oname . 
                 (
-                    $this->myPost('muted_time') ? 
-                    ' for ' . abs(intval($this->myPost('muted_time'))) . ' minute(s)' :
+                    WcPgc::myPost('muted_time') ? 
+                    ' for ' . abs(intval(WcPgc::myPost('muted_time'))) . ' minute(s)' :
                      ''
                 ) . '.' . "\n"
             ;
@@ -86,14 +90,14 @@
     }
     
     // Process unmute request if target user is muted
-    if(!$this->myPost('muted') && $this->getMuted($oname) !== FALSE) {
-        if($this->hasPermission('UNMUTE', 'skip_msg')) {
-            $this->writeFile(
+    if(!WcPgc::myPost('muted') && $this->user->getMuted($oname) !== FALSE) {
+        if($this->user->hasPermission('UNMUTE', 'skip_msg')) {
+            WcFile::writeFile(
                 MUTEDL, 
                 preg_replace(
                     '/' . "\n" . base64_encode(trim($oname)) . ' ([0-9]+)/', 
                     '', 
-                    $this->mutedList
+                    $this->user->mutedList
                 ),
                 'w', 
                 'allow_empty'
@@ -104,30 +108,30 @@
     }
   
     // Process ban request if target user is not banned already
-    if($this->myPost('banned') && $this->getBanned($oname) === FALSE) {
-        if($this->hasPermission('BAN', 'skip_msg')) {
+    if(WcPgc::myPost('banned') && $this->user->getBanned($oname) === FALSE) {
+        if($this->user->hasPermission('BAN', 'skip_msg')) {
             
             // Parse requested ban time if any
             $xpar = '';
-            if($this->myPost('banned_time')) {                       
-                if(ctype_digit($this->myPost('banned_time'))) {
-                    $xpar = ' '.(time() + (60 * abs(intval($this->myPost('banned_time')))));
+            if(WcPgc::myPost('banned_time')) {                       
+                if(ctype_digit(WcPgc::myPost('banned_time'))) {
+                    $xpar = ' '.(time() + (60 * abs(intval(WcPgc::myPost('banned_time')))));
                 }
             } else { $xpar = ' 0'; }
             
-            $this->writeFile(
+            WcFile::writeFile(
                 BANNEDL, 
                 preg_replace(
                     '/' . "\n" . base64_encode($oname) . ' ([0-9]+)/', 
                     '', 
-                    $this->bannedList
+                    $this->user->bannedList
                 ) . "\n" . base64_encode($oname) . $xpar, 
                 'w'
             );
             $output .= '- Successfully banned ' . $oname . 
                 (
-                    $this->myPost('banned_time') ? 
-                    ' for ' . abs(intval($this->myPost('banned_time'))) . ' minute(s)' : 
+                    WcPgc::myPost('banned_time') ? 
+                    ' for ' . abs(intval(WcPgc::myPost('banned_time'))) . ' minute(s)' : 
                     ''
                 ) . '.' . "\n"
             ;
@@ -135,14 +139,14 @@
     }
     
     // Process unban request if target user is banned
-    if(!$this->myPost('banned') && $this->getBanned($oname) !== FALSE) {
-        if($this->hasPermission('UNBAN', 'skip_msg')) {
-            $this->writeFile(
+    if(!WcPgc::myPost('banned') && $this->user->getBanned($oname) !== FALSE) {
+        if($this->user->hasPermission('UNBAN', 'skip_msg')) {
+            WcFile::writeFile(
                 BANNEDL, 
                 preg_replace(
                     '/' . "\n" . base64_encode($oname) . ' ([0-9]+)/', 
                     '', 
-                    $this->bannedList
+                    $this->user->bannedList
                 ), 
                 'w', 
                 'allow_empty'
@@ -152,18 +156,18 @@
     }
 
     $changes = 0; $name_err = FALSE;
-    if($this->hasPermission('USER_E', 'skip_msg')) {
-        if($this->myPost('name') != $oname) {
+    if($this->user->hasPermission('USER_E', 'skip_msg')) {
+        if(WcPgc::myPost('name') != $oname) {
         
             // Check if new name already exists
-            if($this->userMatch($this->myPost('name')) !== FALSE) {
-                $output .= '- Cannot rename: '.$this->myPost('name').' already exists!';
+            if($this->user->match(WcPgc::myPost('name')) !== FALSE) {
+                $output .= '- Cannot rename: '.WcPgc::myPost('name').' already exists!';
                 $name_err = TRUE;
             // Check if name is valid
             } elseif(
-                strlen(trim($this->myPost('name'), ' ')) == 0 || 
-                strlen(trim($this->myPost('name'))) > 30 || 
-                preg_match("/[\?<>\$\{\}\"\: ]/i", $this->myPost('name'))
+                strlen(trim(WcPgc::myPost('name'), ' ')) == 0 || 
+                strlen(trim(WcPgc::myPost('name'))) > 30 || 
+                preg_match("/[\?<>\$\{\}\"\: ]/i", WcPgc::myPost('name'))
             ) {
                 $output .= '- Invalid Nickname, too long (max = 30) OR 
                     containing invalid characters: ? < > $ { } " : space' . "\n";
@@ -177,9 +181,9 @@
         }
         
         // Process web address request
-        if($this->myPost('web') != $udata['web']) {
-            if(filter_var($this->myPost('web'), FILTER_VALIDATE_URL)) {
-                $udata['web'] = $this->myPost('web');
+        if(WcPgc::myPost('web') != $udata['web']) {
+            if(filter_var(WcPgc::myPost('web'), FILTER_VALIDATE_URL)) {
+                $udata['web'] = WcPgc::myPost('web');
                 $changes = 1;
                 $output .= '- Web Address Successfully set!' . "\n";
             } else {
@@ -188,9 +192,9 @@
         }
 
         // Process email address request
-        if($this->myPost('email') != $udata['email']) {
-            if(filter_var($this->myPost('email'), FILTER_VALIDATE_EMAIL)) {
-                $udata['email'] = $this->myPost('email');
+        if(WcPgc::myPost('email') != $udata['email']) {
+            if(filter_var(WcPgc::myPost('email'), FILTER_VALIDATE_EMAIL)) {
+                $udata['email'] = WcPgc::myPost('email');
                 $changes = 1;
                 $output .= '- Email Address Successfully set!' . "\n";
             } else {
@@ -199,116 +203,116 @@
         }
 
         // Process reset avatar request
-        if($this->myPost('reset_avatar') && $udata['avatar']) {
+        if(WcPgc::myPost('reset_avatar') && $udata['avatar']) {
             $udata['avatar'] = '';
             $changes = 1;
             $output .= '- Avatar Successfully Reset!' . "\n";
         }
 
         // Process reset password request
-        if($this->myPost('reset_pass') && $udata['pass']) {
+        if(WcPgc::myPost('reset_pass') && $udata['pass']) {
             $udata['pass'] = '';
             $changes = 1;
             $output .= '- Password Successfully Reset!' . "\n";
         }
 
         // Process password regenerate request
-        if($this->myPost('regen_pass')) {
-            $npass = $this->randNumb(8);
+        if(WcPgc::myPost('regen_pass')) {
+            $npass = WcUtils::randNumb(8);
             $udata['pass'] = md5(md5($npass));
             $changes = 1;
             $output .= '- Password Successfully Re-generated: ' . $npass . "\n";
         }
 
         if($changes) {
-            $nstring = $this->parseUDataString(
+            $nstring = $this->user->parseDataString(
                 NULL,
                 $udata
             );
             
             // If name is the same or name error exists, write with the name unchanged
-            if($this->myPost('name') == $oname || $name_err) {
+            if(WcPgc::myPost('name') == $oname || $name_err) {
                 $towrite = preg_replace(
                     '/^(' . base64_encode($oname) . ')\|(.*?)\|/m', 
                     '\\1|' . $nstring . '|', 
-                    $this->userList
+                    $this->user->rawList
                 );
                 
             // If not, write with the new name
-            } elseif(trim($this->myPost('name'), ' ')) {
+            } elseif(trim(WcPgc::myPost('name'), ' ')) {
                 $towrite = preg_replace(
                     '/^(' . base64_encode($oname) . ')\|(.*?)\|/m', 
-                    base64_encode($this->myPost('name')) . '|' . base64_encode($nstring) . '|', 
-                    $this->userList
+                    base64_encode(WcPgc::myPost('name')) . '|' . base64_encode($nstring) . '|', 
+                    $this->user->rawList
                 );
                 
                 // Update the moderator, mute and ban lists
-                if($this->getMod($oname) !== FALSE) {
-                    $this->writeFile(
+                if($this->user->getMod($oname) !== FALSE) {
+                    WcFile::writeFile(
                         MODL, 
                         preg_replace(
                             '/^(' . base64_encode($oname) . ')$/m', 
-                            base64_encode($this->myPost('name')), 
-                            $this->modList
+                            base64_encode(WcPgc::myPost('name')), 
+                            $this->user->modList
                         ), 
                         'w'
                     );
                 }
                 
-                if($this->getMuted($oname) !== FALSE) {
-                    $this->writeFile(
+                if($this->user->getMuted($oname) !== FALSE) {
+                    WcFile::writeFile(
                         MUTEDL, 
                         preg_replace(
                             '/^' . base64_encode($oname) . ' ([0-9]+)$/m', 
-                            base64_encode($this->myPost('name')) . ' \\1', 
-                            $this->mutedList
+                            base64_encode(WcPgc::myPost('name')) . ' \\1', 
+                            $this->user->mutedList
                         ), 
                         'w'
                     );
                 }
                 
-                if($this->getBanned($oname) !== FALSE) {
-                    $this->writeFile(
+                if($this->user->getBanned($oname) !== FALSE) {
+                    WcFile::writeFile(
                         BANNEDL, 
                         preg_replace(
                             '/^' . base64_encode($oname) . ' ([0-9]+)$/m', 
-                            base64_encode($this->myPost('name')) . ' \\1',
-                            $this->bannedList
+                            base64_encode(WcPgc::myPost('name')) . ' \\1',
+                            $this->user->bannedList
                         ), 
                         'w'
                     );
                 }
                 
                 // Rename pm room files
-                $users = explode("\n", trim($this->readFile(USERL)));
+                $users = explode("\n", trim(WcFile::readFile(USERL)));
                 foreach($users as $k => $v) {
                     list($user_name, $tmp) = explode('|', trim($v), 2);
-                    if($user_name != base64_encode($this->myPost('name'))) {
+                    if($user_name != base64_encode(WcPgc::myPost('name'))) {
                     
-                        $old_pm_room_name = $this->parsePmRoomName(
+                        $old_pm_room_name = $this->room->parseConvName(
                             $oname, 
                             base64_decode($user_name)
                         );
-                        $pm_room_name = $this->parsePmRoomName(
-                            $this->myPost('name'), 
+                        $pm_room_name = $this->room->parseConvName(
+                            WcPgc::myPost('name'), 
                             base64_decode($user_name)
                         );    
                         
                         if(file_exists(
-                                $this->roomDir . 
+                                self::$roomDir . 
                                 base64_encode($old_pm_room_name) . '.txt'
                         )) {
                             rename(
-                                $this->roomDir . 
+                                self::$roomDir . 
                                 base64_encode($old_pm_room_name) . '.txt',
-                                $this->roomDir . 
+                                self::$roomDir . 
                                 base64_encode($pm_room_name) . '.txt'
                             );
                         }
                         
                         foreach(
                             glob(
-                                $this->roomDir . 
+                                self::$roomDir . 
                                 '*_' . base64_encode($old_pm_room_name) . '.txt'
                             ) as $file
                         ) {
@@ -326,19 +330,19 @@
                 
                 // Check if current room needs to be updated
                 
-                $pm_room_name_self = $this->parsePmRoomName(
-                    $this->name, 
+                $pm_room_name_self = $this->room->parseConvName(
+                    $this->user->name, 
                     $oname
                 );
                 
-                if($this->mySession('current_room') == $pm_room_name_self) {
-                    $this->wcSetSession('current_room', $pm_room_name_self);
-                    $this->wcSetCookie('current_room', $pm_room_name_self);    
+                if(WcPgc::mySession('current_room') == $pm_room_name_self) {
+                    WcPgc::wcSetSession('current_room', $pm_room_name_self);
+                    WcPgc::wcSetCookie('current_room', $pm_room_name_self);    
                 }
                 touch(ROOMS_LASTMOD);
             }
 
-            $this->writeFile(USERL, $towrite, 'w');
+            WcFile::writeFile(USERL, $towrite, 'w');
         }
     }
     echo trim($output);

@@ -4,10 +4,10 @@
 
     if(!isset($this)) { die(); }
 
-    echo $this->popTemplate(
+    echo WcGui::popTemplate(
         'wcchat.join.password_required',
         array(
-            'USER_NAME' => $this->name
+            'USER_NAME' => $this->user->name
         )
     );
 

@@ -7,7 +7,7 @@
     // Process if form field has been supplied
     if(isset($_FILES['avatar']['tmp_name'])) {
 
-        $type = $this->getFileExt($_FILES['avatar']['name']);
+        $type = WcFile::getFileExt($_FILES['avatar']['name']);
         $allowed_types = array('jpeg', 'jpg', 'gif', 'png');
 
         // Halt if type is not among allowed types
@@ -21,19 +21,19 @@
             if(!AVATAR_SIZE) { $tn_size = 25; } else { $tn_size = AVATAR_SIZE; }
             
             // Set destination paths
-            $dest = $this->includeDirServer . 
-                'files/avatars/' . base64_encode($this->name) . '.' . 
+            $dest = self::$includeDirServer . 
+                'files/avatars/' . base64_encode($this->user->name) . '.' . 
                 str_replace('image/', '', $_FILES['avatar']['type'])
             ;
-            $dest_write = base64_encode($this->name) . '.' . 
+            $dest_write = base64_encode($this->user->name) . '.' . 
                 str_replace('image/', '', $_FILES['avatar']['type'])
             ;
             
             // Try to create a cropped thumbnail, halt otherwise
-            if($this->thumbnailCreateCr($_FILES['avatar']['tmp_name'], $dest, $tn_size)) {
+            if(WcImg::thumbnailCreateCr($_FILES['avatar']['tmp_name'], $dest, $tn_size)) {
             
                 unlink($_FILES['avatar']['tmp_name']);
-                $nstring =  $this->parseUDataString(
+                $nstring =  $this->user->parseDataString(
                     array(
                         'avatar' => $dest_write . '?' . time()  
                     )
@@ -41,12 +41,12 @@
 
                 // Set user's avatar value
                 $towrite = preg_replace(
-                    '/^(' . base64_encode($this->name) . ')\|(.*?)\|/m', 
+                    '/^(' . base64_encode($this->user->name) . ')\|(.*?)\|/m', 
                     '\\1|' . $nstring . '|', 
-                    $this->userList
+                    $this->user->rawList
                 );
 
-                $this->writeFile(USERL, $towrite, 'w');
+                WcFile::writeFile(USERL, $towrite, 'w');
                 echo 'Avatar successfully set!';
             }
         }

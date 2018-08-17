@@ -4,6 +4,6 @@
 
     if(!isset($this)) { die(); }
 
-    echo $this->refreshMsgE();
+    echo $this->room->getNewMsgE();
 
 ?>

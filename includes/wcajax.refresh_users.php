@@ -4,6 +4,6 @@
 
     if(!isset($this)) { die(); }
 
-    echo $this->refreshUsers();
+    echo $this->user->getListChanges();
 
 ?>

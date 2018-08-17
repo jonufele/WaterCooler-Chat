@@ -6,25 +6,25 @@
 
     $efile = '';
     // If user avatar exists, strip its control timestamp
-    if($this->uData['avatar']) {
-        list($efile, $_time) = explode('?', $this->uData['avatar']); 
+    if($this->user->data['avatar']) {
+        list($efile, $_time) = explode('?', $this->user->data['avatar']); 
     }
     
     // If avatar exists, reset user value and delete image file
-    if(file_exists($this->includeDirServer . 'files/avatars/' . $efile)) {
-        $nstring = $this->parseUDataString(
+    if(file_exists(self::$includeDirServer . 'files/avatars/' . $efile)) {
+        $nstring = $this->user->parseDataString(
             array('avatar' => '')
         );
         
         $towrite = preg_replace(
-            '/(' . base64_encode($this->name) . ')\|(.*?)\|/', 
+            '/(' . base64_encode($this->user->name) . ')\|(.*?)\|/', 
             '\\1|' . $nstring . '|', 
-            $this->userList
+            $this->user->rawList
         );
 
-        $this->writeFile(USERL, $towrite, 'w');
+        WcFile::writeFile(USERL, $towrite, 'w');
         echo 'Avatar successfully reset!';
-        unlink($this->includeDirServer . 'files/avatars/' . $efile);
+        unlink(self::$includeDirServer . 'files/avatars/' . $efile);
     } else {
         echo 'No Avatar to reset!';
     }

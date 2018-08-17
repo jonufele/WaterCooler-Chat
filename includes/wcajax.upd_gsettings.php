@@ -4,7 +4,7 @@
 
     if(!isset($this)) { die(); }
 
-    if(!$this->hasPermission('GSETTINGS')) { die(); }
+    if(!$this->user->hasPermission('GSETTINGS')) { die(); }
 
     // Set arrays with $_POST ids and batch process
     $arr = array();
@@ -19,7 +19,7 @@
     );
 
     foreach($gsettings_par as $key => $value) {
-        $arr[$value] = $this->myPost('gs_'.strtolower($value));
+        $arr[$value] = WcPgc::myPost('gs_'.strtolower($value));
     }
 
     $gsettings_perm = array(
@@ -36,7 +36,7 @@
         $arr['PERM_'.$value] = '';
         foreach($gsettings_perm2 as $key2 => $value2) {
             if(
-                $this->myPost(
+                WcPgc::myPost(
                     strtolower($value2) . '_' . strtolower($value)
                 ) == '1'
             ) {
@@ -49,66 +49,66 @@
     // Halt if errors exist
     $error = '';
     if(
-        !ctype_digit($this->myPost('gs_refresh_delay')) || 
-        intval($this->myPost('gs_refresh_delay')) < 1
+        !ctype_digit(WcPgc::myPost('gs_refresh_delay')) || 
+        intval(WcPgc::myPost('gs_refresh_delay')) < 1
     ) {
         $error = '- "Refresh Delay" must be an integer >= 1' . "\n";
     }
     
     if(
-        !ctype_digit($this->myPost('gs_refresh_delay_idle')) || 
-        intval($this->myPost('gs_refresh_delay_idle')) < 0
+        !ctype_digit(WcPgc::myPost('gs_refresh_delay_idle')) || 
+        intval(WcPgc::myPost('gs_refresh_delay_idle')) < 0
     ) {
         $error .= '- "Refresh delay (idle)" must be an integer >= 0' . "\n";
     }
     
     if(
-        !ctype_digit($this->myPost('gs_idle_start')) || 
-        intval($this->myPost('gs_idle_start')) < 60
+        !ctype_digit(WcPgc::myPost('gs_idle_start')) || 
+        intval(WcPgc::myPost('gs_idle_start')) < 60
     ) {
         $error .= '- "Idle Start" must be an integer >= 60' . "\n";
     }
     
     if(
-        !ctype_digit($this->myPost('gs_offline_ping')) || 
-        intval($this->myPost('gs_offline_ping')) < 1
+        !ctype_digit(WcPgc::myPost('gs_offline_ping')) || 
+        intval(WcPgc::myPost('gs_offline_ping')) < 1
     ) {
         $error .= '- "Offline Ping" must be an integer >= 1' . "\n";
     }
             
     if(
-        !ctype_digit($this->myPost('gs_anti_spam')) || 
-        intval($this->myPost('gs_anti_spam')) < 0
+        !ctype_digit(WcPgc::myPost('gs_anti_spam')) || 
+        intval(WcPgc::myPost('gs_anti_spam')) < 0
     ) {
         $error .= '- "Anti-SPAM" must be an integer >= 0' . "\n";
     }
     
     if(
-        !ctype_digit($this->myPost('gs_chat_older_msg_step')) || 
-        intval($this->myPost('gs_chat_older_msg_step')) < 1
+        !ctype_digit(WcPgc::myPost('gs_chat_older_msg_step')) || 
+        intval(WcPgc::myPost('gs_chat_older_msg_step')) < 1
     ) {
         $error .= '- "Older Message Load Step" must be an integer >= 1' . "\n";
     }
     
     if(
-        intval($this->myPost('gs_chat_dsp_buffer')) > intval($this->myPost('gs_chat_store_buffer')) || 
-        !ctype_digit($this->myPost('gs_chat_dsp_buffer')) || 
-        !ctype_digit($this->myPost('gs_chat_store_buffer'))
+        intval(WcPgc::myPost('gs_chat_dsp_buffer')) > intval(WcPgc::myPost('gs_chat_store_buffer')) || 
+        !ctype_digit(WcPgc::myPost('gs_chat_dsp_buffer')) || 
+        !ctype_digit(WcPgc::myPost('gs_chat_store_buffer'))
     ) {
         $error .= '- "Chat Store Buffer" must be >= "Chat Display Buffer"' . "\n";
     }
     
-    if($this->myPost('gs_acc_rec_email')) {
-        if(!filter_var($this->myPost('gs_acc_rec_email'), FILTER_VALIDATE_EMAIL)) {
+    if(WcPgc::myPost('gs_acc_rec_email')) {
+        if(!filter_var(WcPgc::myPost('gs_acc_rec_email'), FILTER_VALIDATE_EMAIL)) {
             $error .= '- "Account Recovery Sender E-mail" is invalid!' . "\n";
         }
     }
     
-    if(!file_exists($this->roomDir . base64_encode($this->myPost('gs_default_room')) . '.txt')) {
+    if(!file_exists(self::$roomDir . base64_encode(WcPgc::myPost('gs_default_room')) . '.txt')) {
         $error .= '- "Default Room" is invalid' . "\n";
     }
     
-    if(!file_exists($this->includeDirServer . 'themes/' . $this->myPost('gs_default_theme'))) {
+    if(!file_exists(self::$includeDirServer . 'themes/' . WcPgc::myPost('gs_default_theme'))) {
         $error .= '- "Default Theme" is invalid' . "\n";
     }
     
@@ -116,19 +116,19 @@
     if($error) { echo trim($error); die(); }
 
     // Update settings.php
-    $res = $this->updateConf(
+    $res = WcFile::updateConf(
         array_merge(
             $arr,
             array(
-                'LOAD_EX_MSG' => (($this->myPost('gs_load_ex_msg') == '1') ? 'TRUE' : 'FALSE'),
-                'LIST_GUESTS' => (($this->myPost('gs_list_guests') == '1') ? 'TRUE' : 'FALSE'),
-                'ARCHIVE_MSG' => (($this->myPost('gs_archive_msg') == '1') ? 'TRUE' : 'FALSE'),
+                'LOAD_EX_MSG' => ((WcPgc::myPost('gs_load_ex_msg') == '1') ? 'TRUE' : 'FALSE'),
+                'LIST_GUESTS' => ((WcPgc::myPost('gs_list_guests') == '1') ? 'TRUE' : 'FALSE'),
+                'ARCHIVE_MSG' => ((WcPgc::myPost('gs_archive_msg') == '1') ? 'TRUE' : 'FALSE'),
                 'BOT_MAIN_PAGE_ACCESS' => (
-                    ($this->myPost('gs_bot_main_page_access') == '1') ? 'TRUE' : 'FALSE'
+                    (WcPgc::myPost('gs_bot_main_page_access') == '1') ? 'TRUE' : 'FALSE'
                 ),
-                'GEN_REM_THUMB' => (($this->myPost('gs_gen_rem_thumb') == '1') ? 'TRUE' : 'FALSE'),
+                'GEN_REM_THUMB' => ((WcPgc::myPost('gs_gen_rem_thumb') == '1') ? 'TRUE' : 'FALSE'),
                 'ATTACHMENT_UPLOADS' => (
-                    ($this->myPost('gs_attachment_uploads') == '1') ? 'TRUE' : 'FALSE'
+                    (WcPgc::myPost('gs_attachment_uploads') == '1') ? 'TRUE' : 'FALSE'
                 )        
             )
         )

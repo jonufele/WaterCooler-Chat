@@ -4,6 +4,6 @@
 
     if(!isset($this)) { die(); }
 
-    echo $this->parseTopicContainer();
+    echo $this->room->parseTopicContainer();
 
 ?>
