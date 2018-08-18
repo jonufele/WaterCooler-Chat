@@ -1094,6 +1094,16 @@ $templates['wcchat.info'] = '
             <li>Conversations work like normal rooms, the only difference is the privacy.</li>
         </ul>
     </div>
+    <div>
+        <ul>
+            <li>Rooms are containers to hold messages of a certain topic, not user containers.</li>
+            <li>The user list is <b>room independent</b>.</li>
+            <li>Rooms which read permission is higher than the current user\'s group are invisible (not listed).</li>
+            <li>When a room is deleted/renamed, all users visiting it are moved to the default room (except the moderator who deleted/renamed).</li>
+            <li>The default room cannot be deleted.</li>
+            <li>When a user visits a room, his/her arrival is not announced, only new chat visits are announced.</li>
+        </ul>
+    </div>
     <div class="header2">Archival; Read/Write Buffers</div>
         <div>
             <ul>
