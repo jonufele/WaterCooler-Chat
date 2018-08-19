@@ -1095,6 +1095,7 @@ $templates['wcchat.info'] = '
             <li>Conversations work like normal rooms, the only difference is the privacy.</li>
         </ul>
     </div>
+    <div class="header2">Rooms</div>
     <div>
         <ul>
             <li>Rooms are containers to hold messages of a certain topic, not user containers.</li>

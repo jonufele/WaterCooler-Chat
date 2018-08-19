@@ -286,6 +286,7 @@ H1 {
 #wc_msg_container .msg .event,
 #wc_msg_container .msg .self {
     margin-left: 10px;
+    line-height: 1.5em;
 }
 
 #wc_msg_container .msg .event {
