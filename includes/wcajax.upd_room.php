@@ -65,10 +65,10 @@
             self::$roomDir . 'topic_' . base64_encode($nname) . '.txt'
         );
         
-        if(file_exists(self::$roomDir . 'hidden_' . $enc . '.txt')) {
+        if(file_exists(self::$roomDir . 'updated_' . $enc . '.txt')) {
             rename(
-                self::$roomDir . 'hidden_' . $enc . '.txt', 
-                self::$roomDir . 'hidden_' . base64_encode($nname) . '.txt'
+                self::$roomDir . 'updated_' . $enc . '.txt', 
+                self::$roomDir . 'updated_' . base64_encode($nname) . '.txt'
             );
         }
         

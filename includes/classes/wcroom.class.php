@@ -26,12 +26,12 @@ class WcRoom {
     public $rawMsgList;
 
     /**
-     * Hidden Message List (Raw)
+     * Updated Message List (Raw)
      *
      * @since 1.2
      * @var string
      */
-    public $rawHiddenMsgList;
+    public $rawUpdatedMsgList;
 
     /**
      * Event List (Raw)
@@ -325,12 +325,14 @@ class WcRoom {
                     '', 
                     $file
                 ));
-            
-            // Skip any special room related files (definitions, topic, hidden msg)
+
+            // Skip any special room related files (definitions, topic, updated msg)
+            // hidden_* files were renamed to updated_*, still, keep it here to avoid errors 
             if(
-                strpos($file, 'def_') === FALSE && 
-                strpos($file, 'topic_') === FALSE && 
-                strpos($file, 'hidden_') === FALSE && 
+                strpos(basename($file), 'def_') === FALSE && 
+                strpos(basename($file), 'topic_') === FALSE && 
+                strpos(basename($file), 'updated_') === FALSE && 
+                strpos(basename($file), 'hidden_') === FALSE && 
                 strpos($room_name, 'pm_') === FALSE
             ) {
 
@@ -527,8 +529,9 @@ class WcRoom {
                                 'wcchat.toolbar.bbcode',
                                 array(
                                     
-                                    'SMILIES' => WcGui::iSmiley('wc_topic_txt'),
+                                    'SMILIES' => WcGui::iSmiley('wc_topic_txt', 'wc_topic_txt'),
                                     'FIELD' => 'wc_topic_txt',
+                                    'CONT' => 'wc_topic_txt',
                                     'ATTACHMENT_UPLOADS' => ''
                                 )
                             )
@@ -545,12 +548,13 @@ class WcRoom {
      * @param array $lines
      * @param int $lastread
      * @param string $action Specifies if the user is sending or retrieving message(s)
-     * @param int|null $older_index Sequencial id of the first old (hidden) message
+     * @param int|null $older_index index of the first old (hidden) message
+     * @param int|null $single_msg_reload Used to reload a single message (only inner contents are needed)    
      * @return array
      */
     public function parseMsg(
         $lines, $lastread, $action, 
-        $older_index = NULL
+        $older_index = NULL, $single_msg_reload = NULL
     ) {
 
         // Initialize the displayed messages index
@@ -599,13 +603,25 @@ class WcRoom {
         // Invert order in order to scan the newest first    
         krsort($lines);
         foreach($lines as $k => $v) {
-            list($time, $user, $msg) = explode('|', trim($v), 3);
+            list($time_or, $user_or, $msg) = explode('|', trim($v), 3);
             $pm_target = FALSE;
             
             // Check if user contains a target parameter (Private Message)
-            if(strpos($user, '-') !== FALSE) {
-                list($pm_target, $nuser) = explode('-', $user);
+            if(strpos($user_or, '-') !== FALSE) {
+                list($pm_target, $nuser) = explode('-', $user_or);
                 $user = $nuser;
+            } else {
+                $user = $user_or;
+            }
+            
+            $par = $edited_par = array('', '');
+            // Check if time contains an extra parameter (Edited Message)
+            if(strpos($time_or, '-') !== FALSE) {
+                $par = explode('-', $time_or);
+                $time = $par[1];
+                $edited_par = explode('-', base64_decode($par[0]), 2);
+            } else {
+                $time = $time_or;
             }
 
             $self = FALSE; $hidden = FALSE;
@@ -630,11 +646,18 @@ class WcRoom {
                 break;
             }
             
-            // Generate an unique id for the post message
+            // Generate an unique id for the post message (html object id)
             $unique_id = (
                 !$self ? 
-                ($time . '|' . $user) : 
+                ($time . '|' . $user_or) : 
                 ($time . '|*' . $user)
+            );
+            
+            // The id to use for manipulating the raw source
+            $id_source = (
+                 !$self ? 
+                (str_replace('*', '', $time_or) . '|' . $user_or) : 
+                (str_replace('*', '', $time_or) . '|*' . $user)
             );
             $hidden_cookie = 'hide_' . $unique_id;
             
@@ -718,27 +741,36 @@ class WcRoom {
                     
                     // "Clear Screen" Tag
                     $time_date2 = gmdate('d-M', $start_point + ($this->user->data['timeZone'] * 3600));
-                    $output = WcGui::popTemplate(
-                        'wcchat.posts.self',
-                        array(
-                            'SKIP_ON_OLDER_LOAD' => '_skip',
-                            'STYLE' => 'dislay:inline',
-                            'TIMESTAMP' => 
-                                gmdate(
-                                    (($this->user->data['hourMode'] == '1') ? 'H:i': 'g:i a'), 
-                                    $start_point + ($this->user->data['timeZone'] * 3600)
-                                ).
-                                ($time_date2 != $today_date ? ' ' . $time_date2 : ''),
-                            'USER' => $this->user->name,
-                            'MSG' => (
-                                LOAD_EX_MSG !== FALSE ? 
-                                WcGui::popTemplate('wcchat.posts.undo_clear_screen') : 
-                                WcGui::popTemplate('wcchat.posts.global_clear_screen')
-                            ),
-                            'ID' => $unique_id,
-                            'HIDE_ICON' => ''
-                        )
-                    ) . $new . $output;
+                    $output = 
+                        WcGui::popTemplate(
+                            'wcchat.post_container',
+                            array(
+                                'CONTENT' =>  
+                                    WcGui::popTemplate(
+                                        'wcchat.posts.self',
+                                        array(
+                                            'STYLE' => 'dislay:inline',
+                                            'TIMESTAMP' => 
+                                                gmdate(
+                                                    (($this->user->data['hourMode'] == '1') ? 'H:i': 'g:i a'), 
+                                                    $start_point + ($this->user->data['timeZone'] * 3600)
+                                                ).
+                                                ($time_date2 != $today_date ? ' ' . $time_date2 : ''),
+                                            'USER' => $this->user->name,
+                                            'MSG' => (
+                                                LOAD_EX_MSG !== FALSE ? 
+                                                WcGui::popTemplate('wcchat.posts.undo_clear_screen') : 
+                                                WcGui::popTemplate('wcchat.posts.global_clear_screen')
+                                            ),
+                                            'ID' => $unique_id,
+                                            'HIDE_ICON' => '',
+                                            'UPDATED_NOTE' => ''
+                                        )
+                                    ),
+                                'SKIP_ON_OLDER_LOAD' => '_skip',
+                                'ID' => $unique_id
+                            )
+                        ) . $new . $output;
                     break;
                 }
 
@@ -747,13 +779,21 @@ class WcRoom {
                     WcPgc::myGet('all') != 'ALL' && 
                     $older_index === NULL && 
                     base64_decode($user) == $this->user->name && 
-                    $action != 'SEND'
+                    $action != 'SEND' && 
+                    $single_msg_reload === NULL
                 ) {
                     $index++;
                     continue;
                 }
                 
                 $down_perm = ($this->user->hasPermission('ATTACH_DOWN', 'skip_msg') ? TRUE : FALSE);
+                $post_edit_perm = ($this->user->hasPermission('POST_E', 'skip_msg') && 
+                (
+                    (
+                        (time() < ($time + POST_EDIT_TIMEOUT) || POST_EDIT_TIMEOUT == 0) && 
+                        $this->user->name == base64_decode($user)
+                    ) || $this->user->isMod
+                )) ? TRUE : FALSE;
 
                 // Process the post if not part of an ignore
                 if(!WcPgc::myCookie('ign_' . $user)) {
@@ -769,7 +809,7 @@ class WcRoom {
                                 $pm_target !== FALSE
                             )
                         ) {
-                            $output = WcGui::popTemplate(
+                            $tmp = WcGui::popTemplate(
                                 'wcchat.posts.normal',
                                 array(
                                     'ALL' => ($action != 'SEND' ? WcPgc::myGet('ALL') : 'ALL'),
@@ -778,6 +818,57 @@ class WcRoom {
                                         'wcchat.posts.normal.pm_tag', 
                                         '', 
                                         $pm_target !== FALSE
+                                    ),
+                                    'EDIT_TAG' => WcGui::popTemplate(
+                                        'wcchat.posts.normal.edit_tag',
+                                        array(
+                                            'BT' => WcGui::popTemplate(
+                                                'wcchat.posts.normal.edit_tag.bt',
+                                                array(
+                                                    'ID' => $unique_id,
+                                                    'TAG' => $par[0],
+                                                    'CLASS' => ( 
+                                                        (
+                                                            (
+                                                                base64_decode($user) != $this->user->name || 
+                                                                (
+                                                                    base64_decode($user) == $this->user->name && 
+                                                                    time() > ($time + POST_EDIT_TIMEOUT) && 
+                                                                    POST_EDIT_TIMEOUT != 0
+                                                                )
+                                                            ) && 
+                                                            $this->user->isMod
+                                                        ) ? (
+                                                            (WcPgc::myCookie('hide_edit') == 1) ? 
+                                                            'edit_bt_off' : 
+                                                            'edit_bt'
+                                                        ) : 
+                                                        ''
+                                                    )
+                                                ),
+                                                $post_edit_perm && !WcPgc::mySession('archive')
+                                            ),
+                                            'EDITED' => WcGui::popTemplate(
+                                                'wcchat.posts.normal.edit_tag.edited',
+                                                 array(
+                                                    'TARGET' => WcGui::popTemplate(
+                                                        'wcchat.posts.normal.edit_tag.edited.target',
+                                                        array('NAME' => $edited_par[1]),
+                                                        WcUtils::hasData($edited_par[1]) && 
+                                                        base64_decode($user) != $edited_par[1]
+                                                    )
+                                                ), 
+                                                WcUtils::hasData($edited_par[0])
+                                            ),
+                                            'ID' => $unique_id
+                                        )
+                                    ),
+                                    'EDIT_CONTAINER' => WcGui::popTemplate(
+                                        'wcchat.posts.edit_container',
+                                        array(
+                                            'ID' => $unique_id
+                                        ),
+                                        $post_edit_perm
                                     ),
                                     'STYLE' => (
                                         WcPgc::myCookie('hide_time') ? 
@@ -818,9 +909,9 @@ class WcRoom {
                                     'MSG' => WcGui::popTemplate(
                                         'wcchat.posts.hidden' . ($hidden ? '_mod' : ''), 
                                         '', 
-                                        $hidden || WcPgc::myCookie($hidden_cookie), 
+                                        $hidden || WcPgc::myCookie($hidden_cookie),
                                         WcGui::parseBbcode(
-                                            $msg,
+                                            WcGui::parseLongMsg($msg, $unique_id),
                                             $down_perm,
                                             $this->user->name
                                         )
@@ -834,8 +925,10 @@ class WcRoom {
                                                 '_r' : 
                                                 ''
                                             ), 
-                                            'ID' => $unique_id, 
-                                            'OFF' => ''
+                                            'ID' => $unique_id,
+                                            'ID_SOURCE' => $id_source, 
+                                            'OFF' => '',
+                                            'PRIVATE' => ($pm_target ? 1 : 0)
                                         ),
                                         !WcPgc::mySession('archive')
                                     ),
@@ -853,9 +946,27 @@ class WcRoom {
                                         array('WIDTH' => 
                                             (AVATAR_SIZE ? AVATAR_SIZE : $this->user->defAvatarSize)
                                         )
+                                    ),
+                                    'UPDATED_NOTE' => WcGui::popTemplate(
+                                        'wcchat.posts.updated_note',
+                                        array('ID' => $unique_id),
+                                        $this->user->isLoggedIn
                                     )
                                 )
-                            ). $new . $output;
+                            );
+                               
+                            if($single_msg_reload !== NULL) {
+                                return $tmp;
+                            } else { 
+                                $output = WcGui::popTemplate(
+                                    'wcchat.post_container',
+                                    array(
+                                        'CONTENT' => $tmp,
+                                        'SKIP_ON_OLDER_LOAD' => '',
+                                        'ID' => $unique_id
+                                    )
+                                ). $new . $output;
+                            }
                             
                             $index++;
                             
@@ -869,10 +980,61 @@ class WcRoom {
                             }
                         }
                     } else {
-                        $output = WcGui::popTemplate(
+                        $tmp = WcGui::popTemplate(
                             'wcchat.posts.self',
                             array(
                                 'SKIP_ON_OLDER_LOAD' => '',
+                                'EDIT_TAG' => WcGui::popTemplate(
+                                    'wcchat.posts.normal.edit_tag',
+                                    array(
+                                        'BT' => WcGui::popTemplate(
+                                            'wcchat.posts.normal.edit_tag.bt',
+                                            array(
+                                                'ID' => $unique_id,
+                                                'TAG' => $par[0],
+                                                'CLASS' => ( 
+                                                    (
+                                                        (
+                                                            base64_decode($user) != $this->user->name || 
+                                                            (
+                                                                base64_decode($user) == $this->user->name && 
+                                                                time() > ($time + POST_EDIT_TIMEOUT) && 
+                                                                POST_EDIT_TIMEOUT != 0
+                                                            )
+                                                        ) && 
+                                                        $this->user->isMod
+                                                    ) ? (
+                                                        (WcPgc::myCookie('hide_edit') == 1) ? 
+                                                        'edit_bt_off' : 
+                                                        'edit_bt'
+                                                    ) : 
+                                                    ''
+                                                )
+                                            ),
+                                            $post_edit_perm && !WcPgc::mySession('archive')
+                                        ),
+                                        'EDITED' => WcGui::popTemplate(
+                                            'wcchat.posts.normal.edit_tag.edited',
+                                             array(
+                                                'TARGET' => WcGui::popTemplate(
+                                                    'wcchat.posts.normal.edit_tag.edited.target',
+                                                    array('NAME' => $edited_par[1]),
+                                                    WcUtils::hasData($edited_par[1]) && 
+                                                    base64_decode($user) != $edited_par[1]
+                                                )
+                                            ), 
+                                            WcUtils::hasData($edited_par[0])
+                                        ),
+                                        'ID' => $unique_id
+                                    )
+                                ),
+                                'EDIT_CONTAINER' => WcGui::popTemplate(
+                                    'wcchat.posts.edit_container',
+                                    array(
+                                        'ID' => $unique_id
+                                    ),
+                                    $post_edit_perm
+                                ),
                                 'STYLE' => (WcPgc::myCookie('hide_time') ? 'display: none' : 'dislay:inline'),
                                 'TIMESTAMP' => 
                                     gmdate(
@@ -886,7 +1048,7 @@ class WcRoom {
                                     '', 
                                     $hidden || WcPgc::myCookie($hidden_cookie), 
                                     WcGui::parseBbcode(
-                                        $msg,
+                                        WcGui::parseLongMsg($msg, $unique_id),
                                         $down_perm,
                                         $this->user->name
                                     )
@@ -900,13 +1062,33 @@ class WcRoom {
                                             '_r' : 
                                             ''
                                         ), 
-                                        'ID' => $unique_id, 
-                                        'OFF' => ''
+                                        'ID' => $unique_id,
+                                        'ID_SOURCE' => $id_source, 
+                                        'OFF' => '',
+                                        'PRIVATE' => ($pm_target ? 1 : 0)
                                     ),
                                     !WcPgc::mySession('archive')
+                                ),
+                                'UPDATED_NOTE' => WcGui::popTemplate(
+                                    'wcchat.posts.updated_note',
+                                    array('ID' => $unique_id),
+                                    $this->user->isLoggedIn
                                 )
                             )
-                        ) . $new . $output;
+                        );
+                        
+                        if($single_msg_reload !== NULL) {
+                                return $tmp;
+                        } else { 
+                            $output = WcGui::popTemplate(
+                                'wcchat.post_container',
+                                array(
+                                    'CONTENT' => $tmp,
+                                    'SKIP_ON_OLDER_LOAD' => '',
+                                    'ID' => $unique_id
+                                )
+                            ). $new . $output;
+                        }
                         
                         $index++;
                         if(WcPgc::myGet('all') == 'ALL' || $older_index !== NULL) {
@@ -940,7 +1122,7 @@ class WcRoom {
         ) {
             $output = WcGui::popTemplate('wcchat.posts.new_msg_separator') . $output;
         }
-        
+
         return array($output, $index, $first_elem);
     }
 
@@ -1120,14 +1302,43 @@ class WcRoom {
     }
 
     /**
-     * Retrieves the list of Hidden Messages (Ajax Component)
+     * Retrieves the list of Updated Messages (Ajax Component)
      * 
      * @since 1.3
      * @return string|void
      */
-    public function getHiddenMsg() {
+    public function getUpdatedMsg() {
     
-        return trim($this->rawHiddenMsgList, ' ');
+        // Truncate file if older than catch window
+        if(
+            (time() - WcTime::parseFileMTime(MESSAGES_UPDATED)) > 
+            WcChat::$catchWindow && 
+            WcUtils::hasData($this->rawUpdatedMsgList)
+        ) {
+            WcFile::writeFile(
+                MESSAGES_UPDATED,
+                '',
+                'w',
+                'allow_empty'
+            );
+        }
+    
+        // Send contents to ajax caller if is new
+        $lastmod = WcTime::parseFileMTime(MESSAGES_UPDATED);
+        if(
+            $lastmod > 
+            WcTime::handleLastRead(
+                'read', 
+                'updated_' . WcPgc::mySession('current_room')
+            )
+        ) {
+            WcTime::handleLastRead(
+                'store', 
+                'updated_' . WcPgc::mySession('current_room')
+            );
+            
+            return trim($this->rawUpdatedMsgList, ' ');
+        }
     }
 
     /**
@@ -1169,7 +1380,7 @@ class WcRoom {
      * @return string|void Html Template
      */    
     public function getNewMsg() {
-    
+
         if($this->user->isBanned !== FALSE) {
             return 'You are banned!';
         }
@@ -1277,7 +1488,7 @@ class WcRoom {
         // If content exists before the oldest displayed message or archives exist, initiate the controls to load older posts
         $older_controls = '';
         if(count($lines) && WcPgc::myGet('all') == 'ALL' && LOAD_EX_MSG === TRUE) {
-            if($first_elem) {
+            if($first_elem) {file_put_contents('s.txt', $first_elem);
                 list($tmp1, $tmp2) = explode($first_elem, $this->rawMsgList, 2);
                 if(trim($tmp1) || $this->def['lArchVol'] > 0) {
                     $older_controls = WcGui::popTemplate('wcchat.posts.older');

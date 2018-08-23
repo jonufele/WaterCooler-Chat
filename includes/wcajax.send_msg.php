@@ -231,7 +231,7 @@
                 $towrite = 
                     WcTime::parseMicroTime() . '|' . 
                     $name_prefix . base64_encode($this->user->name) . '|' . 
-                    strip_tags($text) . 
+                    str_replace("\n", '<br>', strip_tags($text)) . 
                     "\n"
                 ;
                 WcFile::writeFile(MESSAGES_LOC, $source . $towrite, 'w');

@@ -31,7 +31,20 @@
                     file_put_contents(
                         self::$roomDir . base64_encode($room_name) . '.txt',
                         time() . '|*' . base64_encode('Private Conversation Room') . '| has been created.' . "\n"
-                    );    
+                    );
+                    file_put_contents(
+                        self::$roomDir . 'def_' . base64_encode($room_name) . '.txt',
+                        $this->room->parseDefString()
+                    );
+                    file_put_contents(
+                        self::$roomDir . 'topic_' . base64_encode($room_name) . '.txt',
+                        ''
+                    );
+                    file_put_contents(
+                        self::$roomDir . 'updated_' . base64_encode($room_name) . '.txt',
+                        ''
+                    );
+                        
                 } else {
                     echo 'ERROR: You need to join the chat in order to start a private conversation!';
                     die();

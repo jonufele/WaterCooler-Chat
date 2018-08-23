@@ -321,8 +321,8 @@ class WcChat {
         define('ROOM_DEF_LOC', 
             self::$roomDir . 'def_' . base64_encode(WcPgc::mySession('current_room')) . '.txt'
         );
-        define('MESSAGES_HIDDEN', 
-            self::$roomDir . 'hidden_' . base64_encode(WcPgc::mySession('current_room')) . '.txt'
+        define('MESSAGES_UPDATED', 
+            self::$roomDir . 'updated_' . base64_encode(WcPgc::mySession('current_room')) . '.txt'
         );
         define('USERL', self::$dataDir . 'users.txt');
         define('MODL', self::$dataDir . 'mods.txt');
@@ -353,12 +353,12 @@ class WcChat {
             );
         }
         if(!file_exists(ROOMS_LASTMOD)) { file_put_contents(ROOMS_LASTMOD, ''); }
-        if(!file_exists(MESSAGES_HIDDEN)) { file_put_contents(MESSAGES_HIDDEN, ''); }
+        if(!file_exists(MESSAGES_UPDATED)) { file_put_contents(MESSAGES_UPDATED, ''); }
 
         $this->user->modList          = WcFile::readFile(MODL);
         $this->user->mutedList        = WcFile::readFile(MUTEDL);
         $this->room->rawMsgList          = WcFile::readFile(MESSAGES_LOC);
-        $this->room->rawHiddenMsgList    = WcFile::readFile(MESSAGES_HIDDEN);
+        $this->room->rawUpdatedMsgList    = WcFile::readFile(MESSAGES_UPDATED);
         $this->user->rawList         = WcFile::readFile(USERL);
         $this->room->topic            = WcFile::readFile(TOPICL);
         $this->user->bannedList       = WcFile::readFile(BANNEDL);
@@ -635,8 +635,9 @@ class WcChat {
             WcGui::popTemplate(
                 'wcchat.toolbar.bbcode',
                 array(
-                    'SMILIES' => WcGui::iSmiley('wc_text_input_field'),
+                    'SMILIES' => WcGui::iSmiley('wc_text_input_field', 'wc_text_input'),
                     'FIELD' => 'wc_text_input_field',
+                    'CONT' => 'wc_text_input',
                     'ATTACHMENT_UPLOADS' => WcGui::popTemplate(
                         'wcchat.toolbar.bbcode.attachment_uploads',
                         array(
@@ -657,7 +658,7 @@ class WcChat {
             'IMAGE_MAX_DSP_DIM',  'IMAGE_AUTO_RESIZE_UNKN', 'VIDEO_WIDTH', 'VIDEO_HEIGHT', 
             'AVATAR_SIZE', 'DEFAULT_AVATAR', 'DEFAULT_ROOM', 'DEFAULT_THEME', 
             'INVITE_LINK_CODE', 'ACC_REC_EMAIL', 'ATTACHMENT_TYPES', 'ATTACHMENT_MAX_FSIZE', 
-            'ATTACHMENT_MAX_POST_N'
+            'ATTACHMENT_MAX_POST_N', 'POST_EDIT_TIMEOUT', 'MAX_DATA_LEN'
         );
 
         $gsettings_par_v = array();
@@ -675,7 +676,7 @@ class WcChat {
         $gsettings_perm = array(
             'GSETTINGS', 'ROOM_C', 'ROOM_E', 'ROOM_D', 'MOD', 
             'UNMOD', 'USER_E', 'USER_D', 'TOPIC_E', 'BAN', 'UNBAN', 'MUTE', 
-            'UNMUTE', 'MSG_HIDE', 'MSG_UNHIDE', 'POST', 'PROFILE_E', 
+            'UNMUTE', 'MSG_HIDE', 'MSG_UNHIDE', 'POST', 'POST_E', 'PROFILE_E', 
             'IGNORE', 'PM_SEND', 'PM_ROOM', 'LOGIN', 'ACC_REC', 'READ_MSG', 
             'ROOM_LIST', 'USER_LIST', 'ATTACH_UPL', 'ATTACH_DOWN');
 

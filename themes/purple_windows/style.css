@@ -53,6 +53,7 @@ H1 {
     padding: 5px;
     border: 1px solid #ac939d;
     background-color: white;
+    margin: 0;
 }
 
 #wcchat .left_col {
@@ -99,6 +100,10 @@ H1 {
 
 #wcchat .critical_error legend { 
     font-weight: bold;
+}
+
+#wcchat .center {
+	text-align: center;
 }
 
 /*--------------------------------------*/
@@ -182,6 +187,21 @@ H1 {
     background-color: rgba(234, 220, 235, 0.6);
 }
 
+#wc_msg_container .updated_msg_note {
+    font-style: italic;
+    color: #888888;
+    margin: 5px;
+    text-align: center;
+}
+
+#wc_msg_container .updated_msg_container {
+	text-align: center;
+}
+
+#wc_msg_container .bbcode a {
+    text-decoration: none;
+}
+
 #wc_msg_container .msg {
     padding: 5px;
     border-top: 1px dotted #a28299;
@@ -210,6 +230,46 @@ H1 {
     font-family: tahoma;
     margin: 0 0 3px 3px;
     color: #9a6d7f;
+}
+
+#wc_msg_container .msg .more,
+#wc_msg_container .msg_pm .more,
+#wc_msg_container .msg .less,
+#wc_msg_container .msg_pm .less {
+    font-style: italic;
+    font-size: 10px;
+    color: #888888;
+    margin-left: 5px;
+}
+
+#wc_msg_container .msg .edit_tag,
+#wc_msg_container .msg_pm .edit_tag {
+    float: right;
+    font-style: italic;
+    font-size: 7pt;
+    color: #888888;
+    margin-left: 5px;
+}
+
+#wc_msg_container .msg .edit_bt_off,
+#wc_msg_container .msg_pm .edit_bt_off {
+    display: none;
+}
+
+#wc_msg_container .msg .edit_tag img,
+#wc_msg_container .msg_pm .edit_tag img {
+    margin-left: 5px;
+}
+
+#wc_msg_container .msg .editbox,
+#wc_msg_container .msg_pm .editbox {
+    width: 97%;
+}
+
+#wc_msg_container .msg .note,
+#wc_msg_container .msg_pm .note {
+    font-size: 9px;
+    color: #888888;
 }
 
 #wc_msg_container .msg .timestamp,

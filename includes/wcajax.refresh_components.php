@@ -10,16 +10,17 @@
         (
             (
                 WcTime::parseFileMTime(
-                    self::$roomDir . 'hidden_' . 
+                    self::$roomDir . 'updated_' . 
                     base64_encode(WcPgc::mySession('current_room')) . '.txt'
                 ) <= 
                 (time()+self::$catchWindow)
             ) ? 
-            $this->room->getHiddenMsg() : 
+            $this->room->getUpdatedMsg() : 
             ''
         ) . '[$]' . 
         $this->room->getNewMsgE() . '[$]' . 
         WcPgc::mySession('alert_msg') . '[$]' .
+        $this->user->name . '[$]' .
         str_replace('[$]', '', $this->room->getNewMsg())
     ;
     if(trim($output, '[$]')) { echo $output; }

@@ -23,8 +23,8 @@
         unlink(self::$roomDir . $enc . '.txt');
         unlink(self::$roomDir . 'def_' . $enc.'.txt');
         unlink(self::$roomDir . 'topic_' . $enc.'.txt');
-        if(file_exists(self::$roomDir . 'hidden_' . $enc . '.txt')) {
-            unlink(self::$roomDir . 'hidden_' . $enc . '.txt');
+        if(file_exists(self::$roomDir . 'updated_' . $enc . '.txt')) {
+            unlink(self::$roomDir . 'updated_' . $enc . '.txt');
         }
         // If deleted room is current room, move user to the default room
         if(WcPgc::mySession('current_room') == $oname) {

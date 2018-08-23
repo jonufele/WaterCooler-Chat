@@ -75,6 +75,12 @@ define('ARCHIVE_MSG', TRUE);
 // Allow search engines / automated bots access to the chat's main page
 define('BOT_MAIN_PAGE_ACCESS', FALSE);
 
+// Number of seconds a post is available for edition (0 = no limit)
+define('POST_EDIT_TIMEOUT', 300);
+
+// Maximum number of characters to display by default in messages (0 = no limit)
+define('MAX_DATA_LEN', 500);
+
 
 # ============================================================================
 #                  MULTIMEDIA SETTINGS
@@ -148,6 +154,7 @@ define('PERM_MSG_HIDE', 'MMOD MOD');
 define('PERM_MSG_UNHIDE', 'MMOD MOD');
 
 define('PERM_POST', 'MMOD MOD CUSER USER');
+define('PERM_POST_E', 'MMOD MOD CUSER USER');
 define('PERM_ATTACH_UPL', 'MMOD MOD CUSER USER');
 define('PERM_ATTACH_DOWN', 'MMOD MOD CUSER USER GUEST');
 define('PERM_PROFILE_E', 'MMOD MOD CUSER USER');

@@ -75,7 +75,7 @@ class WcGui {
      * @param string $field Target Html Id
      * @return string Html Template
      */
-    public static function iSmiley($field) {
+    public static function iSmiley($field, $cont) {
     
         $out = '';
         $s1 =
@@ -109,6 +109,7 @@ class WcGui {
                     array(
                         'title' => $value,
                         'field' => $field,
+                        'cont' => $cont,
                         'str_pat' => $value,
                         'str_rep' => 'sm' . $key . '.gif'
                     )
@@ -160,6 +161,8 @@ class WcGui {
      * 
      * @since 1.1
      * @param string $data
+     * @param bool $down_perm
+     * @param string $user_name          
      * @return string Parsed Msg
      */
     public static function parseBbcode($data, $down_perm, $user_name) {
@@ -287,6 +290,32 @@ class WcGui {
         );
 
         return $output;
+    }
+    
+    /**
+     * Parses a long posted message and generates toggle interface
+     * 
+     * @since 1.4
+     * @param string $data
+     * @return string Parsed Data
+     */
+    public static function parseLongMsg($data, $id) {
+        
+        $string_len = strlen($data);
+        if($string_len > MAX_DATA_LEN && MAX_DATA_LEN > 0) {
+            $cropped = substr($data, 0, MAX_DATA_LEN);
+            return WcGui::popTemplate(
+                'wcchat.posts.partial_content',
+                array(
+                    'ID' => $id,
+                    'PARTIAL' => $cropped,
+                    'FULL' => $data
+                )
+            );
+        } else {
+            return $data;
+        }
+            
     }
     
 }
