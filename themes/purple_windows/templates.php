@@ -494,10 +494,10 @@ $templates['wcchat.posts.self'] = '
 $templates['wcchat.posts.normal'] = '
 <div class="msg{PM_SUFIX}">
     {UPDATED_NOTE}
-    {EDIT_TAG}{PM_TAG}
+    {PM_TAG}
     <img src="{AVATAR}" class="avatar_thumb" {WIDTH} onload="wc_scroll(\'{ALL}\')">
     <div class="msg_right_col">
-        {HIDE_ICON}
+        {EDIT_TAG}{HIDE_ICON}
         [<span class="user">{POPULATE_START}{USER}{POPULATE_END}{PM_TARGET}</span>]
         <span class="timestamp" style="{STYLE}">
             {TIMESTAMP}
