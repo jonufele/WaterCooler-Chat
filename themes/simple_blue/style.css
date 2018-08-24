@@ -190,6 +190,11 @@ H1 {
 	text-align: center;
 }
 
+#wc_msg_container .bbcode {
+    margin-top: 10px;
+    margin-bottom: 5px;
+}
+
 #wc_msg_container .bbcode a {
     text-decoration: none;
 }
@@ -480,9 +485,15 @@ H1 {
 
 
 #wc_ulist .user_item,
-#wc_ulist .user_item_pm {
+#wc_ulist .user_item_pm,
+#wc_ulist .user_item_msg_icon {
     font-size: 12px;
     margin: 3px;
+    margin-left: 12px;
+}
+
+#wc_ulist .user_item_msg_icon { 
+    margin-left: 0px;
 }
 
 #wc_ulist .user_item_pm {
@@ -491,38 +502,44 @@ H1 {
 }
 
 #wc_ulist .user_item a,
-#wc_ulist .user_item_pm a {
+#wc_ulist .user_item_pm a,
+#wc_ulist .user_item_msg_icon a {
     text-decoration: none;
 }
 
 #wc_ulist .user_item a:hover,
-#wc_ulist .user_item_pm a:hover {
+#wc_ulist .user_item_pm a:hover,
+#wc_ulist .user_item_msg_icon a:hover {
     text-decoration: underline;
 }
 
 #wc_ulist .user_item img,
-#wc_ulist .user_item_pm img {
+#wc_ulist .user_item_pm img,
+#wc_ulist .user_item_msg_icon img {
     padding: 1px;
     border: 1px solid #60779b;
     margin-right: 5px;
 }
 
 #wc_ulist .user_item img.joined_on,
-#wc_ulist .user_item_pm img.joined_on {
+#wc_ulist .user_item_pm img.joined_on,
+#wc_ulist .user_item_msg_icon img.joined_on {
     padding: 1px;
     border: 1px solid #7f8cac;
     border-top: 2px solid #08a52a;
 }
 
 #wc_ulist .user_item img.joined_idle,
-#wc_ulist .user_item_pm img.joined_idle {
+#wc_ulist .user_item_pm img.joined_idle,
+#wc_ulist .user_item_msg_icon img.joined_idle {
     padding: 1px;
     border: 1px solid #7f8cac;
     border-top: 2px solid #f28900;
 }
 
 #wc_ulist .user_item img.joined_na,
-#wc_ulist .user_item_pm img.joined_na {
+#wc_ulist .user_item_pm img.joined_na,
+#wc_ulist .user_item_msg_icon img.joined_na {
     padding: 1px;
     border: 1px solid #7f8cac;
     border-top: 2px solid #c10707;
@@ -531,41 +548,46 @@ H1 {
 #wc_ulist .user_item img.web,
 #wc_ulist .user_item img.edit_bt,
 #wc_ulist .user_item_pm img.web,
-#wc_ulist .user_item_pm img.edit_bt {
+#wc_ulist .user_item_pm img.edit_bt,
+#wc_ulist .user_item_msg_icon img.web,
+#wc_ulist .user_item_msg_icon img.edit_bt {
     padding: 1px;
     border: 0;
     vertical-align: middle;
 }
 
 #wc_ulist .user_item img.edit_bt_off,
-#wc_ulist .user_item_pm img.edit_bt_off { 
+#wc_ulist .user_item_pm img.edit_bt_off,
+#wc_ulist .user_item_msg_icon img.edit_bt_off { 
     padding: 1px;
     border: 0;
     display: none;
 }
 
 #wc_ulist .user_item img.joined_icon,
-#wc_ulist .user_item_pm img.joined_icon {
+#wc_ulist .user_item_pm img.joined_icon,
+#wc_ulist .user_item_msg_icon img.joined_icon {
     width: 10px;
     border: 0;
 }
 
-#wc_ulist .user_item img.new_msg_icon,
-#wc_ulist .user_item_pm img.new_msg_icon {
-    position: absolute;
+#wc_ulist .user_item_msg_icon img.new_msg_icon,
+#wc_ulist .user_item_msg_icon img.new_msg_icon_small {
+    float: left;
+    position: relative;
+    left: 10px;
+    top: 0px;
     border: 0;
-}
-
-#wc_ulist .user_item img.new_msg_icon_small,
-#wc_ulist .user_item_pm img.new_msg_icon_small {
-    position: absolute;
-    border: 0;
+    margin: 0;
+    padding: 0;
 }
 
 #wc_ulist .user_item .moderator_icon,
 #wc_ulist .user_item .muted_icon,
 #wc_ulist .user_item_pm .moderator_icon,
-#wc_ulist .user_item_pm .muted_icon {
+#wc_ulist .user_item_pm .muted_icon,
+#wc_ulist .user_item_msg_icon .moderator_icon,
+#wc_ulist .user_item_msg_icon .muted_icon {
     vertical-align: middle;
     width: 10px;
     border: 0;
@@ -590,8 +612,6 @@ H1 {
 
 #wc_ulist .form_box {
     padding: 20px;
-    z-index: 3;
-    position: absolute;
 }
 
 #wc_ulist .form_box div {

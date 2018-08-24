@@ -511,10 +511,10 @@ $templates['wcchat.posts.normal'] = '
 
 $templates['wcchat.posts.partial_content'] = '
 <div id="wc_msg_partial_{ID}">
-    {PARTIAL}.. <a href="#" onclick="wc_toggle(\'wc_msg_partial_{ID}\'); wc_toggle(\'wc_msg_full_{ID}\'); return false" class="more">[Show More]</a>
+    {PARTIAL}.. <a href="#" onclick="wc_toggle(\'wc_msg_partial_{ID}\'); wc_toggle(\'wc_msg_full_{ID}\'); return false;" class="more">[Show More]</a>
 </div>
 <div id="wc_msg_full_{ID}" class="closed">
-    {FULL} <a href="#js_{ID}" onclick="wc_toggle(\'wc_msg_full_{ID}\'); wc_toggle(\'wc_msg_partial_{ID}\');" class="less">[Show Less]</a>
+    {FULL} <a href="#" onclick="wc_toggle(\'wc_msg_full_{ID}\'); wc_toggle(\'wc_msg_partial_{ID}\'); document.getElementById(\'js_{ID}\').scrollIntoView(); return false;" class="less">[Show Less]</a>
 </div>';
 
 $templates['wcchat.posts.edit_container'] = '
@@ -575,7 +575,7 @@ $templates['wcchat.posts.older'] = '
 
 $templates['wcchat.posts.older.block_separator'] = '<hr>';
 
-$templates['wcchat.posts.new_msg_separator'] = '<div class="new_msg"><img src="{INCLUDE_DIR_THEME}images/new_msg_separator.png" onload="wc_scroll(\'ALL\')"></div>';
+$templates['wcchat.posts.new_msg_separator'] = '<div id="wc_new_msg" class="new_msg"><img src="{INCLUDE_DIR_THEME}images/new_msg_separator.png" onload="setTimeout(function() {document.getElementById(\'wc_new_msg\').scrollIntoView();}, 2000);"></div>';
 
 $templates['wcchat.posts.undo_clear_screen'] = 'Screen cleanup (<a href="#" onclick="wc_undo_clear_screen(\'{CALLER}\'); return false;">Undo</a>)';
 

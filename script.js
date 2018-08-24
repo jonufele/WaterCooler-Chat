@@ -1128,6 +1128,7 @@ function wc_toggle_post_edit(c, id, tag)
         http.open("GET", c+"mode=toggle_post_edit&id=" + id + "&tag=" + tag, true);
         http.onreadystatechange=function(){if(http.readyState==4){
             post_edit.innerHTML = http.responseText;
+		document.getElementById('js_' + id).scrollIntoView();
         }}
         http.send(null);
     } else {

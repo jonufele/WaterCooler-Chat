@@ -741,7 +741,8 @@ class WcUser {
                                             )
                                         ),
                                         !WcPgc::myCookie('ign_' . base64_encode($usr)) && 
-                                        !$this->isMuted && !$this->isBanned
+                                        !$this->isMuted && !$this->isBanned && 
+                                        $this->hasProfileAccess
                                     );
                                     
                                 // Bring unread updated conversations to the top of the list
@@ -793,7 +794,7 @@ class WcUser {
                                     !$this->isMuted && !$this->isBanned && 
                                     $this->hasPermission('PM_ROOM', 'skip_msg')
                                 ),
-                                'PM_CLASS' => ($currently_in_pm ? '_pm' : ''),
+                                'PM_CLASS' => ($currently_in_pm ? '_pm' : ($pm_room_icon ? '_msg_icon' : '')),
                                 'NEW_MSG' => $pm_room_icon,
                                 'MOD_ICON' => $mod_icon,
                                 'MUTED_ICON' =>$muted_icon,

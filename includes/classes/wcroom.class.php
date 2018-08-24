@@ -1488,7 +1488,7 @@ class WcRoom {
         // If content exists before the oldest displayed message or archives exist, initiate the controls to load older posts
         $older_controls = '';
         if(count($lines) && WcPgc::myGet('all') == 'ALL' && LOAD_EX_MSG === TRUE) {
-            if($first_elem) {file_put_contents('s.txt', $first_elem);
+            if($first_elem) {
                 list($tmp1, $tmp2) = explode($first_elem, $this->rawMsgList, 2);
                 if(trim($tmp1) || $this->def['lArchVol'] > 0) {
                     $older_controls = WcGui::popTemplate('wcchat.posts.older');
