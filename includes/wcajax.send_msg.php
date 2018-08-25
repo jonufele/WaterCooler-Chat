@@ -176,12 +176,12 @@
                     // Image(s) detected, try parse to more detailed tags with information about the image(s)
                     $text = preg_replace_callback(
                         '/(?<!=\"|\[IMG\])((http|ftp)+(s)?:\/\/[^<>\s]+(\.jpg|\.jpeg|\.png|\.gif)([?0-9]*))/i',
-                        array($this, 'parseImg'),
+                        'WcImg::parseImg',
                         trim($text)
                     );
                     $text = preg_replace_callback(
                         '/\[IMG\](.*?)\[\/IMG\]/i',
-                        array($this, 'parseImg'),
+                        'WcImg::parseImg',
                         trim($text)
                     );
                 }
