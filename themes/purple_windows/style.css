@@ -595,18 +595,6 @@ H1 {
     padding: 0;
 }
 
-#wc_ulist .user_item img.new_msg_icon,
-#wc_ulist .user_item_pm img.new_msg_icon {
-    position: absolute;
-    border: 0;
-}
-
-#wc_ulist .user_item img.new_msg_icon_small,
-#wc_ulist .user_item_pm img.new_msg_icon_small {
-    position: absolute;
-    border: 0;
-}
-
 #wc_ulist .user_item .moderator_icon,
 #wc_ulist .user_item .muted_icon,
 #wc_ulist .user_item_pm .moderator_icon,
