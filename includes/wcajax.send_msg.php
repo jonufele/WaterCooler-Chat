@@ -198,7 +198,11 @@
                         $archive = str_replace(
                             '.txt', 
                             '.' . $this->room->def['lArchVol'], 
-                            MESSAGES_LOC
+                            str_replace(basename(
+                                MESSAGES_LOC), 
+                                'archived/' . basename(MESSAGES_LOC),
+                                MESSAGES_LOC
+                            )
                         );
                         
                         // Check if current arquive is full, if yes, start a new arquive
@@ -208,7 +212,11 @@
                             $archive = str_replace(
                                 '.txt', 
                                 '.' . $this->room->def['lArchVol'], 
-                                MESSAGES_LOC
+                                str_replace(basename(
+                                    MESSAGES_LOC), 
+                                    'archived/' . basename(MESSAGES_LOC),
+                                    MESSAGES_LOC
+                                )
                             );
                             WcFile::writeFile(
                                 ROOM_DEF_LOC, 

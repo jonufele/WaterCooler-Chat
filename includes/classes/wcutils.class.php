@@ -20,42 +20,42 @@ class WcUtils {
         // Halt if errors exist
         $errors = '';
         if(
-            !is_numeric(REFRESH_DELAY) || 
+            !is_int(REFRESH_DELAY) || 
             intval(REFRESH_DELAY) < 1
         ) {
             $errors = '- REFRESH_DELAY must be an integer >= 1' . "\n";
         }
         
         if(
-            !is_numeric(REFRESH_DELAY_IDLE) || 
+            !is_int(REFRESH_DELAY_IDLE) || 
             intval(REFRESH_DELAY_IDLE) < 0
         ) {
             $errors .= '- REFRESH_DELAY_IDLE must be an integer >= 0' . "\n";
         }
         
         if(
-            !is_numeric(IDLE_START) || 
+            !is_int(IDLE_START) || 
             intval(IDLE_START) < 60
         ) {
             $errors .= '- IDLE_START must be an integer >= 60' . "\n";
         }
         
         if(
-            !is_numeric(OFFLINE_PING) || 
+            !is_int(OFFLINE_PING) || 
             intval(OFFLINE_PING) < 1
         ) {
             $errors .= '- OFFLINE_PING must be an integer >= 1' . "\n";
         }
                 
         if(
-            !is_numeric(ANTI_SPAM) || 
+            !is_int(ANTI_SPAM) || 
             intval(ANTI_SPAM) < 0
         ) {
             $errors .= '- ANTI_SPAM must be an integer >= 0' . "\n";
         }
         
         if(
-            !is_numeric(CHAT_OLDER_MSG_STEP) || 
+            !is_int(CHAT_OLDER_MSG_STEP) || 
             intval(CHAT_OLDER_MSG_STEP) < 1
         ) {
             $errors .= '- CHAT_OLDER_MSG_STEP must be an integer >= 1' . "\n";
@@ -63,10 +63,24 @@ class WcUtils {
         
         if(
             intval(CHAT_DSP_BUFFER) > intval(CHAT_STORE_BUFFER) || 
-            !is_numeric(CHAT_DSP_BUFFER) || 
-            !is_numeric(CHAT_STORE_BUFFER)
+            !is_int(CHAT_DSP_BUFFER) || 
+            !is_int(CHAT_STORE_BUFFER)
         ) {
             $errors .= '- CHAT_STORE_BUFFER must be >= CHAT_DSP_BUFFER' . "\n";
+        }
+        
+        if(
+            !is_int(POST_EDIT_TIMEOUT) || 
+            intval(POST_EDIT_TIMEOUT) < 0
+        ) {
+            $errors .= '- "POST_EDIT_TIMEOUT" must be an integer >= 0' . "\n";
+        }
+    
+        if(
+            !is_int(MAX_DATA_LEN) || 
+            intval(MAX_DATA_LEN) < 0
+        ) {
+            $errors .= '- "MAX_DATA_LEN" must be an integer >= 0' . "\n";
         }
         
         if(ACC_REC_EMAIL) {

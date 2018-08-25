@@ -39,7 +39,7 @@
             ) ? TRUE : FALSE;
             
         if(!$edit_permission) {
-            echo "ERROR: Cannot Edit post! Possible causes:\n- Access denied\n- Invalid Message Id\n- Expired Edit Timeout!";
+            echo "ERROR: Cannot Edit post! Possible causes:\n- Access denied\n- Invalid Message Id\n- Expired Edit Timeout\n- The message was archived/discarded";
             die();
         }
    

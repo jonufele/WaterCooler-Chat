@@ -582,6 +582,8 @@ $templates['wcchat.posts.global_clear_screen'] = 'New Chat Visit';
 
 $templates['wcchat.posts.curr_user_ref'] = '<span class="curr_user_ref">{NAME}</span>';
 
+$templates['wcchat.posts.archived'] = '<img src="{INCLUDE_DIR_THEME}images/archived.png" title="Archived" class="archived">';
+
 # ============================================================================
 #                         ROOMS
 # ============================================================================
@@ -1170,6 +1172,7 @@ $templates['wcchat.info'] = '
             <li>To post a message, a user needs to be logged in and joined</li>
             <li>Posted messages can be hidden either by users/moderators (self only: cookie) or moderators under edit mode (global hide)</li>
             <li>A message that is hidden (either locally or globally) cannot be edited</li>
+            <li>Archived messages are read-only.</li>
             <li>Globally hiding a message takes immediate effect on other users, while un-hiding only takes effect on user\'s next visit to the room</li>
             <li>When a message is edited, the other users receive a note on top of the message with a reload link.</li>
             <li>To write a multi-line message, turn on multi-line mode (Toolbar), write the message, go back to single line mode and submit.</li>

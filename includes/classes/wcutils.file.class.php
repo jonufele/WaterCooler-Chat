@@ -20,6 +20,7 @@ class WcFile {
 
         $output = '';
         $tmp1 = is_writable(WcChat::$roomDir);
+        $tmp1_2 = is_writable(WcChat::$roomDir . 'archived/');
         $tmp2 = is_writable(WcChat::$dataDir);
         $tmp3 = is_writable(WcChat::$dataDir . 'tmp/');
         $tmp4 = is_writable(WcChat::$includeDirServer . 'files/');
@@ -27,13 +28,14 @@ class WcFile {
         $tmp6 = is_writable(WcChat::$includeDirServer . 'files/avatars/');
         $tmp7 = is_writable(WcChat::$includeDirServer . 'files/thumb/');
 
-        if(!$tmp1 || !$tmp2 || !$tmp3 || !$tmp4 || !$tmp5 || !$tmp6 || !$tmp7) {
+        if(!$tmp1 || !$tmp1_2 || !$tmp2 || !$tmp3 || !$tmp4 || !$tmp5 || !$tmp6 || !$tmp7) {
 
-            if(!$tmp1 || !$tmp2 || !$tmp3) {
+            if(!$tmp1 || !$tmp1_2 || !$tmp2 || !$tmp3) {
                 $output .= '<h2>Data Directories (Absolute Server Path)</h2>';
             }
 
             if(!$tmp1) { $output .= addslashes(WcChat::$roomDir) . "\n"; }
+            if(!$tmp1_2) { $output .= addslashes(WcChat::$roomDir) . 'archived/' . "\n"; }
             if(!$tmp2) { $output .= addslashes(WcChat::$dataDir) . "\n"; }
             if(!$tmp3) { $output .= addslashes(WcChat::$dataDir . 'tmp/') . "\n"; }
             if(!$tmp4 || !$tmp5 || !$tmp6 || !$tmp7) {

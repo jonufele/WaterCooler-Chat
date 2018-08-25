@@ -846,7 +846,8 @@ class WcRoom {
                                                         ''
                                                     )
                                                 ),
-                                                $post_edit_perm && !WcPgc::mySession('archive')
+                                                $post_edit_perm && !WcPgc::mySession('archive'),
+                                                (WcPgc::mySession('archive') ? WcGui::popTemplate('wcchat.posts.archived') : '')
                                             ),
                                             'EDITED' => WcGui::popTemplate(
                                                 'wcchat.posts.normal.edit_tag.edited',
@@ -1448,7 +1449,7 @@ class WcRoom {
                     // Scan Current Archive volume
                     $archive_vol = intval(WcPgc::mySession('archive'));
                     $archive_target = 
-                        WcChat::$roomDir . 
+                        WcChat::$roomDir . 'archived/' .
                         base64_encode(WcPgc::mySession('current_room')) . '.' . 
                         ($this->def['lArchVol'] + 1 - $archive_vol)
                     ;
@@ -1466,11 +1467,11 @@ class WcRoom {
                     
                     $next_archive_vol =  (intval(WcPgc::mySession('archive')) + 1);
                     $next_archive_target = 
-                        WcChat::$roomDir . 
+                        WcChat::$roomDir . 'archived/' .
                         base64_encode(WcPgc::mySession('current_room')) . '.' . 
                         ($this->def['lArchVol'] + 1 - $next_archive_vol)
                     ;
-                    
+
                     if(file_exists($next_archive_target)) {
                         $lines = explode(
                             "\n", 

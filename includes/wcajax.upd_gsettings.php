@@ -99,6 +99,20 @@
         $error .= '- "Chat Store Buffer" must be >= "Chat Display Buffer"' . "\n";
     }
     
+    if(
+        !ctype_digit(WcPgc::myPost('gs_post_edit_timeout')) || 
+        intval(WcPgc::myPost('gs_post_edit_timeout')) < 0
+    ) {
+        $error .= '- "Post Edit Timeout" must be an integer >= 0' . "\n";
+    }
+    
+    if(
+        !ctype_digit(WcPgc::myPost('gs_max_data_len')) || 
+        intval(WcPgc::myPost('gs_max_data_len')) < 0
+    ) {
+        $error .= '- "Max Data Len" must be an integer >= 0' . "\n";
+    }
+    
     if(WcPgc::myPost('gs_acc_rec_email')) {
         if(!filter_var(WcPgc::myPost('gs_acc_rec_email'), FILTER_VALIDATE_EMAIL)) {
             $error .= '- "Account Recovery Sender E-mail" is invalid!' . "\n";

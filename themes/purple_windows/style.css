@@ -387,6 +387,10 @@ H1 {
     display: none;
 }
 
+#wc_msg_container .archived {
+    float: right;
+}
+
 /*--------------------------------------*/
 /*            GLOBAL SETTINGS           */
 /*--------------------------------------*/
