@@ -1210,6 +1210,7 @@ $templates['wcchat.info'] = '
     <div class="header2">Symbols</div>
     <div>
         <ul>
+            <li><img src="{INCLUDE_DIR_THEME}images/archived.png"> - Archived Message (Read-only)</li>
             <li><img src="{INCLUDE_DIR_THEME}images/arrow.png"> - Hides a message <span>(Hides for all users if user is a moderator under edit mode)</span></li>
             <li><img src="{INCLUDE_DIR_THEME}images/arrow_r.png"> - Un-Hides a message <span>(Won\'t work if the message was globally hidden by a moderator)</span></li>
             <li><img src="{INCLUDE_DIR_THEME}images/attach.png"> - Item is an uploaded attachment</li>
