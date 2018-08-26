@@ -764,7 +764,9 @@ class WcRoom {
                                             ),
                                             'ID' => $unique_id,
                                             'HIDE_ICON' => '',
-                                            'UPDATED_NOTE' => ''
+                                            'UPDATED_NOTE' => '',
+                                            'EDIT_TAG' => '',
+                                            'EDIT_CONTAINER' => ''
                                         )
                                     ),
                                 'SKIP_ON_OLDER_LOAD' => '_skip',
