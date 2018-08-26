@@ -1139,7 +1139,7 @@ function wc_toggle_post_edit(c, id, tag)
 function wc_toggle(id)
 {
     var box1 = document.getElementById(id);
-    if(typeof box1 !== 'undefined')
+    if(box1 !== null)
     {
         if (box1.className.search('closed') != -1){
             if(box1.className.search(' closed') != -1) {
@@ -1197,8 +1197,8 @@ function wc_pop_input(text)
     obj.focus();
 }
 
-function wc_pop_vid(id, w, h) {
-    document.getElementById('wc_video_'+id).innerHTML = '<iframe width="'+w+'" height="'+h+'" src="https://www.youtube.com/embed/'+id+'" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>';
+function wc_pop_vid(id, vid, w, h) {
+    document.getElementById('wc_video_'+id).innerHTML = '<iframe width="'+w+'" height="'+h+'" src="https://www.youtube.com/embed/'+vid+'" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>';
     wc_toggle('im_'+id);
-    wc_toggle('video_'+id);
+    wc_toggle('wc_video_'+id);
 }

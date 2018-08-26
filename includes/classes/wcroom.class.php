@@ -914,7 +914,8 @@ class WcRoom {
                                         WcGui::parseBbcode(
                                             WcGui::parseLongMsg($msg, $unique_id),
                                             $down_perm,
-                                            $this->user->name
+                                            $this->user->name,
+                                            $unique_id
                                         )
                                     ),
                                     'ID' => $unique_id,
@@ -1045,13 +1046,14 @@ class WcRoom {
                                     ($time_date != $today_date ? ' '.$time_date : ''),
                                 'USER' => base64_decode($user),
                                 'MSG' => WcGui::popTemplate(
-                                    'wcchat.posts.hidden', 
+                                    'wcchat.posts.hidden' . ($hidden ? '_mod' : ''), 
                                     '', 
                                     $hidden || WcPgc::myCookie($hidden_cookie), 
                                     WcGui::parseBbcode(
                                         WcGui::parseLongMsg($msg, $unique_id),
                                         $down_perm,
-                                        $this->user->name
+                                        $this->user->name,
+                                        $unique_id
                                     )
                                 ),
                                 'ID' => $unique_id,
@@ -1491,7 +1493,7 @@ class WcRoom {
         if(count($lines) && WcPgc::myGet('all') == 'ALL' && LOAD_EX_MSG === TRUE) {
             if($first_elem) {
                 list($tmp1, $tmp2) = explode($first_elem, $this->rawMsgList, 2);
-                if(trim($tmp1) || $this->def['lArchVol'] > 0) {
+                if(strpos($tmp1, "\n") !== FALSE || $this->def['lArchVol'] > 0) {
                     $older_controls = WcGui::popTemplate('wcchat.posts.older');
                 }
             } else {

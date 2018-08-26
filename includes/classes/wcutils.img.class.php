@@ -135,6 +135,41 @@ class WcImg {
                 return '[IMG|' . IMAGE_AUTO_RESIZE_UNKN . ']' . $source . '[/IMG]';
         }
     }
+    
+    /**
+     * Generates thumbnails for youtube videos
+     * 
+     * @since 1.4
+     * @param string $s Video url parameters
+     * @return string
+     */
+    public static function parseVideoImg($s) {
+        $image = self::initImg('https://img.youtube.com/vi/'.$s[1].'/0.jpg');
+        
+        if($image) {
+            $w = imagesx($image);
+            $h = imagesy($image);
+            
+            $target = 'files/thumb/tn_youtube_' . $s[1] . '.jpg';
+            
+            if(
+                $w > 0 && $h > 0
+            ) {
+                if(
+                    self::thumbnailCreateMed(
+                        $image,
+                        $w,
+                        $h, 
+                        WcChat::$includeDirServer . $target,
+                        IMAGE_MAX_DSP_DIM
+                    )
+                ) {
+                    return '[YOUTUBE]'.$s[1].'[/YOUTUBE]';
+                }
+            }
+        }
+        return $s[0];
+    }
 
     /**
      * Generates a normal thumbnail

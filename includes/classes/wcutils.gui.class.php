@@ -165,7 +165,7 @@ class WcGui {
      * @param string $user_name          
      * @return string Parsed Msg
      */
-    public static function parseBbcode($data, $down_perm, $user_name) {
+    public static function parseBbcode($data, $down_perm, $user_name, $msg_id = NULL) {
     
         $search =
             array(
@@ -180,7 +180,8 @@ class WcGui {
                 '/\[img\|([0-9]+)\](.*?)\[\/img\]/i',
                 '/\[url\="(.*?)"\](.*?)\[\/url\]/i',
                 '/\[attach_(.*?)_([0-9a-f]+)_([0-9]+)_([A-Za-z0-9 _\.]+)\]/i',
-                '/https:\/\/www\.youtube\.com\/watch\?v=([0-9a-zA-Z]*)/i',
+                '/https:\/\/www\.youtube\.com\/watch\?v=([0-9a-zA-Z-+_=]*)/i',
+                '/\[YOUTUBE\]([0-9a-zA-Z-+_=]*?)\[\/YOUTUBE\]/i',
                 '/(?<!href=\"|src=\"|\])((http|ftp)+(s)?:\/\/[^<>\s]+)/i'
                );
 
@@ -231,11 +232,19 @@ class WcGui {
                         <span style="font-size: 10px">(\\3KB)</span>
                     </i>
                 </div>',
-                '<div id="im_\\1">
-                    <a href="#" onclick="wc_pop_vid(\'\\1\', ' . VIDEO_WIDTH . ', ' . VIDEO_HEIGHT . '); return false;">
-                    <img src="' . INCLUDE_DIR_THEME . 'images/video_cover.jpg" class="thumb" style="margin: 10px" onload="wc_scroll(\''.$all.'\')"></a>
+                '<div id="im_'.$msg_id.'\\1">
+                    <a href="#" onclick="wc_pop_vid(\''.$msg_id.'\\1\', \'\\1\', ' . VIDEO_WIDTH . ', ' . VIDEO_HEIGHT . '); return false;">
+                        <img src="' . INCLUDE_DIR_THEME . 'images/video_cover.jpg" class="thumb" style="margin: 10px; width: '.IMAGE_MAX_DSP_DIM.'px" onload="wc_scroll(\''.$all.'\')">
+                    </a>
                 </div>
-                <div id="wc_video_\\1" class="closed"></div>',
+                <div id="wc_video_'.$msg_id.'\\1" class="closed"></div>',
+                '<div id="im_'.$msg_id.'\\1">
+                    <a href="#" onclick="wc_pop_vid(\''.$msg_id.'\\1\', \'\\1\', ' . VIDEO_WIDTH . ', ' . VIDEO_HEIGHT . '); return false;">
+                        <img src="'.INCLUDE_DIR_THEME.'images/play.png" style="float: left; position: relative; left: 20px; top: 5px;z-index: 3" onload="wc_scroll(\''.$all.'\')">
+                        <img src="' . WcChat::$includeDir . 'files/thumb/tn_youtube_\\1.jpg" class="thumb" style="margin: 10px; position: relative; left: 0;" onload="wc_scroll(\''.$all.'\')">
+                    </a>
+                </div>
+                <div id="wc_video_'.$msg_id.'\\1" class="closed"></div>',
                 '<a href="\\0" target="_blank" style="font-size:10px;font-family:tahoma">\\0</a>'
             );
 

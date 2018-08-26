@@ -169,7 +169,8 @@
                 // Check if posts contains images
                 if(
                     !preg_match('/((http|ftp)+(s)?:\/\/[^<>\s]+)(.jpg|.jpeg|.png|.gif)([?0-9]*)/i', $text) && 
-                    !preg_match('/\[IMG\](.*?)\[\/IMG\]/i', $text)
+                    !preg_match('/\[IMG\](.*?)\[\/IMG\]/i', $text) && 
+                    !preg_match('/https:\/\/www\.youtube\.com\/watch\?v=([0-9a-zA-Z-+_=]*)/i', $text)
                 ) {
                     $text = trim($text);
                 } else {
@@ -182,6 +183,11 @@
                     $text = preg_replace_callback(
                         '/\[IMG\](.*?)\[\/IMG\]/i',
                         'WcImg::parseImg',
+                        trim($text)
+                    );
+                    $text = preg_replace_callback(
+                        '/https:\/\/www\.youtube\.com\/watch\?v=([0-9a-zA-Z-+_=]*)/',
+                        'WcImg::parseVideoImg',
                         trim($text)
                     );
                 }
