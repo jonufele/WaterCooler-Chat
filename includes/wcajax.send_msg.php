@@ -166,31 +166,8 @@
                     $text = trim($ntext, ' ');
                 }
 
-                // Check if posts contains images
-                if(
-                    !preg_match('/((http|ftp)+(s)?:\/\/[^<>\s]+)(.jpg|.jpeg|.png|.gif)([?0-9]*)/i', $text) && 
-                    !preg_match('/\[IMG\](.*?)\[\/IMG\]/i', $text) && 
-                    !preg_match('/https:\/\/www\.youtube\.com\/watch\?v=([0-9a-zA-Z-+_=]*)/i', $text)
-                ) {
-                    $text = trim($text);
-                } else {
-                    // Image(s) detected, try parse to more detailed tags with information about the image(s)
-                    $text = preg_replace_callback(
-                        '/(?<!=\"|\[IMG\])((http|ftp)+(s)?:\/\/[^<>\s]+(\.jpg|\.jpeg|\.png|\.gif)([?0-9]*))/i',
-                        'WcImg::parseImg',
-                        trim($text)
-                    );
-                    $text = preg_replace_callback(
-                        '/\[IMG\](.*?)\[\/IMG\]/i',
-                        'WcImg::parseImg',
-                        trim($text)
-                    );
-                    $text = preg_replace_callback(
-                        '/https:\/\/www\.youtube\.com\/watch\?v=([0-9a-zA-Z-+_=]*)/',
-                        'WcImg::parseVideoImg',
-                        trim($text)
-                    );
-                }
+                // Check if posts contains images / videos, generate thumbnail bbcode tags
+                $text = WcGui::parseBbcodeThumb($text);
 
                 // Check if the new post will overflow the store buffer, if yes, delete the oldest line (1st line)
                 $source = $this->room->rawMsgList;

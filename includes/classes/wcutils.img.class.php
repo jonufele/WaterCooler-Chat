@@ -69,6 +69,8 @@ class WcImg {
         // Use http instead of https (in case https wrapper is not installed)
         $iname = str_replace('https://', 'http://', $source);
         $image = self::initImg($iname);
+        
+        $target = 'files/thumb/tn_' . strtoupper(dechex(crc32($iname))) . '.jpg';
 
         if($image) {
             $w = imagesx($image);
@@ -90,7 +92,6 @@ class WcImg {
                     $nh = IMAGE_MAX_DSP_DIM;
                 }
 
-                $target = 'files/thumb/tn_' . strtoupper(dechex(crc32($iname))) . '.jpg';
                 if(GEN_REM_THUMB) {
                     if(
                         self::thumbnailCreateMed(
@@ -106,7 +107,7 @@ class WcImg {
                                 ($attach != NULL ? 'A' : '') . '|' . 
                                 $w . 'x' . $h . '|' . $nw . 'x' . $nh . 
                                 '|tn_' . strtoupper(dechex(crc32($iname))) . 
-                            ']' . 
+                            '|]' . 
                                 $source_tag . 
                             '[/IMG]'
                         ;
@@ -115,7 +116,7 @@ class WcImg {
                             '[IMG' . 
                                 ($attach != NULL ? 'A' : '') . '|' . 
                                 $w . 'x' . $h . '|' . $nw . 'x' . $nh . 
-                            ']' . 
+                            '|]' . 
                                 $source_tag . 
                             '[/IMG]';
                     }
@@ -124,7 +125,7 @@ class WcImg {
                         '[IMG' . 
                             ($attach != NULL ? 'A' : '') . '|' . 
                             $w . 'x' . $h . '|' . $nw . 'x' . $nh . 
-                        ']' . 
+                        '|]' . 
                             $source_tag . 
                         '[/IMG]';
                 }
@@ -132,7 +133,7 @@ class WcImg {
                 return '[IMG]' . $source . '[/IMG]';
             }
         } else {
-                return '[IMG|' . IMAGE_AUTO_RESIZE_UNKN . ']' . $source . '[/IMG]';
+                return '[IMG|' . IMAGE_AUTO_RESIZE_UNKN . '|]' . $source . '[/IMG]';
         }
     }
     

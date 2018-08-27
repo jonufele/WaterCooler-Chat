@@ -54,7 +54,7 @@ class WcGui {
                 array(
                     WcChat::$ajaxCaller,
                     WcChat::$includeDir,
-                    (defined('INCLUDE_DIR_THEME') ? INCLUDE_DIR_THEME : ''),
+                    WcChat::$includeDirTheme,
                     WcChat::$wcPrefix
                 ),
                 $out
@@ -66,6 +66,31 @@ class WcGui {
                 return $no_cond_content;
             }
         }
+    }
+    
+    /**
+     * Includes Theme Templates
+     * 
+     * @since 1.4
+     * @return void
+     */
+    public static function includeTemplates() {
+        $array = array(
+            'global_sett', 'index', 'info', 'join',
+            'login', 'main', 'posts', 'profile_sett',
+            'rooms', 'static_msg', 'text_input', 'themes',
+            'toolbar', 'topic', 'users'
+        );
+        
+        foreach($array as $value) {
+            include 
+                WcChat::$includeDirServer . 'themes/' . 
+                THEME . '/templates/wctplt.' . 
+                $value . '.php'
+            ;
+        }
+        
+        return $templates;        
     }
     
     /**
@@ -173,11 +198,11 @@ class WcGui {
                 '/\[i\](.*?)\[\/i\]/i',
                 '/\[u\](.*?)\[\/u\]/i',
                 '/\[img](.*?)\[\/img\]/i',
-                '/\[imga\|([0-9]+)x([0-9]+)\|([0-9]+)x([0-9]+)\](.*?)\[\/img\]/i',
-                '/\[imga\|([0-9]+)x([0-9]+)\|([0-9]+)x([0-9]+)\|tn_([0-9A-Z]+)\](.*?)\[\/img\]/i',
-                '/\[img\|([0-9]+)x([0-9]+)\|([0-9]+)x([0-9]+)\](.*?)\[\/img\]/i',
-                '/\[img\|([0-9]+)x([0-9]+)\|([0-9]+)x([0-9]+)\|tn_([0-9A-Z]+)\](.*?)\[\/img\]/i',
-                '/\[img\|([0-9]+)\](.*?)\[\/img\]/i',
+                '/\[imga\|([0-9]+)x([0-9]+)\|([0-9]+)x([0-9]+)[|]?\](.*?)\[\/img\]/i',
+                '/\[imga\|([0-9]+)x([0-9]+)\|([0-9]+)x([0-9]+)\|tn_([0-9A-Z]+)[|]?\](.*?)\[\/img\]/i',
+                '/\[img\|([0-9]+)x([0-9]+)\|([0-9]+)x([0-9]+)[|]?\](.*?)\[\/img\]/i',
+                '/\[img\|([0-9]+)x([0-9]+)\|([0-9]+)x([0-9]+)\|tn_([0-9A-Z]+)[|]?\](.*?)\[\/img\]/i',
+                '/\[img\|([0-9]+)[|]?\](.*?)\[\/img\]/i',
                 '/\[url\="(.*?)"\](.*?)\[\/url\]/i',
                 '/\[attach_(.*?)_([0-9a-f]+)_([0-9]+)_([A-Za-z0-9 _\.]+)\]/i',
                 '/https:\/\/www\.youtube\.com\/watch\?v=([0-9a-zA-Z-+_=]*)/i',
@@ -204,12 +229,12 @@ class WcGui {
                 </div>',
                 '<div style="width: \\3px;" class="thumb_container">
                     <img src="\\5" style="width: \\3px; height: \\4px;" class="thumb" onload="wc_scroll(\''.$all.'\')"><br>
-                    <img src="' . INCLUDE_DIR_THEME . 'images/attach.png">
+                    <img src="' . WcChat::$includeDirTheme . 'images/attach.png">
                     <a href="' . ($down_perm ? WcChat::$includeDir . 'files/attachments/\\5' : '#') . '" target="_blank" ' . $down_alert . '>\\1 x \\2</a>
                 </div>',
                 '<div style="width: \\3px;" class="thumb_container">
                     <img src="' . WcChat::$includeDir . 'files/thumb/tn_\\5.jpg" class="thumb" onload="wc_scroll(\''.$all.'\')"><br>
-                    <img src="' . INCLUDE_DIR_THEME . 'images/attach.png">
+                    <img src="' . WcChat::$includeDirTheme . 'images/attach.png">
                     <a href="' . ($down_perm ? WcChat::$includeDir . 'files/attachments/\\6' : '#') . '" target="_blank" ' . $down_alert . '>\\1 x \\2</a>
                 </div>',
                 '<div style="width: \\3px;" class="thumb_container">
@@ -227,20 +252,20 @@ class WcGui {
                 '<a href="\\1" target="_blank">\\2</a>',
                 '<div style="margin:10px;">
                     <i>
-                        <img src="' . INCLUDE_DIR_THEME . 'images/attach.png"> 
+                        <img src="' . WcChat::$includeDirTheme . 'images/attach.png"> 
                         <a href="' . ($down_perm ? WcChat::$includeDir . 'files/attachments/\\1_\\2_\\4' : '#') . '" target="_blank" ' . $down_alert . '>\\4</a> 
                         <span style="font-size: 10px">(\\3KB)</span>
                     </i>
                 </div>',
                 '<div id="im_'.$msg_id.'\\1">
                     <a href="#" onclick="wc_pop_vid(\''.$msg_id.'\\1\', \'\\1\', ' . VIDEO_WIDTH . ', ' . VIDEO_HEIGHT . '); return false;">
-                        <img src="' . INCLUDE_DIR_THEME . 'images/video_cover.jpg" class="thumb" style="margin: 10px; width: '.IMAGE_MAX_DSP_DIM.'px" onload="wc_scroll(\''.$all.'\')">
+                        <img src="' . WcChat::$includeDirTheme . 'images/video_cover.jpg" class="thumb" style="margin: 10px; width: '.IMAGE_MAX_DSP_DIM.'px" onload="wc_scroll(\''.$all.'\')">
                     </a>
                 </div>
                 <div id="wc_video_'.$msg_id.'\\1" class="closed"></div>',
                 '<div id="im_'.$msg_id.'\\1">
                     <a href="#" onclick="wc_pop_vid(\''.$msg_id.'\\1\', \'\\1\', ' . VIDEO_WIDTH . ', ' . VIDEO_HEIGHT . '); return false;">
-                        <img src="'.INCLUDE_DIR_THEME.'images/play.png" style="float: left; position: relative; left: 20px; top: 5px;z-index: 3" onload="wc_scroll(\''.$all.'\')">
+                        <img src="' . WcChat::$includeDirTheme . 'images/play.png" style="float: left; position: relative; left: 20px; top: 5px;z-index: 3" onload="wc_scroll(\''.$all.'\')">
                         <img src="' . WcChat::$includeDir . 'files/thumb/tn_youtube_\\1.jpg" class="thumb" style="margin: 10px; position: relative; left: 0;" onload="wc_scroll(\''.$all.'\')">
                     </a>
                 </div>
@@ -325,6 +350,42 @@ class WcGui {
             return $data;
         }
             
+    }
+    
+    /**
+     * Parses links within a string and generates thumbnail bbcode tags
+     * 
+     * @since 1.4
+     * @param string $data
+     * @return string Parsed Data
+     */
+    public static function parseBBcodeThumb($text) {
+        if(
+            !preg_match('/(?<!=\"|\[IMG\]|[|]\])((http|ftp)+(s)?:\/\/[^<>\s]+)(.jpg|.jpeg|.png|.gif)([?0-9]*)/i', $text) && 
+            !preg_match('/\[IMG\](.*?)\[\/IMG\]/i', $text) && 
+            !preg_match('/https:\/\/www\.youtube\.com\/watch\?v=([0-9a-zA-Z-+_=]*)/i', $text)
+        ) {
+            $text = trim($text);
+        } else {
+            // Image(s) detected, try parse to more detailed tags with information about the image(s)
+            $text = preg_replace_callback(
+                '/(?<!=\"|\[IMG\]|[|]\])((http|ftp)+(s)?:\/\/[^<>\s]+(\.jpg|\.jpeg|\.png|\.gif)([?0-9]*))/i',
+                'WcImg::parseImg',
+                trim($text)
+            );
+            $text = preg_replace_callback(
+                '/\[IMG\](.*?)\[\/IMG\]/i',
+                'WcImg::parseImg',
+                trim($text)
+            );
+            $text = preg_replace_callback(
+                '/https:\/\/www\.youtube\.com\/watch\?v=([0-9a-zA-Z-+_=]*)/',
+                'WcImg::parseVideoImg',
+                trim($text)
+            );
+        }
+        
+        return $text;
     }
     
 }

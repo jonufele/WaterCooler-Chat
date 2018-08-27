@@ -395,6 +395,8 @@ function wc_poste(e, c, id, tag)
         if(e.which == 13 || e.keyCode == 13) {
             e.preventDefault();
             var text_input = document.getElementById('editbox_cont_' + id);
+            var loader = document.getElementById('edit_loader_' + id);
+            loader.innerHTML = document.getElementById('wc_loader_img_c').innerHTML; 
 
             var http = getHTTPObject();
             http.open("GET", c+"mode=edit_msg&new_data="+encodeURIComponent(text_input.value)+"&id=" + id + "&tag=" + tag, true);
@@ -402,9 +404,13 @@ function wc_poste(e, c, id, tag)
                 if(http.responseText.length > 0) {
                     if(http.responseText.search('ERROR') == -1) {
                         document.getElementById('js_' + id).innerHTML = http.responseText;
+                        setTimeout( function() {document.getElementById('js_' + id).scrollIntoView();}, 500);
                     } else {
                         alert(wc_parse_error(http.responseText));
+                        loader.innerHTML = '';
                     }  
+                } else {
+                     loader.innerHTML = '';
                 }
             }}
             http.send(null);

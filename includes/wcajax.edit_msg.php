@@ -42,6 +42,15 @@
             echo "ERROR: Cannot Edit post! Possible causes:\n- Access denied\n- Invalid Message Id\n- Expired Edit Timeout\n- The message was archived/discarded";
             die();
         }
+        
+        $parsed_data =
+            $new_id . '|' . str_replace(
+                "\n", 
+                '<br>', 
+                strip_tags(
+                    WcGui::parseBbcodeThumb(WcPgc::myGet('new_data'))    
+                )
+            );
    
         WcFile::writeFile(
             MESSAGES_LOC,
@@ -50,7 +59,7 @@
                     (WcUtils::hasData(WcPgc::myGet('tag')) ? WcPgc::myGet('tag') . '-' : '').
                     WcPgc::myGet('id')
                 ).')\|(.*)$/im', 
-                $new_id . '|' . str_replace("\n", '<br>', strip_tags(WcPgc::myGet('new_data'))), 
+                $parsed_data, 
                 $this->room->rawMsgList
             ),
             'w'
@@ -65,19 +74,14 @@
         );
         
         echo $this->room->parseMsg(
-            array(
-                $new_id . '|' . 
-                str_replace(
-                    "\n", 
-                    '<br>', 
-                    strip_tags(WcPgc::myGet('new_data'))
-                )
-            ),
+            array($parsed_data),
             0,
             'RETRIEVE',
             NULL,
             'RELOAD_MSG'
         );
+        
+        sleep(1);
     }
 
 ?>

@@ -90,6 +90,14 @@ class WcChat {
      * @var string
      */
     public static $includeDir;
+    
+    /**
+     * Theme Include Directory
+     *
+     * @since 1.4
+     * @var string
+     */
+    public static $includeDirTheme;
 
     /**
      * Ajax Caller
@@ -279,10 +287,9 @@ class WcChat {
             DEFAULT_THEME
         ));
         
-        include self::$includeDirServer . 'themes/' . THEME . '/templates.php';
-        self::$templates = $templates;
+        self::$templates = WcGui::includeTemplates();
         
-        define('INCLUDE_DIR_THEME', self::$includeDir . 'themes/' . THEME . '/');
+        self::$includeDirTheme = self::$includeDir . 'themes/' . THEME . '/';
 
         self::$ajaxCaller = self::$includeDir . 'ajax.php?';
         

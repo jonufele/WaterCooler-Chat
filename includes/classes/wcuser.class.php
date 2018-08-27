@@ -620,7 +620,7 @@ class WcUser {
                             
                         $av = ($tmp1 ? 
                             WcChat::$includeDir . 'files/avatars/' . base64_decode($tmp1) : 
-                            INCLUDE_DIR_THEME . DEFAULT_AVATAR
+                            WcChat::$includeDirTheme . DEFAULT_AVATAR
                         );
                         $ulink = ($tmp3 ? 
                             (
@@ -633,7 +633,7 @@ class WcUser {
                     } else {
                         $ulink = '';
                         $av = (DEFAULT_AVATAR ? 
-                            INCLUDE_DIR_THEME . DEFAULT_AVATAR : 
+                            WcChat::$includeDirTheme . DEFAULT_AVATAR : 
                             ''
                         );
                     }
@@ -644,7 +644,7 @@ class WcUser {
                     if($isbanned !== FALSE) {
                         $ulink = '';
                         $av = (DEFAULT_AVATAR ? 
-                            INCLUDE_DIR_THEME . DEFAULT_AVATAR : 
+                            WcChat::$includeDirTheme . DEFAULT_AVATAR : 
                             ''
                         );
                         $name_style = ' style="text-decoration: line-through;"';

@@ -494,12 +494,12 @@ class WcRoom {
                 array(
                     'AVATAR' => ($udata1['avatar'] ? 
                         WcChat::$includeDir . 'files/avatars/' . $udata1['avatar'] : 
-                        INCLUDE_DIR_THEME . DEFAULT_AVATAR
+                        WcChat::$includeDirTheme . DEFAULT_AVATAR
                     ),
                     'NAME' =>base64_decode($user1),
                     'AVATAR2' => ($udata2['avatar'] ? 
                         WcChat::$includeDir . 'files/avatars/' . $udata2['avatar'] : 
-                        INCLUDE_DIR_THEME . DEFAULT_AVATAR
+                        WcChat::$includeDirTheme . DEFAULT_AVATAR
                     ),
                     'NAME2' => base64_decode($user2)
                 )
@@ -941,9 +941,9 @@ class WcRoom {
                                         (
                                             WcUtils::hasData($avatar_array[base64_decode($user)]) ? 
                                             WcChat::$includeDir . 'files/avatars/' . $avatar_array[base64_decode($user)] : 
-                                            INCLUDE_DIR_THEME . DEFAULT_AVATAR
+                                            WcChat::$includeDirTheme . DEFAULT_AVATAR
                                         ) : 
-                                        INCLUDE_DIR_THEME . DEFAULT_AVATAR
+                                        WcChat::$includeDirTheme . DEFAULT_AVATAR
                                     ),
                                     'WIDTH' => WcGui::popTemplate(
                                         'wcchat.posts.normal.width', 
