@@ -59,7 +59,7 @@ $templates['wcchat.toolbar.bbcode.attachment_uploads'] = ' <a href="#" onclick="
 
 $templates['wcchat.toolbar.commands'] = '
 <div id="wc_commands">
-    <a href="#" onclick="wc_toggle(\'wc_msg_container\'); wc_toggle(\'wc_info\'); return false" title="Information">
+    <a href="#" onclick="wc_toggle_msg_cont(\'wc_info\'); return false" title="Information">
         <img src="{INCLUDE_DIR_THEME}images/cmd.png">
     </a> 
     <a href="#" onclick="wc_clear_screen(\'{CALLER}\'); return false" title="Clear Screen">
@@ -75,7 +75,7 @@ $templates['wcchat.toolbar.commands'] = '
     {EDIT}
 </div>';
 
-$templates['wcchat.toolbar.commands.gsettings'] = ' <a href="#" onclick="wc_toggle(\'wc_msg_container\'); wc_toggle(\'wc_global_settings\'); return false" title="Global Settings"><img src="{INCLUDE_DIR_THEME}images/gsett.png"></a>';
+$templates['wcchat.toolbar.commands.gsettings'] = ' <a href="#" onclick="wc_toggle_msg_cont(\'wc_global_settings\'); return false" title="Global Settings"><img src="{INCLUDE_DIR_THEME}images/gsett.png"></a>';
 
 $templates['wcchat.toolbar.commands.edit'] = ' <a href="#" onclick="wc_toggle_edit(\'{CALLER}\', \'{PREFIX}\'); return false" title="Toggle Edit Mode On/Off"><img src="{INCLUDE_DIR_THEME}images/edtmode.png" id="wc_toggle_edit_icon"></a>';
 

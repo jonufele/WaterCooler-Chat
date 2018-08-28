@@ -1192,6 +1192,44 @@ function wc_toggle_input_line_mode() {
     wc_toggle('wc_multi_line_submit');
 }
 
+function wc_toggle_msg_cont(target) {
+    info = document.getElementById('wc_info');
+    gsett = document.getElementById('wc_global_settings');
+    msg_cont = document.getElementById('wc_msg_container');
+    
+    if(target == 'wc_info') {
+        if(info.className.search('closed') != -1) {
+            if(gsett !== null) {
+                if(gsett.className.search('closed') == -1) {
+                    wc_toggle('wc_global_settings');
+                } else {
+                    wc_toggle('wc_msg_container');
+                }
+            } else {
+                wc_toggle('wc_msg_container');
+            }
+            wc_toggle('wc_info');    
+        } else {
+            wc_toggle('wc_info');
+            wc_toggle('wc_msg_container');
+        }
+    }
+    
+    if(target == 'wc_global_settings') {
+        if(gsett.className.search('closed') != -1) {
+            if(info.className.search('closed') == -1) {
+                wc_toggle('wc_info');
+            } else {
+                wc_toggle('wc_msg_container');
+            }
+            wc_toggle('wc_global_settings');    
+        } else {
+            wc_toggle('wc_global_settings');
+            wc_toggle('wc_msg_container');
+        }
+    }
+}
+
 /*=================================
  #           POPULATE             #
  =================================*/
