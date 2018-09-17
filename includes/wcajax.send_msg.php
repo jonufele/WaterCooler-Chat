@@ -92,7 +92,7 @@
                 }
 
                 // Check if last post is within anti-spam limit
-                if((time() - WcPgc::mySession('lastpost')) < ANTI_SPAM) {
+                if((time() - intval(WcPgc::mySession('lastpost'))) < ANTI_SPAM) {
                     echo 'Anti Spam: Please allow ' . ANTI_SPAM . 's between posted messages!';
                     die();
                 }
