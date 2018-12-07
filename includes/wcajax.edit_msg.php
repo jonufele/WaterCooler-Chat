@@ -59,7 +59,7 @@
                     (WcUtils::hasData(WcPgc::myGet('tag')) ? WcPgc::myGet('tag') . '-' : '').
                     WcPgc::myGet('id')
                 ).')\|(.*)$/im', 
-                $parsed_data, 
+                str_replace(array('$0', '$1'), array('\$0', '\$1'), $parsed_data), 
                 $this->room->rawMsgList
             ),
             'w'

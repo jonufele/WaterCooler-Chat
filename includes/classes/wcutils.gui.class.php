@@ -228,7 +228,7 @@ class WcGui {
                     <img src="\\1" class="thumb" onload="wc_scroll(\''.$all.'\')">
                 </div>',
                 '<div style="width: \\3px;" class="thumb_container">
-                    <img src="\\5" style="width: \\3px; height: \\4px;" class="thumb" onload="wc_scroll(\''.$all.'\')"><br>
+                    <img src="' . WcChat::$includeDir . 'files/attachments/\\5" style="width: \\3px; height: \\4px;" class="thumb" onload="wc_scroll(\''.$all.'\')"><br>
                     <img src="' . WcChat::$includeDirTheme . 'images/attach.png">
                     <a href="' . ($down_perm ? WcChat::$includeDir . 'files/attachments/\\5' : '#') . '" target="_blank" ' . $down_alert . '>\\1 x \\2</a>
                 </div>',
@@ -361,7 +361,7 @@ class WcGui {
      */
     public static function parseBBcodeThumb($text) {
         if(
-            !preg_match('/(?<!=\"|\[IMG\]|[|]\])((http|ftp)+(s)?:\/\/[^<>\s]+)(.jpg|.jpeg|.png|.gif)([?0-9]*)/i', $text) && 
+            !preg_match('/(?<!=\"|\[IMG\]|[|]\])((http|ftp)+(s)?:\/\/[^<>\s]+)(.jpg|.jpeg|.png|.gif)([^ ]*)/i', $text) && 
             !preg_match('/\[IMG\](.*?)\[\/IMG\]/i', $text) && 
             !preg_match('/https:\/\/www\.youtube\.com\/watch\?v=([0-9a-zA-Z-+_=]*)/i', $text)
         ) {
@@ -369,7 +369,7 @@ class WcGui {
         } else {
             // Image(s) detected, try parse to more detailed tags with information about the image(s)
             $text = preg_replace_callback(
-                '/(?<!=\"|\[IMG\]|[|]\])((http|ftp)+(s)?:\/\/[^<>\s]+(\.jpg|\.jpeg|\.png|\.gif)([?0-9]*))/i',
+                '/(?<!=\"|\[IMG\]|[|]\])((http|ftp)+(s)?:\/\/[^<>\s]+(\.jpg|\.jpeg|\.png|\.gif)([^ ]*))/i',
                 'WcImg::parseImg',
                 trim($text)
             );

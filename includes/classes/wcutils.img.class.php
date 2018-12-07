@@ -92,7 +92,7 @@ class WcImg {
                     $nh = IMAGE_MAX_DSP_DIM;
                 }
 
-                if(GEN_REM_THUMB) {
+                if(GEN_REM_THUMB || $attach !== NULL) {
                     if(
                         self::thumbnailCreateMed(
                             $image,
@@ -104,7 +104,7 @@ class WcImg {
                     ) {
                         return 
                             '[IMG' . 
-                                ($attach != NULL ? 'A' : '') . '|' . 
+                                ($attach !== NULL ? 'A' : '') . '|' . 
                                 $w . 'x' . $h . '|' . $nw . 'x' . $nh . 
                                 '|tn_' . strtoupper(dechex(crc32($iname))) . 
                             '|]' . 
@@ -114,7 +114,7 @@ class WcImg {
                     } else {
                         return 
                             '[IMG' . 
-                                ($attach != NULL ? 'A' : '') . '|' . 
+                                ($attach !== NULL ? 'A' : '') . '|' . 
                                 $w . 'x' . $h . '|' . $nw . 'x' . $nh . 
                             '|]' . 
                                 $source_tag . 
@@ -123,14 +123,19 @@ class WcImg {
                 } else {
                     return 
                         '[IMG' . 
-                            ($attach != NULL ? 'A' : '') . '|' . 
+                            ($attach !== NULL ? 'A' : '') . '|' . 
                             $w . 'x' . $h . '|' . $nw . 'x' . $nh . 
                         '|]' . 
                             $source_tag . 
                         '[/IMG]';
                 }
             } else {
-                return '[IMG]' . $source . '[/IMG]';
+                return '[IMG' . 
+                        ($attach !== NULL ? 'A' : '') . '|' . 
+                        $w . 'x' . $h . '|' . $w . 'x' . $h . 
+                        '|]' . 
+                        $source_tag . 
+                '[/IMG]';
             }
         } else {
                 return '[IMG|' . IMAGE_AUTO_RESIZE_UNKN . '|]' . $source . '[/IMG]';
