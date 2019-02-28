@@ -574,7 +574,7 @@ function wc_refresh_components(c, incdir, lim) {
             if(arr[3].length > 0) {
                 var arr2 = arr[3].split(" ");
                 for(i = 0 ; i < arr2.length ; i++) {
-                    if(arr2[i].search('\\$') == -1) {
+                    if(arr2[i].search('$') == -1) {
                         msg = document.getElementById(arr2[i]);
                         if(msg != null) {
                             icon = document.getElementById('wc_icon_' + arr2[i]);
@@ -586,7 +586,7 @@ function wc_refresh_components(c, incdir, lim) {
                             }
                         }
                     } else {
-                        var parts = arr2[i].split('\\$');
+                        var parts = arr2[i].split('$');
                         var updated_msg_id = 'updated_note_' + parts[1] + '|' + parts[2];
                         
                         if(document.getElementById(updated_msg_id) != null && parts[0] != arr[6]) {

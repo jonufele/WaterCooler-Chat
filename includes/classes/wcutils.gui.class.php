@@ -363,7 +363,7 @@ class WcGui {
         if(
             !preg_match('/(?<!=\"|\[IMG\]|[|]\])((http|ftp)+(s)?:\/\/[^<>\s]+)(.jpg|.jpeg|.png|.gif)([^ ]*)/i', $text) && 
             !preg_match('/\[IMG\](.*?)\[\/IMG\]/i', $text) && 
-            !preg_match('/https:\/\/www\.youtube\.com\/watch\?v=([0-9a-zA-Z-+_=]*)/i', $text)
+            !preg_match('/https:\/\/www\.youtube\.com\/watch\?v=([0-9a-zA-Z-+_=]*)([^ ]*)/i', $text)
         ) {
             $text = trim($text);
         } else {
