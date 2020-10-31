@@ -24,7 +24,7 @@ define('TITLE', 'My Chat');
 # ============================================================================
 
 // Relative Path from web root to chat system (Empty if on the root)
-define('INCLUDE_DIR', '');
+define('INCLUDE_DIR', dirname($_SERVER['REQUEST_URI']));
 
 # ============================================================================
 #                  CHAT SETTINGS

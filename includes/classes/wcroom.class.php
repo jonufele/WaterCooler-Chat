@@ -287,7 +287,7 @@ class WcRoom {
     
         $room_loc = WcChat::$roomDir . 'def_' . base64_encode($room) . '.txt';
         if(file_exists($room_loc)) {
-            list($wperm, $rperm, $larch_vol, $larch_vol_msg_n, $last_mod) = 
+            $items = 
                 explode(
                     '|', 
                     WcFile::readFile(
@@ -296,11 +296,12 @@ class WcRoom {
                 );
             
             return array(
-                'wPerm'         => intval($wperm),
-                'rPerm'         => intval($rperm),
-                'lArchVol'      => intval($larch_vol),
-                'lArchVolMsgN'  => intval($larch_vol_msg_n),
-                'lastMod'       => $last_mod
+                'wPerm'         => intval($items[0]),
+                'rPerm'         => intval($items[1]),
+                'lArchVol'      => intval($items[2]),
+                'lArchVolMsgN'  => intval($items[3]),
+                'lastMod'       => $items[4],
+                'sticky'        => (isset($items[5]) ? $items[5] : 0)
             );
         } else {
             return FALSE;
@@ -342,13 +343,21 @@ class WcRoom {
                     $this->user->hasPermission('ROOM_E', 'skip_msg') && 
                     strpos($room_name, 'pm_') === FALSE
                 ) {
-                    list($perm, $t1, $t2, $t3, $t4) = explode(
+                    $mitems = explode(
                         '|', 
                         WcFile::readFile(
                             WcChat::$roomDir . 'def_' . 
                             base64_encode($room_name) . '.txt'
                         )
                     );
+                    
+                    $perm = $mitems[0];
+                    $t1 = $mitems[1];
+                    $t2 = $mitems[2];
+                    $t3 = $mitems[3];
+                    $t4 = $mitems[4];
+                    $t5 = (isset($mitems[5]) ? $mitems[5] : 0);
+                    
                     $enc = base64_encode($file);
                     $edit_form = 
                         WcGui::popTemplate(
@@ -363,6 +372,7 @@ class WcRoom {
                                 'SEL22' => ($t1 == '2' ? ' SELECTED' : ''),
                                 'SEL23' => ($t1 == '3' ? ' SELECTED' : ''),
                                 'SEL24' => ($t1 == '4' ? ' SELECTED' : ''),
+                                'CKD' => ($t5 == '1' ? ' CHECKED' : ''),
                                 'DELETE_BT' => WcGui::popTemplate(
                                     'wcchat.rooms.edit_form.delete_bt', 
                                     array('ID' => $enc), 
@@ -389,13 +399,15 @@ class WcRoom {
                                     'TITLE' => $room_name,
                                     'EDIT_BT' => $edit_icon,
                                     'FORM' => $edit_form,
-                                    'NEW_MSG' => WcGui::popTemplate('wcchat.rooms.new_msg.off')
+                                    'NEW_MSG' => WcGui::popTemplate('wcchat.rooms.new_msg.off' . ($t5 == '1' ? 's' : '')),
+                                    'STICKY' => ''
                                 )
                             );
                     } else {
                         $lastread = WcTime::handleLastRead('read', $room_name);
                         $lastmod = $this->parseLastMod($room_name);
 
+                        if(!WcPgc::myCookie('skip_dead_rooms') || (time()-$lastmod) <= (86400*7) || $t5 == '1') {
                         $rooms .= 
                             WcGui::popTemplate(
                                 'wcchat.rooms.room',
@@ -405,17 +417,19 @@ class WcRoom {
                                     'FORM' => $edit_form,
                                     'NEW_MSG' => WcGui::popTemplate(
                                         'wcchat.rooms.new_msg.' . 
-                                        (($lastread < $lastmod) ? 'on' : 'off')
-                                    )
+                                        (($lastread < $lastmod) ? 'on' : 'off') . 
+                                        ($t5 == '1' ? 's' : '')
+                                    ),
+                                    'STICKY' => ''
                                 )
                             );
-                    }
+                    }}
                 }
             }
         }
 
         // Check if the edit buttons/links are supposed to be hidden
-        $create_room = '';
+        $create_room = $toggle_dead = '';
         if($this->user->hasPermission('ROOM_C', 'skip_msg')) {
             $create_room =
                 WcGui::popTemplate(
@@ -431,11 +445,13 @@ class WcRoom {
         // Replace list with message if no permission to read the list
         if(!$this->user->hasPermission('ROOM_LIST', 'skip_msg')) {
             $rooms = 'Can\'t display rooms.';
+        } else {
+            $toggle_dead = WcGui::popTemplate('wcchat.rooms.toggle_dead');
         }
 
         return WcGui::popTemplate(
             'wcchat.rooms.inner', 
-            array('ROOMS' => $rooms, 'CREATE' => $create_room)
+            array('ROOMS' => $rooms, 'CREATE' => $create_room, 'TOGGLE_DEAD' => $toggle_dead)
         );
     }
 
@@ -473,9 +489,10 @@ class WcRoom {
                                 '[**]', 
                                 '', 
                                 $this->topic
-                            )),
+                            ),
                             $down_perm,
                             $this->user->name
+                        )
                     )
                 )
             );
@@ -1240,7 +1257,7 @@ class WcRoom {
     public function parseDefString($array = NULL, $rdata = NULL) {
         // Return empty data string if no replacement requests exist
         if($array == NULL && $rdata == NULL) {
-            return '0|0|0|0|'.WcTime::parseMicroTime();
+            return '0|0|0|0|'.WcTime::parseMicroTime().'|0';
         } else {
             if($rdata == NULL) {
                 $rdata = $this->def;
@@ -1252,7 +1269,8 @@ class WcRoom {
                 'rPerm' => intval($rdata['rPerm']), 
                 'lArchVol' => intval($rdata['lArchVol']), 
                 'lArchVolMsgN' =>  intval($rdata['lArchVolMsgN']), 
-                'lastMod' => $rdata['lastMod']
+                'lastMod' => $rdata['lastMod'],
+                'sticky' => $rdata['sticky']
             );
 
             // Replace values according to suplied array
@@ -1395,7 +1413,7 @@ class WcRoom {
         
         $output = '';
         $lastmod = $this->parseLastMod();
-        $older_index = WcPgc::myGet('n');
+        $older_index = WcPgc::myPost('n');
         if(!WcUtils::hasData($older_index)) { $older_index = NULL; }
 
         $lastread = WcTime::handleLastRead('read');

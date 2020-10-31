@@ -4,7 +4,7 @@
 
     if(!isset($this)) { die(); }
 
-    $hint = WcPgc::myGet('hint');
+    $hint = WcPgc::myPost('hint');
     
     if(WcUtils::hasData($hint)) {
         $words = explode(' ', trim($hint));

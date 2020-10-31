@@ -4,7 +4,7 @@
 
     if(!isset($this)) { die(); }
 
-    $pass = WcPgc::myGet('pass');
+    $pass = WcPgc::myPost('pass');
     
     // Halt if password don't match, return a 0 to ajax caller
     if(md5(md5($pass)) != $this->user->data['pass']) {

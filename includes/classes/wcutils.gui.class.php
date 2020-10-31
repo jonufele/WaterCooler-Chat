@@ -191,9 +191,11 @@ class WcGui {
      * @return string Parsed Msg
      */
     public static function parseBbcode($data, $down_perm, $user_name, $msg_id = NULL) {
-    
+
         $search =
             array(
+                '/\[color\=([#0-9a-zA-Z]+)\](.*?)\[\/color\]/i',
+                '/\[quote\](.*?)\[\/quote\]([<br>]*)/i',
                 '/\[b\](.*?)\[\/b\]/i',
                 '/\[i\](.*?)\[\/i\]/i',
                 '/\[u\](.*?)\[\/u\]/i',
@@ -221,6 +223,8 @@ class WcGui {
 
         $replace =
             array(
+                '<span style="color: \\1">\\2</span>',
+                '<div style="max-height: 100px; overflow: auto; margin: 10px; padding: 10px; background-color: #e3e3ea; border: 1px dashed #ccccdd; color: #3a3a66;"><i>\\1</i></div>',
                 '<b>\\1</b>',
                 '<i>\\1</i>',
                 '<u>\\1</u>',
@@ -363,7 +367,7 @@ class WcGui {
         if(
             !preg_match('/(?<!=\"|\[IMG\]|[|]\])((http|ftp)+(s)?:\/\/[^<>\s]+)(.jpg|.jpeg|.png|.gif)([^ ]*)/i', $text) && 
             !preg_match('/\[IMG\](.*?)\[\/IMG\]/i', $text) && 
-            !preg_match('/https:\/\/www\.youtube\.com\/watch\?v=([0-9a-zA-Z-+_=]*)([^ ]*)/i', $text)
+            !preg_match('/https:\/\/www\.youtube\.com\/watch\?v=([0-9a-zA-Z-+_=]*)/i', $text)
         ) {
             $text = trim($text);
         } else {

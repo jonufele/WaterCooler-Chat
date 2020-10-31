@@ -4,7 +4,7 @@
 
     if(!isset($this)) { die(); }
 
-    $room_name = html_entity_decode(WcPgc::myGet('n'));
+    $room_name = html_entity_decode(WcPgc::myPost('n'));
 
     if(
         strpos($room_name, 'pm_') !== FALSE && 

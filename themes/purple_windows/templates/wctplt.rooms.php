@@ -12,7 +12,15 @@ $templates['wcchat.rooms'] = '
     </div>
 </div>';
 
-$templates['wcchat.rooms.inner'] = '{ROOMS}{CREATE}';
+$templates['wcchat.rooms.inner'] = '{ROOMS}{CREATE}{TOGGLE_DEAD}';
+
+$templates['wcchat.rooms.toggle_dead'] = '
+<div style="font-size: 10px; margin-top: 5px">
+    <a href="#" onclick="wc_toggle_drooms(\'{CALLER}\', \'{PREFIX}\')" >Show/Hide Inactive Rooms</a>
+</div>
+<div style="font-size: 10px; margin-top: 5px">
+    <a href="/wcchat_search.php" target="_blank">Search</a>
+</div>';
 
 $templates['wcchat.rooms.create'] = '
 <div id="wc_room_create">
@@ -26,20 +34,26 @@ $templates['wcchat.rooms.create'] = '
 
 $templates['wcchat.rooms.current_room'] = '
 <div class="current room_item">
-    {NEW_MSG} {TITLE}{EDIT_BT}
+    {NEW_MSG} {TITLE}{STICKY}{EDIT_BT}
 </div>
 {FORM}';
 
 $templates['wcchat.rooms.room'] = '
 <div class="room_item">
-    {NEW_MSG} <a href="#" onclick="wc_change_room(\'{CALLER}\', this.innerHTML, 0); return false;">{TITLE}</a>
+    {NEW_MSG} <a href="#" onclick="wc_change_room(\'{CALLER}\', this.innerHTML, 0); return false;">{TITLE}</a>{STICKY}
     {EDIT_BT}
 </div>
 {FORM}';
 
+$templates['wcchat.rooms.sticky'] = '<img src="{INCLUDE_DIR_THEME}images/sticky.png" title="Room has new messages" style="width: 12px; height: auto;  margin: 0 0 0 2px">';
+
 $templates['wcchat.rooms.new_msg.on'] = '<img src="{INCLUDE_DIR_THEME}images/nmsg.png" title="Room has new messages">';
 
 $templates['wcchat.rooms.new_msg.off'] = '<img src="{INCLUDE_DIR_THEME}images/nmsg_off.png" title="No new messages">';
+
+$templates['wcchat.rooms.new_msg.ons'] = '<img src="{INCLUDE_DIR_THEME}images/nmsgs.png" title="Room has new messages">';
+
+$templates['wcchat.rooms.new_msg.offs'] = '<img src="{INCLUDE_DIR_THEME}images/nmsg_offs.png" title="No new messages">';
 
 $templates['wcchat.rooms.edit_form'] = '
 <div id="wc_edt_{ID}" class="closed">
@@ -68,6 +82,7 @@ $templates['wcchat.rooms.edit_form'] = '
                 <option value="4"{SEL24}>User</option>
             </select>
         </div>
+        <div><input type="checkbox" id="wc_sticky_{ID}" value="1" {CKD}> Sticky</div>
         <input type="submit" value="Update" onclick="wc_upd_room(\'{CALLER}\', \'{ID}\')"> {DELETE_BT}
     </div>
 </div>';

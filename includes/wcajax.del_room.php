@@ -8,7 +8,7 @@
     if(!$this->user->hasPermission('ROOM_D')) { die(); }
     $changes = 0;
     $room_move = '';
-    $oname = WcPgc::myGet('oname');
+    $oname = WcPgc::myPost('oname');
     $enc = base64_encode($oname);
     
     // Room Name exists?

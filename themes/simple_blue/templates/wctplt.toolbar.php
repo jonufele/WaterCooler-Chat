@@ -39,6 +39,18 @@ $templates['wcchat.toolbar.bbcode'] = '
 <a href="#" onclick="wc_bbcode(document.getElementById(\'{FIELD}\'), \'{CONT}\', \'[IMG]\', \'[/IMG]\'); return false;">
     <img src="{INCLUDE_DIR_THEME}images/bbcode/img.png" title="Image link not terminating with extension">
 </a>
+<a href="#" onclick="wc_bbcode(document.getElementById(\'{FIELD}\'), \'{CONT}\', \'[QUOTE]\', \'[/QUOTE]\'); return false;">
+    <img src="{INCLUDE_DIR_THEME}images/quote.gif" title="Quote">
+</a>
+<a style="color: red" href="#" onclick="wc_bbcode(document.getElementById(\'{FIELD}\'), \'{CONT}\', \'[COLOR=red]\', \'[/COLOR]\'); return false;" title="Red Color">
+    A
+</a>
+<a style="color: green" href="#" onclick="wc_bbcode(document.getElementById(\'{FIELD}\'), \'{CONT}\', \'[COLOR=green]\', \'[/COLOR]\'); return false;" title="Green Color">
+    A
+</a>
+<a style="color: blue" href="#" onclick="wc_bbcode(document.getElementById(\'{FIELD}\'), \'{CONT}\', \'[COLOR=blue]\', \'[/COLOR]\'); return false;" title="Blue Color">
+    A
+</a>
 {ATTACHMENT_UPLOADS}
 <span id="wc_smiley_icon{FIELD}">
     <a href="#" onclick="wc_toggle_smiley(\'{FIELD}\', \'{CONT}\'); return false;">

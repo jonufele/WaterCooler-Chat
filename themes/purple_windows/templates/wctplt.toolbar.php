@@ -39,6 +39,9 @@ $templates['wcchat.toolbar.bbcode'] = '
 <a href="#" onclick="wc_bbcode(document.getElementById(\'{FIELD}\'), \'{CONT}\', \'[IMG]\', \'[/IMG]\'); return false;">
     <img src="{INCLUDE_DIR_THEME}images/bbcode/img.png" title="Image link not terminating with extension">
 </a>
+<a href="#" onclick="wc_bbcode(document.getElementById(\'{FIELD}\'), \'{CONT}\', \'[QUOTE]\', \'[/QUOTE]\'); return false;">
+    <img src="{INCLUDE_DIR_THEME}images/quote.gif" title="Quote" style="width: 20px; height: 15px">
+</a>
 {ATTACHMENT_UPLOADS}
 <span id="wc_smiley_icon{FIELD}">
     <a href="#" onclick="wc_toggle_smiley(\'{FIELD}\', \'{CONT}\'); return false;">

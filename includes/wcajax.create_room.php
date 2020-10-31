@@ -7,7 +7,7 @@
     // Halt if no permission to create rooms
     if(!$this->user->hasPermission('ROOM_C')) { die(); }
 
-    $room_name = urldecode(WcPgc::myGet('n'));
+    $room_name = urldecode(WcPgc::myPost('n'));
     
     // Halt if name contains "pm_" (reserved for user pm rooms)
     if(strpos($room_name, 'pm_') !== FALSE) {
