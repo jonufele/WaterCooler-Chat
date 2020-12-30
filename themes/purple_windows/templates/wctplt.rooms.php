@@ -12,25 +12,22 @@ $templates['wcchat.rooms'] = '
     </div>
 </div>';
 
-$templates['wcchat.rooms.inner'] = '{ROOMS}{CREATE}{TOGGLE_DEAD}';
+$templates['wcchat.rooms.inner'] = '{ROOMS}<div style="margin-top: 10px">{CREATE}{TOGGLE_DEAD}</div>';
 
 $templates['wcchat.rooms.toggle_dead'] = '
-<div style="font-size: 10px; margin-top: 5px">
-    <a href="#" onclick="wc_toggle_drooms(\'{CALLER}\', \'{PREFIX}\')" >Show/Hide Inactive Rooms</a>
-</div>
-<div style="font-size: 10px; margin-top: 5px">
-    <a href="/wcchat_search.php" target="_blank">Search</a>
-</div>';
+<a href="#" onclick="wc_toggle_drooms(\'{CALLER}\', \'{PREFIX}\'); return false" ><img src="{INCLUDE_DIR_THEME}images/room.png" style="width: 18px; margin-left: 5px" title="Toggle inactive rooms"></a>
+<a href="#" onclick="wc_toggle_msg_cont(\'wc_search\'); return false"><img src="{INCLUDE_DIR_THEME}images/search.gif" style="vertical-align: top; position: relative; top: 2px; margin-left: 3px" title="Search"></a>';
 
 $templates['wcchat.rooms.create'] = '
-<div id="wc_room_create">
-    <a href="#" onclick="wc_toggle(\'wc_croom_box\'); return false;" class="create_link{OFF}" id="wc_create_link">Create New Room</a>
+<div id="wc_room_create" style="position: absolute">
     <div id="wc_croom_box" class="closed">
         <div class="form_box">
             Room Name: <input type="text" id="wc_room_name" value=""> <input type="submit" value="create" onclick="wc_create_room(\'{CALLER}\')">
+			<div style="float:right; font-size: 10px"><a href="#" onclick="wc_toggle(\'wc_croom_box\'); return false">Close</a></div>
         </div>
     </div>
-</div>';
+</div>
+<a href="#" onclick="wc_toggle(\'wc_croom_box\'); return false;" class="create_link{OFF}" id="wc_create_link"><img src="{INCLUDE_DIR_THEME}images/nroom.png" style="width: 18px" title="Create new room"></a>';
 
 $templates['wcchat.rooms.current_room'] = '
 <div class="current room_item">
@@ -45,7 +42,7 @@ $templates['wcchat.rooms.room'] = '
 </div>
 {FORM}';
 
-$templates['wcchat.rooms.sticky'] = '<img src="{INCLUDE_DIR_THEME}images/sticky.png" title="Room has new messages" style="width: 12px; height: auto;  margin: 0 0 0 2px">';
+$templates['wcchat.rooms.sticky'] = '<img src="{INCLUDE_DIR_THEME}images/sticky.png" title="Room has new messages" style="width: 12px; height: auto; margin: 0 0 0 2px">';
 
 $templates['wcchat.rooms.new_msg.on'] = '<img src="{INCLUDE_DIR_THEME}images/nmsg.png" title="Room has new messages">';
 

@@ -484,6 +484,232 @@ H1 {
 }
 
 /*--------------------------------------*/
+/*            SEARCH                    */
+/*--------------------------------------*/
+
+#wc_search .header {
+    text-align: center;
+    font-size: 20px;
+    margin: 10px;
+}
+
+#wc_search div {
+    margin: 10px;
+}
+
+#wc_search span {
+    font-size: 9px;
+    color:#5b5c7c
+}
+
+#wc_search .updated_msg_note {
+    font-style: italic;
+    color: #888888;
+    margin: 5px;
+    text-align: center;
+}
+
+#wc_search .updated_msg_container {
+	text-align: center;
+}
+
+#wc_search .bbcode {
+    margin-top: 10px;
+    margin-bottom: 5px;
+}
+
+#wc_search .bbcode a {
+    text-decoration: none;
+}
+
+#wc_search .msg {
+    padding: 5px;
+    border-top: 1px dotted #e1ebef;
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
+
+#wc_search .msg_first {
+    padding: 5px;
+}
+
+
+#wc_search .msg_pm {
+    padding: 5px;
+    border-top: 1px solid #c5dfe2;
+    background-color: #e6f1f2;
+}
+
+
+#wc_search .msg_right_col {
+    overflow: hidden;
+    padding: 5px;    
+}
+
+#wc_search .msg_pm .private {
+    float: right;
+    font-style: italic;
+    font-size: 7pt;
+    font-family: tahoma;
+    margin: 0 0 3px 3px;
+    color: #77a0a5;
+}
+
+#wc_search .msg .more,
+#wc_search .msg_pm .more,
+#wc_search .msg .less,
+#wc_search .msg_pm .less {
+    font-style: italic;
+    font-size: 10px;
+    color: #888888;
+    margin-left: 5px;
+}
+
+#wc_search .msg .edit_tag,
+#wc_search .msg_pm .edit_tag {
+    float: right;
+    font-style: italic;
+    font-size: 7pt;
+    color: #888888;
+    margin-left: 5px;
+}
+
+#wc_search .msg .edit_bt_off,
+#wc_search .msg_pm .edit_bt_off {
+    display: none;
+}
+
+#wc_search .msg .edit_tag img,
+#wc_search .msg_pm .edit_tag img {
+    margin-left: 5px;
+}
+
+#wc_search .msg .editbox,
+#wc_search .msg_pm .editbox {
+    width: 97%;
+}
+
+#wc_search .msg .note,
+#wc_search .msg_pm .note {
+    font-size: 9px;
+    color: #888888;
+}
+
+#wc_search .msg .timestamp,
+#wc_search .msg_pm .timestamp {
+
+    font-size: 7pt;
+    font-family: tahoma;
+    color: #888888
+}
+
+#wc_search .msg .user,
+#wc_search .msg_pm .user {
+    font-size: 10px;
+    font-family: verdana;
+    color: #6335bf;
+    font-weight: bold
+}
+
+#wc_search .msg .user a,
+#wc_search .msg_pm .user a {
+    text-decoration: none;
+}
+
+#wc_search .msg .user a:hover,
+#wc_search .msg_pm .user a:hover {
+    color: #9469ea !important;
+}
+
+#wc_search .msg .user a:visited,
+#wc_search .msg_pm .user a:visited {
+    color: #6335bf;
+}
+
+#wc_search .msg img.avatar_thumb,
+#wc_search .msg_pm img.avatar_thumb {
+    padding: 1px;
+    border: 1px solid #60779b;
+    margin: 5px 10px 0 10px;
+    float: left;
+}
+
+#wc_search .msg img.thumb,
+#wc_search .msg_pm img.thumb {
+    padding: 1px;
+    border: 1px solid #60779b;
+}
+
+#wc_search .msg img.mod_icon,
+#wc_search .msg_pm img.mod_icon {
+    width: 10px;
+}
+
+#wc_search .msg .thumb_container,
+#wc_search .msg_pm .thumb_container {
+    text-align: center;
+    font-size: 10px;
+    margin: 10px;
+}
+
+#wc_search .msg iframe,
+#wc_search .msg_pm iframe {
+    margin: 10px;
+    display: block;
+    padding: 1px;
+    border: 1px solid #ced9ea
+}
+
+#wc_search .msg .msg_body,
+#wc_search .msg_pm .msg_body {
+    margin-top: 5px;
+    line-height: 1.5em; 
+}
+
+#wc_search .msg .event,
+#wc_search .msg .self {
+    margin-left: 10px;
+    line-height: 1.5em;
+}
+
+#wc_search .msg .event {
+    color: #64267c;
+}
+
+#wc_search .msg .curr_user_ref,
+#wc_search .msg_pm .curr_user_ref {
+    background-color: #dee7f4;
+    padding: 3px;
+}
+
+#wc_search .load_older_controls {
+    padding:5px;
+    text-align: center
+}
+
+#wc_search #wc_older hr {
+    border-bottom: 1px dashed #718099;
+    height: 1px;
+}
+
+#wc_search .new_msg {
+    margin: 5px;
+    text-align: center;
+}
+
+#wc_search .new_msg img {
+    width: 300px;
+}
+
+#wc_search .hide_icon_off {
+    display: none;
+}
+
+#wc_search .archived {
+    float: right;
+}
+
+/*--------------------------------------*/
 /*            USER LIST                 */
 /*--------------------------------------*/
 
