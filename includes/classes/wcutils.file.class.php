@@ -66,14 +66,16 @@ class WcFile {
     
         if(strlen(trim($content)) > 0 || $allow_empty_content) {
             $handle = fopen($file, $mode);
-            while (!flock($handle, LOCK_EX | LOCK_NB)) {
-                sleep(1);
-            }
-            fwrite($handle, $content);
-            fflush($handle);
-            flock($handle, LOCK_UN);
+            if($handle) {
+				while (!flock($handle, LOCK_EX | LOCK_NB)) {
+					sleep(1);
+				}
+				fwrite($handle, $content);
+				fflush($handle);
+				flock($handle, LOCK_UN);
 
-            fclose($handle);
+				fclose($handle);
+			}
         }
     }
 

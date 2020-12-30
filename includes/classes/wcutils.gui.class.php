@@ -78,7 +78,7 @@ class WcGui {
         $array = array(
             'global_sett', 'index', 'info', 'join',
             'login', 'main', 'posts', 'profile_sett',
-            'rooms', 'static_msg', 'text_input', 'themes',
+            'rooms', 'search', 'static_msg', 'text_input', 'themes',
             'toolbar', 'topic', 'users'
         );
         
@@ -337,10 +337,10 @@ class WcGui {
      * @param string $data
      * @return string Parsed Data
      */
-    public static function parseLongMsg($data, $id) {
+    public static function parseLongMsg($data, $id, $no_crop = FALSE) {
         
         $string_len = strlen($data);
-        if($string_len > MAX_DATA_LEN && MAX_DATA_LEN > 0) {
+        if($string_len > MAX_DATA_LEN && MAX_DATA_LEN > 0 && !$no_crop) {
             $cropped = substr($data, 0, MAX_DATA_LEN);
             return WcGui::popTemplate(
                 'wcchat.posts.partial_content',

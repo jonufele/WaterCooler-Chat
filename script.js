@@ -250,6 +250,8 @@ function wc_change_room(c, n, new_conv)
             if(http.responseText.indexOf('ERROR') == 0) {
                 alert(wc_parse_error(http.responseText));
             } else {
+				wc_close_open_cont();
+				wc_toggle('wc_msg_container');
                 document.getElementById('wc_room_list').innerHTML = http.responseText;
                 wc_refresh_msg_once(c, 'ALL', 0);
                 wc_refresh_topic(c);
@@ -1233,39 +1235,60 @@ function wc_toggle_input_line_mode() {
     wc_toggle('wc_multi_line_submit');
 }
 
+function wc_close_open_cont() {
+	info = document.getElementById('wc_info');
+    gsett = document.getElementById('wc_global_settings');
+    msg_cont = document.getElementById('wc_msg_container');
+    search = document.getElementById('wc_search');
+    
+    if(gsett != null && gsett != undefined) {
+		if(gsett.className.search('closed') == -1) {
+			wc_toggle('wc_global_settings');
+		}
+	}
+	if(search.className.search('closed') == -1) {
+		wc_toggle('wc_search');
+	}
+	if(msg_cont.className.search('closed') == -1) {
+		wc_toggle('wc_msg_container');
+	}
+	if(info.className.search('closed') == -1) {
+		wc_toggle('wc_info');
+	}
+}
+
 function wc_toggle_msg_cont(target) {
     info = document.getElementById('wc_info');
     gsett = document.getElementById('wc_global_settings');
     msg_cont = document.getElementById('wc_msg_container');
+    search = document.getElementById('wc_search');
     
     if(target == 'wc_info') {
         if(info.className.search('closed') != -1) {
-            if(gsett !== null) {
-                if(gsett.className.search('closed') == -1) {
-                    wc_toggle('wc_global_settings');
-                } else {
-                    wc_toggle('wc_msg_container');
-                }
-            } else {
-                wc_toggle('wc_msg_container');
-            }
+			wc_close_open_cont();
             wc_toggle('wc_info');    
         } else {
-            wc_toggle('wc_info');
+			wc_close_open_cont();
             wc_toggle('wc_msg_container');
         }
     }
     
-    if(target == 'wc_global_settings') {
+    if(target == 'wc_global_settings' && gsett != null && gsett != undefined) {
         if(gsett.className.search('closed') != -1) {
-            if(info.className.search('closed') == -1) {
-                wc_toggle('wc_info');
-            } else {
-                wc_toggle('wc_msg_container');
-            }
-            wc_toggle('wc_global_settings');    
-        } else {
+			wc_close_open_cont();
             wc_toggle('wc_global_settings');
+        } else {
+			wc_close_open_cont();
+            wc_toggle('wc_msg_container');
+        }
+    }
+    
+    if(target == 'wc_search') {
+        if(search.className.search('closed') != -1) {
+			wc_close_open_cont();
+            wc_toggle('wc_search');    
+        } else {
+			wc_close_open_cont();
             wc_toggle('wc_msg_container');
         }
     }
@@ -1286,4 +1309,28 @@ function wc_pop_vid(id, vid, w, h) {
     document.getElementById('wc_video_'+id).innerHTML = '<iframe width="'+w+'" height="'+h+'" src="https://www.youtube.com/embed/'+vid+'" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>';
     wc_toggle('im_'+id);
     wc_toggle('wc_video_'+id);
+}
+
+/*=================================
+ #           SEARCH               #
+ =================================*/
+
+function wc_search(c, event)
+{
+	event.preventDefault();
+    var formData = new FormData();
+    var http = getHTTPObject();
+    obj = document.getElementById('wc_search_res');
+    obj.innerHTML = '<div style="padding: 100px 0; text-align: center">' + document.getElementById('wc_loader_img_c').innerHTML + '</div>';
+    formData.append('key', document.getElementById('search_key').value);
+    http.open("POST", c+"mode=search", true);
+    http.onreadystatechange=function(){
+		if(http.readyState==4){
+        if(http.responseText.length > 0) {
+            obj.innerHTML = http.responseText;
+        } else {
+			obj.innerHTML = '<div style="padding: 100px 0; text-align: center">No results found!</div>';
+		}
+    }}
+    http.send(formData);
 }

@@ -20,7 +20,7 @@
         
         // Get rid of the pending account recovery file if exists
         if(file_exists(self::$dataDir . 'tmp/rec_' . base64_encode($this->user->name))) {
-            unlink(self::$dataDir . 'tmp/rec_' . $u);
+            unlink(self::$dataDir . 'tmp/rec_' . base64_encode($this->user->name));
         }
     }
 

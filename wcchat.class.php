@@ -714,6 +714,7 @@ class WcChat {
                 ),
                 'POSTS' => WcGui::popTemplate('wcchat.posts'),
                 'INFO' => WcGui::popTemplate('wcchat.info'),
+                'SEARCH' => WcGui::popTemplate('wcchat.search'),
                 'GSETTINGS' => ($this->user->hasPermission('GSETTINGS', 'skip_msg') ? 
                     WcGui::popTemplate(
                         'wcchat.global_settings',

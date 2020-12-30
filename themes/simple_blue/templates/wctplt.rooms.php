@@ -15,14 +15,15 @@ $templates['wcchat.rooms'] = '
 $templates['wcchat.rooms.inner'] = '{ROOMS}<div style="margin-top: 10px">{CREATE}{TOGGLE_DEAD}</div>';
 
 $templates['wcchat.rooms.toggle_dead'] = '
-<a href="#" onclick="wc_toggle_drooms(\'{CALLER}\', \'{PREFIX}\')" ><img src="{INCLUDE_DIR_THEME}images/room.png" style="width: 18px; margin-left: 5px" title="Toggle inactive rooms"></a>
-<a href="{INCLUDE_DIR}wcchat_search.php" target="_blank"><img src="{INCLUDE_DIR_THEME}images/search.gif" style="vertical-align: top; position: relative; top: 2px; margin-left: 3px" title="Search"></a>';
+<a href="#" onclick="wc_toggle_drooms(\'{CALLER}\', \'{PREFIX}\'); return false" ><img src="{INCLUDE_DIR_THEME}images/room.png" style="width: 18px; margin-left: 5px" title="Toggle inactive rooms"></a>
+<a href="#" onclick="wc_toggle_msg_cont(\'wc_search\'); return false"><img src="{INCLUDE_DIR_THEME}images/search.gif" style="vertical-align: top; position: relative; top: 2px; margin-left: 3px" title="Search"></a>';
 
 $templates['wcchat.rooms.create'] = '
 <div id="wc_room_create" style="position: absolute">
     <div id="wc_croom_box" class="closed">
         <div class="form_box">
             Room Name: <input type="text" id="wc_room_name" value=""> <input type="submit" value="create" onclick="wc_create_room(\'{CALLER}\')">
+			<div style="float:right; font-size: 10px"><a href="#" onclick="wc_toggle(\'wc_croom_box\'); return false">Close</a></div>
         </div>
     </div>
 </div>

@@ -571,7 +571,8 @@ class WcRoom {
      */
     public function parseMsg(
         $lines, $lastread, $action, 
-        $older_index = NULL, $single_msg_reload = NULL
+        $older_index = NULL, $single_msg_reload = NULL,
+        $no_crop = FALSE
     ) {
 
         // Initialize the displayed messages index
@@ -865,7 +866,7 @@ class WcRoom {
                                                         ''
                                                     )
                                                 ),
-                                                $post_edit_perm && !WcPgc::mySession('archive'),
+                                                ($post_edit_perm && !WcPgc::mySession('archive') && !$no_crop),
                                                 (WcPgc::mySession('archive') ? WcGui::popTemplate('wcchat.posts.archived') : '')
                                             ),
                                             'EDITED' => WcGui::popTemplate(
@@ -888,7 +889,7 @@ class WcRoom {
                                         array(
                                             'ID' => $unique_id
                                         ),
-                                        $post_edit_perm
+                                        ($post_edit_perm && !$no_crop)
                                     ),
                                     'STYLE' => (
                                         WcPgc::myCookie('hide_time') ? 
@@ -931,7 +932,7 @@ class WcRoom {
                                         '', 
                                         $hidden || WcPgc::myCookie($hidden_cookie),
                                         WcGui::parseBbcode(
-                                            WcGui::parseLongMsg($msg, $unique_id),
+                                            WcGui::parseLongMsg($msg, $unique_id, $no_crop),
                                             $down_perm,
                                             $this->user->name,
                                             $unique_id
@@ -951,7 +952,7 @@ class WcRoom {
                                             'OFF' => '',
                                             'PRIVATE' => ($pm_target ? 1 : 0)
                                         ),
-                                        !WcPgc::mySession('archive')
+                                        (!WcPgc::mySession('archive') && !$no_crop)
                                     ),
                                     'AVATAR' => (
                                         isset($avatar_array[base64_decode($user)]) ? 
@@ -1032,7 +1033,7 @@ class WcRoom {
                                                     ''
                                                 )
                                             ),
-                                            $post_edit_perm && !WcPgc::mySession('archive')
+                                            ($post_edit_perm && !WcPgc::mySession('archive') && !$no_crop)
                                         ),
                                         'EDITED' => WcGui::popTemplate(
                                             'wcchat.posts.normal.edit_tag.edited',
@@ -1054,7 +1055,7 @@ class WcRoom {
                                     array(
                                         'ID' => $unique_id
                                     ),
-                                    $post_edit_perm
+                                    ($post_edit_perm && !$no_crop)
                                 ),
                                 'STYLE' => (WcPgc::myCookie('hide_time') ? 'display: none' : 'dislay:inline'),
                                 'TIMESTAMP' => 
@@ -1069,7 +1070,7 @@ class WcRoom {
                                     '', 
                                     $hidden || WcPgc::myCookie($hidden_cookie), 
                                     WcGui::parseBbcode(
-                                        WcGui::parseLongMsg($msg, $unique_id),
+                                        WcGui::parseLongMsg($msg, $unique_id, $no_crop),
                                         $down_perm,
                                         $this->user->name,
                                         $unique_id
@@ -1089,7 +1090,7 @@ class WcRoom {
                                         'OFF' => '',
                                         'PRIVATE' => ($pm_target ? 1 : 0)
                                     ),
-                                    !WcPgc::mySession('archive')
+                                    (!WcPgc::mySession('archive') && !$no_crop)
                                 ),
                                 'UPDATED_NOTE' => WcGui::popTemplate(
                                     'wcchat.posts.updated_note',
