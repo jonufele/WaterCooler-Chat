@@ -336,6 +336,21 @@ class WcRoom {
                 strpos(basename($file), 'hidden_') === FALSE && 
                 strpos($room_name, 'pm_') === FALSE
             ) {
+				
+				$mitems = explode(
+					'|', 
+					WcFile::readFile(
+						WcChat::$roomDir . 'def_' . 
+						base64_encode($room_name) . '.txt'
+					)
+				);
+				
+				$perm = $mitems[0];
+				$t1 = $mitems[1];
+				$t2 = $mitems[2];
+				$t3 = $mitems[3];
+				$t4 = $mitems[4];
+				$t5 = (isset($mitems[5]) ? $mitems[5] : 0);
 
                 // Parse the edit form if user has permission
                 $edit_form = $edit_icon = '';
@@ -343,20 +358,6 @@ class WcRoom {
                     $this->user->hasPermission('ROOM_E', 'skip_msg') && 
                     strpos($room_name, 'pm_') === FALSE
                 ) {
-                    $mitems = explode(
-                        '|', 
-                        WcFile::readFile(
-                            WcChat::$roomDir . 'def_' . 
-                            base64_encode($room_name) . '.txt'
-                        )
-                    );
-                    
-                    $perm = $mitems[0];
-                    $t1 = $mitems[1];
-                    $t2 = $mitems[2];
-                    $t3 = $mitems[3];
-                    $t4 = $mitems[4];
-                    $t5 = (isset($mitems[5]) ? $mitems[5] : 0);
                     
                     $enc = base64_encode($file);
                     $edit_form = 
@@ -407,7 +408,7 @@ class WcRoom {
                         $lastread = WcTime::handleLastRead('read', $room_name);
                         $lastmod = $this->parseLastMod($room_name);
 
-                        if(!WcPgc::myCookie('skip_dead_rooms') || (time()-$lastmod) <= (86400*7) || $t5 == '1') {
+                        if(!WcPgc::myCookie('skip_dead_rooms') || (time()-$lastmod) <= INACTIVE_ROOM_MIN || $t5 == '1') {
                         $rooms .= 
                             WcGui::popTemplate(
                                 'wcchat.rooms.room',
@@ -451,7 +452,16 @@ class WcRoom {
 
         return WcGui::popTemplate(
             'wcchat.rooms.inner', 
-            array('ROOMS' => $rooms, 'CREATE' => $create_room, 'TOGGLE_DEAD' => $toggle_dead)
+            array(
+				'ROOMS' => $rooms, 
+				'CREATE' => $create_room, 
+				'TOGGLE_DEAD' => $toggle_dead,
+				'SEARCH' => (
+					$this->user->hasPermission('SEARCH', 'skip_msg') ? 
+					WcGui::popTemplate('wcchat.rooms.search') : 
+					''
+				)
+			)
         );
     }
 
@@ -706,7 +716,7 @@ class WcRoom {
                 (
                     $older_index !== NULL && 
                     $old_start === TRUE && 
-                    $index < CHAT_OLDER_MSG_STEP
+                    $index < (!$no_crop ? CHAT_OLDER_MSG_STEP : SEARCH_ROOM_LIMIT)
                 )
             ) {
                 
@@ -1129,7 +1139,7 @@ class WcRoom {
             // Halt if next index increment does not obey display buffer/older msg batch limits
             if(
                 ($index >= CHAT_DSP_BUFFER && $older_index === NULL) || 
-                ($older_index !== NULL && $index >= CHAT_OLDER_MSG_STEP)
+                ($older_index !== NULL && $index >= (!$no_crop ? CHAT_OLDER_MSG_STEP : SEARCH_ROOM_LIMIT))
             ) {
                 break;
             }

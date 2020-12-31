@@ -665,7 +665,8 @@ class WcChat {
             'IMAGE_MAX_DSP_DIM',  'IMAGE_AUTO_RESIZE_UNKN', 'VIDEO_WIDTH', 'VIDEO_HEIGHT', 
             'AVATAR_SIZE', 'DEFAULT_AVATAR', 'DEFAULT_ROOM', 'DEFAULT_THEME', 
             'INVITE_LINK_CODE', 'ACC_REC_EMAIL', 'ATTACHMENT_TYPES', 'ATTACHMENT_MAX_FSIZE', 
-            'ATTACHMENT_MAX_POST_N', 'POST_EDIT_TIMEOUT', 'MAX_DATA_LEN'
+            'ATTACHMENT_MAX_POST_N', 'POST_EDIT_TIMEOUT', 'MAX_DATA_LEN', 'INACTIVE_ROOM_MIN', 
+            'SEARCH_ROOM_LIMIT', 'SEARCH_LIMIT'
         );
 
         $gsettings_par_v = array();
@@ -685,7 +686,7 @@ class WcChat {
             'UNMOD', 'USER_E', 'USER_D', 'TOPIC_E', 'BAN', 'UNBAN', 'MUTE', 
             'UNMUTE', 'MSG_HIDE', 'MSG_UNHIDE', 'POST', 'POST_E', 'PROFILE_E', 
             'IGNORE', 'PM_SEND', 'PM_ROOM', 'LOGIN', 'ACC_REC', 'READ_MSG', 
-            'ROOM_LIST', 'USER_LIST', 'ATTACH_UPL', 'ATTACH_DOWN');
+            'ROOM_LIST', 'USER_LIST', 'ATTACH_UPL', 'ATTACH_DOWN', 'SEARCH');
 
         $gsettings_perm2 = array('MMOD', 'MOD', 'CUSER', 'USER', 'GUEST');
 

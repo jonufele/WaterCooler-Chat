@@ -4,10 +4,14 @@ if(WcPgc::myPost('key')) {
 	
 $all = array();
 $i = 0;
-$max = 100;
+
+if(!$this->user->hasPermission('SEARCH', 'skip_msg')) {
+	echo 'Your usergroup has no permission to use this feature!';
+	die();
+}
 
 foreach(glob(WcChat::$roomDir .'*.txt') as $file) {
-	if($i >= $max) {
+	if($i >= SEARCH_LIMIT) {
 		break;
 	}
 	$i2 = 0;
@@ -29,8 +33,8 @@ foreach(glob(WcChat::$roomDir .'*.txt') as $file) {
         foreach($a as $k => $v) {
             if(
 				stripos($v, WcPgc::myPost('key')) === FALSE || 
-				$i >= $max || 
-				$i2 >= CHAT_OLDER_MSG_STEP
+				$i >= SEARCH_LIMIT || 
+				$i2 >= SEARCH_ROOM_LIMIT
 			) {
                 unset($a[$k]);
             } else {
@@ -50,7 +54,7 @@ foreach(glob(WcChat::$roomDir .'*.txt') as $file) {
     }
 }
 foreach(glob(WcChat::$roomDir . 'archived/*.*') as $file) {
-	if($i >= $max) {
+	if($i >= SEARCH_LIMIT) {
 		break;
 	}
 	$output = '';
@@ -73,8 +77,8 @@ foreach(glob(WcChat::$roomDir . 'archived/*.*') as $file) {
         foreach($a as $k => $v) {
             if(
 				stripos($v, WcPgc::myPost('key')) === FALSE || 
-				$i >= $max || 
-				$i2 >= CHAT_OLDER_MSG_STEP
+				$i >= SEARCH_LIMIT || 
+				$i2 >= SEARCH_ROOM_LIMIT
 			) {
                 unset($a[$k]);
             } else {

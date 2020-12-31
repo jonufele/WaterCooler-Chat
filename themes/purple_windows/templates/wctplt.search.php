@@ -20,7 +20,7 @@ $templates['wcchat.search'] = '
 		<div style="padding: 100px 0; text-align: center">Supply a search key and hit enter.<br>
 		The results will appear here.<br>
 		Search only looks for public messages in current user\'s readable rooms.<br>
-		Search limits: <b>'. CHAT_OLDER_MSG_STEP . '</b> per room; <b>100</b> results max.</div>
+		Search limits: <b>'. SEARCH_ROOM_LIMIT . '</b> per room; <b>' . SEARCH_LIMIT . '</b> results max.</div>
     </div>
 </div>';
 

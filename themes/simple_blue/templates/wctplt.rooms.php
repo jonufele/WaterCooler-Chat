@@ -12,10 +12,12 @@ $templates['wcchat.rooms'] = '
     </div>
 </div>';
 
-$templates['wcchat.rooms.inner'] = '{ROOMS}<div style="margin-top: 10px">{CREATE}{TOGGLE_DEAD}</div>';
+$templates['wcchat.rooms.inner'] = '{ROOMS}<div style="margin-top: 10px">{CREATE}{TOGGLE_DEAD}{SEARCH}</div>';
 
 $templates['wcchat.rooms.toggle_dead'] = '
-<a href="#" onclick="wc_toggle_drooms(\'{CALLER}\', \'{PREFIX}\'); return false" ><img src="{INCLUDE_DIR_THEME}images/room.png" style="width: 18px; margin-left: 5px" title="Toggle inactive rooms"></a>
+<a href="#" onclick="wc_toggle_drooms(\'{CALLER}\', \'{PREFIX}\'); return false" ><img src="{INCLUDE_DIR_THEME}images/room.png" style="width: 18px; margin-left: 5px" title="Toggle inactive rooms"></a>';
+
+$templates['wcchat.rooms.search'] = '
 <a href="#" onclick="wc_toggle_msg_cont(\'wc_search\'); return false"><img src="{INCLUDE_DIR_THEME}images/search.gif" style="vertical-align: top; position: relative; top: 2px; margin-left: 3px" title="Search"></a>';
 
 $templates['wcchat.rooms.create'] = '
