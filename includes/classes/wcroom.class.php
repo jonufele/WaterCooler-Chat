@@ -307,6 +307,121 @@ class WcRoom {
             return FALSE;
         }
     }
+    
+    private function parseRoomItem($file, $room_name, $skip = FALSE) {
+		$mitems = explode(
+			'|', 
+			WcFile::readFile(
+				WcChat::$roomDir . 'def_' . 
+				base64_encode($room_name) . '.txt'
+			)
+		);
+		
+		$perm = $mitems[0];
+		$t1 = $mitems[1];
+		$t2 = $mitems[2];
+		$t3 = $mitems[3];
+		$t4 = $mitems[4];
+		$t5 = (isset($mitems[5]) ? $mitems[5] : 0);
+
+		// Parse the edit form if user has permission
+		$edit_form = $edit_icon = '';
+		if(
+			$this->user->hasPermission('ROOM_E', 'skip_msg') && 
+			strpos($room_name, 'pm_') === FALSE
+		) {
+			
+			$enc = base64_encode($file);
+			$edit_form = 
+				WcGui::popTemplate(
+					'wcchat.rooms.edit_form',
+					array(
+						'ID' => $enc,
+						'ROOM_NAME' => $room_name,
+						'SEL1' => ($perm == '1' ? ' SELECTED' : ''),
+						'SEL2' => ($perm == '2' ? ' SELECTED' : ''),
+						'SEL3' => ($perm == '3' ? ' SELECTED' : ''),
+						'SEL21' => ($t1 == '1' ? ' SELECTED' : ''),
+						'SEL22' => ($t1 == '2' ? ' SELECTED' : ''),
+						'SEL23' => ($t1 == '3' ? ' SELECTED' : ''),
+						'SEL24' => ($t1 == '4' ? ' SELECTED' : ''),
+						'CKD' => ($t5 == '1' ? ' CHECKED' : ''),
+						'DELETE_BT' => WcGui::popTemplate(
+							'wcchat.rooms.edit_form.delete_bt', 
+							array('ID' => $enc), 
+							$room_name != DEFAULT_ROOM
+						)                        
+					)
+				);
+			$edit_icon = WcGui::popTemplate(
+				'wcchat.rooms.edit_form.edit_icon', 
+				array(
+					'ID' => base64_encode($file),
+					'OFF' => (WcPgc::myCookie('hide_edit') == 1 ? '_off' : '')
+				)
+			);
+		}
+
+		// Parse room if user has read permission for this specific room
+		if($this->hasPermission($room_name, 'R')) {
+			if($room_name == WcPgc::mySession('current_room')) {
+				$icon = WcGui::popTemplate('wcchat.rooms.new_msg.off' . ($t5 == '1' ? 's' : ''));
+				if($skip) {
+					$icon = str_replace(' src=', ' style="width: 12px; height: auto" src=', $icon);
+				}
+				return 
+					WcGui::popTemplate(
+						'wcchat.rooms.current_room',
+						array(
+							'TITLE' => $room_name,
+							'EDIT_BT' => $edit_icon,
+							'FORM' => $edit_form,
+							'NEW_MSG' => $icon,
+							'STICKY' => '',
+							'ARROW' => ($skip ? '&nbsp;&nbsp;' : ''),
+							'STYLE' => ($skip ? 'font-size: 10px' : '')
+						)
+					);
+			} else {
+				$lastread = WcTime::handleLastRead('read', $room_name);
+				$lastmod = $this->parseLastMod($room_name);
+
+				if(
+					!WcPgc::myCookie('skip_dead_rooms') || 
+					(time()-$lastmod) <= INACTIVE_ROOM_MIN || 
+					$t5 == '1'
+				) {
+					if(!$skip || $lastread < $lastmod) {
+						$icon = WcGui::popTemplate(
+							'wcchat.rooms.new_msg.' . 
+							(($lastread < $lastmod) ? 'on' : 'off') . 
+							($t5 == '1' ? 's' : '')
+						);
+						if($skip) {
+							$icon = str_replace(
+								' src=', 
+								' style="width: 12px; height: auto" src=', 
+								$icon
+							);
+						}
+						return
+							WcGui::popTemplate(
+								'wcchat.rooms.room',
+								array(
+									'TITLE' => $room_name,
+									'EDIT_BT' => $edit_icon,
+									'FORM' => $edit_form,
+									'NEW_MSG' => $icon,
+									'STICKY' => '',
+									'ARROW' => ($skip ? '&nbsp;&nbsp;' : ''),
+									'STYLE' => ($skip ? 'font-size: 10px' : '')
+								)
+							);
+					}
+				}
+			}
+		}
+	}
 
     /**
      * Generates the room list, rooms are topic containers, not user containers
@@ -314,120 +429,86 @@ class WcRoom {
      * @since 1.2
      * @return string Html Template
      */
-    public function parseList() {
+    public function parseList($parent = FALSE) {
 
         $rooms = $create_room = '';
+        $rooms_arr = $rooms_arrc = $child = array();
+        $subrooms = '';
+        if(file_exists(WcChat::$roomDir . 'subrooms.txt')) {
+			$subrooms = WcFile::readFile(WcChat::$roomDir . 'subrooms.txt');
+			$lines = explode("\n", trim($subrooms));
+			foreach($lines as $k => $v) {
+				$par = explode('|', trim($v, '[]'));
+				$child[$par[0]] = $par[1];
+			}
+		}
 
-        // Scan rooms folder
-        foreach(glob(WcChat::$roomDir . '*.txt') as $file) {
-            $room_name = 
-                base64_decode(str_replace(
-                    array(WcChat::$roomDir, '.txt'), 
-                    '', 
-                    $file
-                ));
-
-            // Skip any special room related files (definitions, topic, updated msg)
-            // hidden_* files were renamed to updated_*, still, keep it here to avoid errors 
-            if(
-                strpos(basename($file), 'def_') === FALSE && 
-                strpos(basename($file), 'topic_') === FALSE && 
-                strpos(basename($file), 'updated_') === FALSE && 
-                strpos(basename($file), 'hidden_') === FALSE && 
-                strpos($room_name, 'pm_') === FALSE
-            ) {
-				
-				$mitems = explode(
-					'|', 
-					WcFile::readFile(
-						WcChat::$roomDir . 'def_' . 
-						base64_encode($room_name) . '.txt'
-					)
-				);
-				
-				$perm = $mitems[0];
-				$t1 = $mitems[1];
-				$t2 = $mitems[2];
-				$t3 = $mitems[3];
-				$t4 = $mitems[4];
-				$t5 = (isset($mitems[5]) ? $mitems[5] : 0);
-
-                // Parse the edit form if user has permission
-                $edit_form = $edit_icon = '';
-                if(
-                    $this->user->hasPermission('ROOM_E', 'skip_msg') && 
-                    strpos($room_name, 'pm_') === FALSE
-                ) {
-                    
-                    $enc = base64_encode($file);
-                    $edit_form = 
-                        WcGui::popTemplate(
-                            'wcchat.rooms.edit_form',
-                            array(
-                                'ID' => $enc,
-                                'ROOM_NAME' => $room_name,
-                                'SEL1' => ($perm == '1' ? ' SELECTED' : ''),
-                                'SEL2' => ($perm == '2' ? ' SELECTED' : ''),
-                                'SEL3' => ($perm == '3' ? ' SELECTED' : ''),
-                                'SEL21' => ($t1 == '1' ? ' SELECTED' : ''),
-                                'SEL22' => ($t1 == '2' ? ' SELECTED' : ''),
-                                'SEL23' => ($t1 == '3' ? ' SELECTED' : ''),
-                                'SEL24' => ($t1 == '4' ? ' SELECTED' : ''),
-                                'CKD' => ($t5 == '1' ? ' CHECKED' : ''),
-                                'DELETE_BT' => WcGui::popTemplate(
-                                    'wcchat.rooms.edit_form.delete_bt', 
-                                    array('ID' => $enc), 
-                                    $room_name != DEFAULT_ROOM
-                                )                        
-                            )
-                        );
-                    $edit_icon = WcGui::popTemplate(
-                        'wcchat.rooms.edit_form.edit_icon', 
-                        array(
-                            'ID' => base64_encode($file),
-                            'OFF' => (WcPgc::myCookie('hide_edit') == 1 ? '_off' : '')
-                        )
-                    );
-                }
-
-                // Parse room if user has read permission for this specific room
-                if($this->hasPermission($room_name, 'R')) {
-                    if($room_name == WcPgc::mySession('current_room')) {
-                        $rooms .=
-                            WcGui::popTemplate(
-                                'wcchat.rooms.current_room',
-                                array(
-                                    'TITLE' => $room_name,
-                                    'EDIT_BT' => $edit_icon,
-                                    'FORM' => $edit_form,
-                                    'NEW_MSG' => WcGui::popTemplate('wcchat.rooms.new_msg.off' . ($t5 == '1' ? 's' : '')),
-                                    'STICKY' => ''
-                                )
-                            );
-                    } else {
-                        $lastread = WcTime::handleLastRead('read', $room_name);
-                        $lastmod = $this->parseLastMod($room_name);
-
-                        if(!WcPgc::myCookie('skip_dead_rooms') || (time()-$lastmod) <= INACTIVE_ROOM_MIN || $t5 == '1') {
-                        $rooms .= 
-                            WcGui::popTemplate(
-                                'wcchat.rooms.room',
-                                array(
-                                    'TITLE' => $room_name,
-                                    'EDIT_BT' => $edit_icon,
-                                    'FORM' => $edit_form,
-                                    'NEW_MSG' => WcGui::popTemplate(
-                                        'wcchat.rooms.new_msg.' . 
-                                        (($lastread < $lastmod) ? 'on' : 'off') . 
-                                        ($t5 == '1' ? 's' : '')
-                                    ),
-                                    'STICKY' => ''
-                                )
-                            );
-                    }}
-                }
-            }
-        }
+		if($parent === FALSE) {
+	        // Scan rooms folder
+	        foreach(glob(WcChat::$roomDir . '*.txt') as $file) {
+	            $room_name = 
+	                base64_decode(str_replace(
+	                    array(WcChat::$roomDir, '.txt'), 
+	                    '', 
+	                    $file
+	                ));
+	
+	            // Skip any special room related files (definitions, topic, updated msg)
+	            // hidden_* files were renamed to updated_*, still, keep it here to avoid errors 
+	            if(
+					strpos(basename($file), 'subrooms') === FALSE &&
+	                strpos(basename($file), 'def_') === FALSE && 
+	                strpos(basename($file), 'topic_') === FALSE && 
+	                strpos(basename($file), 'updated_') === FALSE && 
+	                strpos(basename($file), 'hidden_') === FALSE && 
+	                strpos($room_name, 'pm_') === FALSE
+	            ) {
+					$skip = (strpos($subrooms, '[' . base64_encode($room_name) . '|') === FALSE ? 0 : 1);
+					if(!$skip) {
+						$rooms_arr[$room_name] = $this->parseRoomItem($file, $room_name, $skip);
+					} else {
+						$rooms_arrc[$this->parseParent($room_name, $child)][] = 
+							$this->parseRoomItem($file, $room_name, $skip);
+					}
+	            }
+	        }
+	        foreach($rooms_arr as $k => $v) {
+				$rooms .= $v;
+				if(isset($rooms_arrc[$k])) {
+					foreach($rooms_arrc[$k] as $v2) {
+						if(strlen($v2) > 0) {
+							$rooms .= $v2;
+						}
+					}
+				}
+			}
+		} else {
+			if(
+				strpos(
+					$subrooms, 
+					'|' . base64_encode(WcPgc::mySession('current_room')) . ']'
+				) !== FALSE
+			) {
+				$lines = explode("\n", trim($subrooms));
+				foreach($lines as $k => $v) {
+					$par = explode('|', trim($v, '[]'));
+					if($par[1] == base64_encode(WcPgc::mySession('current_room'))) {
+						$rooms .= $this->parseRoomItem(
+							WcChat::$roomDir . $par[0] . '.txt', 
+			                base64_decode(str_replace(
+			                    array(WcChat::$roomDir, '.txt'), 
+			                    '', 
+			                    WcChat::$roomDir . $par[0] . '.txt'
+			                ))
+						);
+					}
+				}
+			} else {
+				$rooms = '<div style="text-align: center; padding: 50px 0">No subrooms exist.<br>
+					To create one, use the main create room button,<br>
+					with the subroom checkbox checked.</div>';
+			}
+		}
 
         // Check if the edit buttons/links are supposed to be hidden
         $create_room = $toggle_dead = '';
@@ -454,16 +535,96 @@ class WcRoom {
             'wcchat.rooms.inner', 
             array(
 				'ROOMS' => $rooms, 
-				'CREATE' => $create_room, 
-				'TOGGLE_DEAD' => $toggle_dead,
+				'CREATE' => (!$parent ? $create_room : ''), 
+				'TOGGLE_DEAD' => (!$parent ? $toggle_dead : ''),
 				'SEARCH' => (
-					$this->user->hasPermission('SEARCH', 'skip_msg') ? 
+					($this->user->hasPermission('SEARCH', 'skip_msg') && !$parent) ? 
 					WcGui::popTemplate('wcchat.rooms.search') : 
 					''
 				)
 			)
         );
     }
+    
+    public function parseSubRoomPathItem($v) {
+		return '<a href="#" onclick="wc_change_room(\'' . WcChat::$ajaxCaller . '\', this.innerHTML, 0); return false;">' . base64_decode($v) . '</a>';
+	}
+	
+	 public function parseParent($croom, $arr) {
+		$croom = base64_encode($croom);
+		while(isset($arr[$croom])) {
+			$croom = $arr[$croom];
+		}
+		return base64_decode($croom);
+	}
+    
+    public function parseSubRoomPath($arr) {
+		$croom = base64_encode(WcPgc::mySession('current_room'));
+		$path = array();
+		while(isset($arr[$croom])) {
+			$path[] = $arr[$croom];
+			$croom = $arr[$croom];
+		}
+		if(count($path)) {
+			krsort($path);
+			return implode(
+				' <img src="' . WcChat::$includeDirTheme . 'images/arrow.png"> ', 
+				array_map(array($this, 'parseSubRoomPathItem'), $path)
+			) . ' <img src="' . WcChat::$includeDirTheme . 'images/arrow.png"> ';
+		}
+	}
+    
+    public function parseSubRoomIcon($subroom_has_new_msg = FALSE) {
+		$subrooms = ''; $n = 0; $icon = '';
+		$child = array();
+		$croom_path = '';
+        if(file_exists(WcChat::$roomDir . 'subrooms.txt')) {
+			$subrooms = WcFile::readFile(WcChat::$roomDir . 'subrooms.txt');
+			if(
+				strpos(
+					$subrooms, 
+					'|' . base64_encode(WcPgc::mySession('current_room')) . ']'
+				) !== FALSE
+			) {
+				$lines = explode("\n", trim($subrooms));
+				foreach($lines as $k => $v) {
+					$par = explode('|', trim($v, '[]'));
+					if($par[1] == base64_encode(WcPgc::mySession('current_room'))) {
+						$n++;
+					}
+					$child[$par[0]] = $par[1];
+				}
+			} else {
+				$lines = explode("\n", trim($subrooms));
+				foreach($lines as $k => $v) {
+					$par = explode('|', trim($v, '[]'));
+					$child[$par[0]] = $par[1];
+				}
+			}
+			$croom_path = $this->parseSubRoomPath($child);
+		}
+		
+		if($n > 0) {
+			$icon = '';
+			return array(WcGui::popTemplate(
+				'wcchat.topic.inner.subroom_icon',
+				array(
+					'N' => $n,
+					'ICON' => ($subroom_has_new_msg ? '_new' : ''),
+					'TITLE' => $n . ' sub-room(s)'
+				)
+			), $croom_path);
+		} else {
+			return array(WcGui::popTemplate(
+				'wcchat.topic.inner.subroom_icon',
+				array(
+					'N' => '',
+					'ICON' => '_void',
+					'TITLE' => 'No sub-rooms'
+				)
+			), $croom_path);
+		}
+	}
 
     /**
      * Parses The Topic Container Template/Contents
@@ -471,7 +632,7 @@ class WcRoom {
      * @since 1.2
      * @return string Html Template
      */
-    public function parseTopicContainer() {
+    public function parseTopicContainer($subroom_has_new_msg = FALSE) {
     
         $down_perm = ($this->user->hasPermission('ATTACH_DOWN', 'skip_msg') ? TRUE : FALSE);
     
@@ -535,11 +696,15 @@ class WcRoom {
         } else {
             $room_name = WcPgc::mySession('current_room');
         }
+        
+        $tmp = $this->parseSubRoomIcon($subroom_has_new_msg);
 
         return WcGui::popTemplate(
             'wcchat.topic.inner',
             array(
                 'CURRENT_ROOM' => $room_name,
+                'SUBROOM_ICON' => ($this->isConv ? '' : $tmp[0]),
+                'PATH' => $tmp[1],
                 'TOPIC' =>
                     WcGui::popTemplate(
                         'wcchat.topic.box',

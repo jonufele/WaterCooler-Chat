@@ -392,6 +392,36 @@ H1 {
 }
 
 /*--------------------------------------*/
+/*            SUB-ROOMS                 */
+/*--------------------------------------*/
+
+#wcchat #wc_subrooms {
+    height: 400px;
+    border-right: 1px dotted #a28299;
+    border-left: 1px dotted #a28299;
+    overflow: auto;
+    font-size: 12px;
+    padding: 15px;
+}
+
+#wc_subrooms .header {
+    text-align: center;
+    font-size: 20px;
+    margin: 10px;
+}
+
+
+#wc_subrooms div {
+    margin: 10px;
+}
+
+#wc_subrooms span {
+    font-size: 9px;
+    color:#5b5c7c
+}
+
+
+/*--------------------------------------*/
 /*            GLOBAL SETTINGS           */
 /*--------------------------------------*/
 
@@ -716,7 +746,7 @@ H1 {
 
 #wcchat #wc_ulist {
     padding: 5px;
-    padding-bottom: 10px;
+    margin-bottom: 10px;
     height: 400px;
     overflow: auto;
     background-color: rgba(234, 220, 235, 0.7);

@@ -78,8 +78,9 @@ class WcGui {
         $array = array(
             'global_sett', 'index', 'info', 'join',
             'login', 'main', 'posts', 'profile_sett',
-            'rooms', 'search', 'static_msg', 'text_input', 'themes',
-            'toolbar', 'topic', 'users'
+            'rooms', 'search', 'subrooms', 'static_msg', 
+            'text_input', 'themes', 'toolbar', 'topic', 
+            'users'
         );
         
         foreach($array as $value) {

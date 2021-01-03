@@ -92,6 +92,17 @@
             WcPgc::wcSetCookie('current_room', $nname);
         }
         $changes++;
+        
+        if(file_exists(WcChat::$roomDir . 'subrooms.txt')) {
+	        WcFile::writeFile(
+				WcChat::$roomDir . 'subrooms.txt',
+				str_replace(
+					array('[' . base64_encode($oname) . '|', '|' . base64_encode($oname) . ']'),
+					array('[' . base64_encode($nname) . '|', '|' . base64_encode($nname) . ']'),
+					WcFile::readFile(WcChat::$roomDir . 'subrooms.txt')
+				), 'w'
+	        );
+		}
     }
     if($changes) {
         echo 'Room ' . $oname . ' Successfully updated!';

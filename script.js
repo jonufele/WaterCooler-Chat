@@ -223,11 +223,20 @@ function wc_create_room(c)
     var n = document.getElementById('wc_room_name').value;
     var http = getHTTPObject();
     var formData = new FormData();
+    var subroom = document.getElementById('is_subroom');
     formData.append('n', n);
+    if(subroom.checked) {
+		formData.append('subroom', 1);
+	} else {
+		formData.append('subroom', 0);
+	}
     http.open("POST", c+"mode=create_room", true);
     http.onreadystatechange=function(){if(http.readyState==4){
         if(http.responseText.search("ERROR") != -1) { alert(wc_parse_error(http.responseText)); } else {
             document.getElementById('wc_room_list').innerHTML = http.responseText;
+            if(subroom.checked) {
+				wc_refresh_subrooms(c);
+			}
         }
     }}
      http.send(formData);
@@ -256,6 +265,7 @@ function wc_change_room(c, n, new_conv)
                 wc_refresh_msg_once(c, 'ALL', 0);
                 wc_refresh_topic(c);
                 wc_refresh_users(0, c, 0, 0, 'ignore_lastmod');
+                wc_refresh_subrooms(c);
             }
         }}
         http.send(formData);
@@ -285,6 +295,20 @@ function wc_refresh_rooms(c, forced)
     http.send(null);
 }
 
+function wc_refresh_subrooms(c)
+{
+    var http = getHTTPObject();
+    http.open("GET", c+"mode=refresh_subrooms", true);
+    http.onreadystatechange=function(){if(http.readyState==4){
+        if(http.responseText.length > 0) {
+			var p = http.responseText.split('____');
+			document.getElementById('wc_subrooms_inner').innerHTML = p[0];
+			document.getElementById('subroom_icon_c').innerHTML = p[1];
+        }
+    }}
+    http.send(null);
+}
+
 function wc_upd_room(c, par) {
 
     var formData = new FormData();
@@ -302,6 +326,7 @@ function wc_upd_room(c, par) {
     http.onreadystatechange=function(){if(http.readyState==4){
         if(http.responseText.length > 0) { alert(http.responseText); }
         wc_refresh_rooms(c, 'forced');
+        wc_refresh_subrooms(c);
     }}
      http.send(formData);
 }
@@ -321,6 +346,7 @@ function wc_del_room(c, par) {
                 } else {
                     alert(http.responseText);
                 }
+                wc_refresh_subrooms(c);
             }
             wc_refresh_rooms(c, 'forced');
             if(http.responseText.search('RMV') != -1) {
@@ -1240,6 +1266,7 @@ function wc_close_open_cont() {
     gsett = document.getElementById('wc_global_settings');
     msg_cont = document.getElementById('wc_msg_container');
     search = document.getElementById('wc_search');
+    subrooms = document.getElementById('wc_subrooms');
     
     if(gsett != null && gsett != undefined) {
 		if(gsett.className.search('closed') == -1) {
@@ -1255,6 +1282,9 @@ function wc_close_open_cont() {
 	if(info.className.search('closed') == -1) {
 		wc_toggle('wc_info');
 	}
+	if(subrooms.className.search('closed') == -1) {
+		wc_toggle('wc_subrooms');
+	}
 }
 
 function wc_toggle_msg_cont(target) {
@@ -1262,6 +1292,7 @@ function wc_toggle_msg_cont(target) {
     gsett = document.getElementById('wc_global_settings');
     msg_cont = document.getElementById('wc_msg_container');
     search = document.getElementById('wc_search');
+    subrooms = document.getElementById('wc_subrooms');
     
     if(target == 'wc_info') {
         if(info.className.search('closed') != -1) {
@@ -1287,6 +1318,16 @@ function wc_toggle_msg_cont(target) {
         if(search.className.search('closed') != -1) {
 			wc_close_open_cont();
             wc_toggle('wc_search');    
+        } else {
+			wc_close_open_cont();
+            wc_toggle('wc_msg_container');
+        }
+    }
+    
+    if(target == 'wc_subrooms') {
+        if(subrooms.className.search('closed') != -1) {
+			wc_close_open_cont();
+            wc_toggle('wc_subrooms');    
         } else {
 			wc_close_open_cont();
             wc_toggle('wc_msg_container');

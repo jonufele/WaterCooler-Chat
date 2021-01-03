@@ -698,6 +698,8 @@ class WcChat {
                     (in_array($value2, $perm_fields) ? ' CHECKED' : '');
             }
         }
+        
+        $subrooms = $this->room->parseList(TRUE);
 
         $contents = WcGui::popTemplate(
             'wcchat',
@@ -706,7 +708,9 @@ class WcChat {
                 'TOPIC' => WcGui::popTemplate(
                     'wcchat.topic', 
                     array(
-                        'TOPIC' => $this->room->parseTopicContainer()
+                        'TOPIC' => $this->room->parseTopicContainer(
+							(strpos($subrooms, 'nmsg.png') !== FALSE ? TRUE : FALSE)
+                        )
                     )
                 ),
                 'STATIC_MSG' => (!$this->user->isLoggedIn ? 
@@ -716,6 +720,14 @@ class WcChat {
                 'POSTS' => WcGui::popTemplate('wcchat.posts'),
                 'INFO' => WcGui::popTemplate('wcchat.info'),
                 'SEARCH' => WcGui::popTemplate('wcchat.search'),
+                'SUBROOMS' => (
+					WcGui::popTemplate(
+						'wcchat.subrooms',
+						array(
+							'CONTENT' => $subrooms
+						)
+					)
+                ),
                 'GSETTINGS' => ($this->user->hasPermission('GSETTINGS', 'skip_msg') ? 
                     WcGui::popTemplate(
                         'wcchat.global_settings',
