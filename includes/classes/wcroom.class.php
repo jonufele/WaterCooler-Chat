@@ -635,7 +635,7 @@ class WcRoom {
                 $self = TRUE;
                 $user = trim($user, '*');
             }
-            $time_date = gmdate('d-M', $time + ($this->user->data['timeZone'] * 3600));
+            $time_date = gmdate('d-M', (int)($time + ($this->user->data['timeZone'] * 3600)));
 
             // Halt scan if no batch retrieval and current message is no longer new
             if(
@@ -881,7 +881,7 @@ class WcRoom {
                                     'TIMESTAMP' => 
                                         gmdate(
                                             (($this->user->data['hourMode'] == '1') ? 'H:i' : 'g:i a'), 
-                                            $time + ($this->user->data['timeZone'] * 3600)
+                                            (int)($time + ($this->user->data['timeZone'] * 3600))
                                         ) . 
                                         ($time_date != $today_date ? ' ' . $time_date : '')
                                     ,
@@ -1184,8 +1184,7 @@ class WcRoom {
             if($read) {
             
                 // Event's date to compare with today's
-                $time_date = gmdate('d-M', $time + ($this->user->data['timeZone'] * 3600));
-                
+                $time_date = gmdate('d-M', (int)($time + ($this->user->data['timeZone'] * 3600)));
                 // Halt if: event is not new or 
                 // user doesn't have a read point and not sending or 
                 // user already has the event listed
@@ -1213,7 +1212,7 @@ class WcRoom {
                             'TIMESTAMP' => 
                                 gmdate(
                                     (($this->user->data['hourMode'] == '1') ? 'H:i': 'g:i a'), 
-                                    $time + ($this->user->data['timeZone'] * 3600)
+                                    (int)($time + ($this->user->data['timeZone'] * 3600))
                                 ).
                                 ($time_date != $today_date ? ' '.$time_date : ''),
                             'MSG' => WcGui::parseBbcode(
