@@ -49,13 +49,17 @@ class WcGui {
                     '{CALLER}',
                     '{INCLUDE_DIR}',
                     '{INCLUDE_DIR_THEME}',
-                    '{PREFIX}'
+                    '{PREFIX}',
+					'{SCRIPT_NAME}',
+					'{SCRIPT_VERSION}'
                 ),
                 array(
                     WcChat::$ajaxCaller,
                     WcChat::$includeDir,
                     WcChat::$includeDirTheme,
-                    WcChat::$wcPrefix
+                    WcChat::$wcPrefix,
+					SCRIPT_NAME,
+					SCRIPT_VERSION
                 ),
                 $out
             );
