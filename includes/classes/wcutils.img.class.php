@@ -21,13 +21,26 @@ class WcImg {
         $source_image = '';
         if(!function_exists('gd_info')) { return FALSE; }
 
-        // Try to use the faster exif_imagetype function if it exists
-        if(function_exists('exif_imagetype')) {
-            $type = exif_imagetype($original_image);
-        } else {
-            $tmp = @getimagesize($original_image);
-            $type = $tmp[2];
-        }
+		// Try to use the faster exif_imagetype function if it exists
+		if (function_exists('exif_imagetype')) {
+			$type = exif_imagetype($original_image);
+
+			if ($type === false) {
+				// Handle the case where exif_imagetype couldn't determine the image type
+				// You can set a default image type or handle the error as needed
+				$type = IMAGETYPE_UNKNOWN; // Replace with the appropriate default type
+			}
+		} else {
+			$tmp = @getimagesize($original_image);
+
+			if ($tmp !== false) {
+				$type = $tmp[2];
+			} else {
+				// Handle the case where getimagesize couldn't retrieve image information
+				// You can set a default image type or handle the error as needed
+				$type = IMAGETYPE_UNKNOWN; // Replace with the appropriate default type
+			}
+		}
 
         // Create the image resource
         if($type == 1) {
