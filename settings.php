@@ -185,4 +185,12 @@ define('INVITE_LINK_CODE', '');
 
 define('DATA_DIR', __DIR__ . '/data/');
 
+# Please don't edit this section without donating to the 
+# project, remember people spend there time making this for you.
+# ============================================================================
+#                  Donation/Copyright
+# ============================================================================
+
+define('SCRIPT_NAME', 'WaterCooler Chat');
+define('SCRIPT_VERSION', '1.4.21');
 ?>
