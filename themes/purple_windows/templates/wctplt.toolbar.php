@@ -6,7 +6,7 @@
 
 $templates['wcchat.toolbar'] = '
 <div id="wc_toolbar">
-    <img src="{INCLUDE_DIR_THEME}images/pixel.gif?{TIME}" class="closed" {ONLOAD}>
+    <img src="{INCLUDE_DIR_THEME}images/reload.png?{TIME}" class="closed" {ONLOAD}>
     {COMMANDS}
     <span id="wc_settings_icon" class="{ICON_STATE}">
         <a href="#wc_settings_input" onclick="wc_toggle(\'wc_settings_input\'); if(document.getElementById(\'wc_join\').className == \'closed\') { wc_toggle(\'wc_text_input\'); }">
