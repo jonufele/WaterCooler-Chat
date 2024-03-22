@@ -1,9 +1,9 @@
 ﻿**********************************************
 ----------------------------------------------
-*  WaterCooler Chat 1.4                      *
+*  WaterCooler Chat 1.5                      *
 ----------------------------------------------
   Copyright (c) 2018
-  v1.4 originally written by João Ferreira
+  v1.5 originally written by João Ferreira
 
 ----------------------------------------------
 *  README                                    *
@@ -64,7 +64,7 @@
                        REQUIREMENTS
 ============================================================================
 
-  - PHP >= 5.3.0
+  - PHP >= 7.0
   - Ability to change permissions if necessary
   - PHP GD library (for generating image thumbnails)
 

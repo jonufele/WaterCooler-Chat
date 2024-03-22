@@ -1,4 +1,4 @@
-# WaterCooler Chat 1.4
+# WaterCooler Chat 1.5
 
 WaterCooler chat is a simple/easy to use, flat file database php/ajax chat system.
 
@@ -38,7 +38,7 @@ WaterCooler chat is a simple/easy to use, flat file database php/ajax chat syste
 
 ## Requirements
 
- - PHP >= 5.3.0
+ - PHP >= 7.0
  - Ability to change permissions if necessary
  - PHP GD library (for generating image thumbnails)
 
