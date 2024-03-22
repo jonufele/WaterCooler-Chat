@@ -1,86 +1,44 @@
 <?php
-
 /**
  * WaterCooler Chat (Room class)
  * 
- * @version 1.4
+ * @version 1.4 
  * @author Joao Ferreira <jflei@sapo.pt>
  * @copyright (c) 2018, Joao Ferreira
  */
 class WcRoom {
 
-    /**
-     * Room Definitions Array
-     *
-     * @since 1.4
-     * @var array
-     */
-    public $def;
+    // Room Definitions Array @var array
+	public $def; #jv-1.4
+	
+    // Message List (Raw) @var string
+    public $rawMsgList; #jv-1.1
 
-    /**
-     * Message List (Raw)
-     *
-     * @since 1.1
-     * @var string
-     */
-    public $rawMsgList;
+    // Updated Message List (Raw) @var string
+    public $rawUpdatedMsgList; #jv-1.2
 
-    /**
-     * Updated Message List (Raw)
-     *
-     * @since 1.2
-     * @var string
-     */
-    public $rawUpdatedMsgList;
+    // Event List (Raw) @var string
+    public $rawEventList; #jv-1.1
 
-    /**
-     * Event List (Raw)
-     *
-     * @since 1.1
-     * @var string
-     */
-    public $rawEventList;
+    // Room Topic @var string
+    public $topic; #jv-1.1
 
-    /**
-     * Room Topic
-     *
-     * @since 1.1
-     * @var string
-     */
-    public $topic;
-
-    /**
-     * Conversation Room Tag
-     *
-     * @since 1.4
-     * @var bool
-     */
-    public $isConv = FALSE;
+    // Conversation Room Tag @var bool
+    public $isConv = FALSE; #jv-1.4
     
-    /**
-     * User object
-     *
-     * @since 1.4
-     * @var obj
-     */
-    private $user;
+    // User object @var obj
+    private $user; #jv-1.4
     
     function __construct(WcUser $user) {
         $this->user = $user;
     }
 
-    /**
-     * Initializes current room variables
-     * 
-     * @since 1.4
-     * @return void
-     */
-    public function initCurr() {
+    // Initializes current room variables @return void
+    public function initCurr() { #jv-1.4
  
         // Initialize Current Room Session / Cookie
         if(!WcPgc::mySession('current_room')) {
-            WcPgc::wcSetSession('current_room', (
-                (
+            WcPgc::wcSetSession('current_room', ((
                     WcPgc::myCookie('current_room') && 
                     file_exists(
                         WcChat::$roomDir . 
@@ -90,37 +48,25 @@ class WcRoom {
                 WcPgc::myCookie('current_room') : 
                 DEFAULT_ROOM
             ));
-        } elseif(
+        }elseif(
             !file_exists(
                 WcChat::$roomDir . 
                 base64_encode(WcPgc::mySession('current_room')) . '.txt'
             )
-        ) {
+        ){
             WcPgc::wcSetSession('current_room', DEFAULT_ROOM);
             WcPgc::wcSetSession('reset_msg', '1');
             WcPgc::wcSetCookie('current_room', DEFAULT_ROOM);
         }
     }
     
-    /**
-     * Initiates all definitions for the current room
-     * 
-     * @since 1.4
-     * @return void
-     */    
-    public function initCurrDef() {   
+    // Initiates all definitions for the current room @return void    
+    public function initCurrDef() { #jv-1.4   
         $this->def = $this->getDef(WcPgc::mySession('current_room'));
     }
 
-    /**
-     * Checks if user has permission to read/write from/to a room 
-     * 
-     * @since 1.2
-     * @param string $room_name
-     * @param string/null $mode Write(W)/Read(R)
-     * @return bool
-     */
-    public function hasPermission($room_name, $mode = NULL) {
+    // Checks if user has permission to read/write from/to a room @param string $room_name,  @param string/null $mode Write(W)/Read(R), @return bool
+    public function hasPermission($room_name, $mode = NULL) { #jv-1.2
 
         // If room is a private conversation, check only the two participants
         if(strpos($room_name, 'pm_') !== FALSE) {
@@ -161,43 +107,27 @@ class WcRoom {
         return $permission;
     }
 
-    /**
-     * Checks if user has permission to read/write from/to a private message room 
-     * 
-     * @since 1.4
-     * @param string $room_name
-     * @return bool
-     */
-    public function hasConvPermission($room_name) {
-
+    // Checks if user has permission to read/write from/to a private message room @param string $room_name, @return bool
+    public function hasConvPermission($room_name) { #jv-1.4
         // If room is a private conversation, check only the two participants
         if(strpos($room_name, 'pm_') !== FALSE) {
-            list($par1, $par2) = 
-                explode(
-                    '_', 
-                    str_replace('pm_', '', $room_name)
-                );
+            list($par1, $par2) = explode('_', str_replace('pm_', '', $room_name));
             if(
                 (
                     $par1 == base64_encode($this->user->name) || 
                     $par2 == base64_encode($this->user->name)
                 ) && 
                 $this->user->hasProfileAccess
-            ) {
+            ){
                 return TRUE;
-            } else {
+            }else{
                 return FALSE;
             }
         }
     }
 
-    /**
-     * Updates Current Room Last Modified Bit
-     * 
-     * @since 1.4
-     * @return void
-     */    
-    public function updateCurrLastMod() {
+    //Updates Current Room Last Modified Bit, @return void    
+    public function updateCurrLastMod() { #jv-1.4
         
         WcFile::writeFile(
             ROOM_DEF_LOC,
@@ -208,15 +138,10 @@ class WcRoom {
         );
     }
 
-    /**
-     * Gets Room's Last Modified Time (Either stored or file's)
-     * 
-     * @since 1.4
-     * @return int
-     */
-    public function parseLastMod($target = NULL) {
-        if($target === NULL) {
-            if($this->def['lastMod']) {
+    // Gets Room's Last Modified Time (Either stored or file's) @return int
+    public function parseLastMod($target = NULL) { #jv-1.4
+        if($target === NULL) {           
+			if($this->def['lastMod']) {
                 return $this->def['lastMod'];
             } else {
                return WcTime::parseFileMTime(MESSAGES_LOC);
@@ -239,13 +164,8 @@ class WcRoom {
         }
     }
 
-    /**
-     * Generates the unique pm room name from two user names
-     * 
-     * @since 1.4
-     * @return int
-     */
-    public function parseConvName($name1, $name2) {
+    // Generates the unique pm room name from two user names @return int
+    public function parseConvName($name1, $name2) { #jv-1.4
         $participants = array($name1, $name2);
         sort($participants);
         return 'pm_' . 
@@ -541,21 +461,11 @@ class WcRoom {
         );
     }
 
-    /**
-     * Parses post message(s) 
-     * 
-     * @since 1.2
-     * @param array $lines
-     * @param int $lastread
-     * @param string $action Specifies if the user is sending or retrieving message(s)
-     * @param int|null $older_index index of the first old (hidden) message
-     * @param int|null $single_msg_reload Used to reload a single message (only inner contents are needed)    
-     * @return array
-     */
+    // Parses post message(s) @param array $lines, @param int $lastread, @param string $action Specifies if the user is sending or retrieving message(s), @param int|null $older_index index of the first old (hidden) message, @param int|null $single_msg_reload Used to reload a single message (only inner contents are needed),@return array
     public function parseMsg(
         $lines, $lastread, $action, 
         $older_index = NULL, $single_msg_reload = NULL
-    ) {
+    ) { #jv-1.2
 
         // Initialize the displayed messages index
         $index = 0;
@@ -635,7 +545,7 @@ class WcRoom {
                 $self = TRUE;
                 $user = trim($user, '*');
             }
-            $time_date = gmdate('d-M', $time + ($this->user->data['timeZone'] * 3600));
+            $time_date = gmdate('d-M', (int)($time + ($this->user->data['timeZone'] * 3600)));
 
             // Halt scan if no batch retrieval and current message is no longer new
             if(
@@ -880,10 +790,10 @@ class WcRoom {
                                     ),
                                     'TIMESTAMP' => 
                                         gmdate(
-                                            (($this->user->data['hourMode'] == '1') ? 'H:i' : 'g:i a'), 
-                                            $time + ($this->user->data['timeZone'] * 3600)
-                                        ) . 
-                                        ($time_date != $today_date ? ' ' . $time_date : '')
+											(($this->user->data['hourMode'] == '1') ? 'H:i' : 'g:i a'), 
+											(int)($time + ($this->user->data['timeZone'] * 3600))
+										) . 
+										($time_date != $today_date ? ' ' . $time_date : '')
                                     ,
                                     'POPULATE_START' => WcGui::popTemplate(
                                         'wcchat.posts.normal.populate_start', 
@@ -1043,7 +953,7 @@ class WcRoom {
                                 'TIMESTAMP' => 
                                     gmdate(
                                         (($this->user->data['hourMode'] == '1') ? 'H:i': 'g:i a'), 
-                                        $time + ($this->user->data['timeZone'] * 3600)
+                                        (int)($time + ($this->user->data['timeZone'] * 3600))
                                     ).
                                     ($time_date != $today_date ? ' '.$time_date : ''),
                                 'USER' => base64_decode($user),
@@ -1131,21 +1041,13 @@ class WcRoom {
         return array($output, $index, $first_elem);
     }
 
-    /**
-     * Parses Event Message(s), event messages are room independent, users get them no matter the room they're in
-     * 
-     * @since 1.2
-     * @param string $lines
-     * @param int $lastread
-     * @param string $action Specifies if the user is sending or receiving messages
-     * @return string|void Html template
-     */
-    public function parseMsgE($lines, $lastread, $action) {
+    // Parses Event Message(s), event messages are room independent, users get them no matter the room they're in @param string $lines, @param int $lastread, @param string $action Specifies if the user is sending or receiving messages, @return string|void Html template
+    public function parseMsgE($lines, $lastread, $action) { #jv-1.2
     
         $output = '';
         
         // Store today's date to strip of today's events
-        $today_date = gmdate('d-M', time() + ($this->user->data['timeZone'] * 3600));
+        $today_date = gmdate('d-M', (int)(time() + ($this->user->data['timeZone'] * 3600)));
 
         krsort($lines);
         foreach($lines as $k => $v) {
@@ -1184,9 +1086,10 @@ class WcRoom {
             if($read) {
             
                 // Event's date to compare with today's
-                $time_date = gmdate('d-M', $time + ($this->user->data['timeZone'] * 3600));
+                //$time_date = gmdate('d-M', $time + ($this->user->data['timeZone'] * 3600));
+                $time_date = gmdate('d-M', (int)($time + ($this->user->data['timeZone'] * 3600)));
                 
-                // Halt if: event is not new or 
+				// Halt if: event is not new or 
                 // user doesn't have a read point and not sending or 
                 // user already has the event listed
                 if(
@@ -1213,7 +1116,7 @@ class WcRoom {
                             'TIMESTAMP' => 
                                 gmdate(
                                     (($this->user->data['hourMode'] == '1') ? 'H:i': 'g:i a'), 
-                                    $time + ($this->user->data['timeZone'] * 3600)
+                                    (int)($time + ($this->user->data['timeZone'] * 3600))
                                 ).
                                 ($time_date != $today_date ? ' '.$time_date : ''),
                             'MSG' => WcGui::parseBbcode(
@@ -1531,5 +1434,4 @@ class WcRoom {
     }
 
 }
-
 ?>
