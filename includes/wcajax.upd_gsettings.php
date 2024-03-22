@@ -57,6 +57,10 @@
         $error = '- "Refresh Delay" must be an integer >= 1' . "\n";
     }
     
+    if(!is_writable(WcChat::$includeDirServer . 'settings.php')) {
+		$error .= 'Main settings file is not writable, either set it as writable, or update it manually.';
+	}
+    
     if(
         !ctype_digit(WcPgc::myPost('gs_refresh_delay_idle')) || 
         intval(WcPgc::myPost('gs_refresh_delay_idle')) < 0
