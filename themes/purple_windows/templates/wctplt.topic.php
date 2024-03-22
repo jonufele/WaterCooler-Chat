@@ -10,8 +10,14 @@ $templates['wcchat.topic'] = '
 </fieldset>';
 
 $templates['wcchat.topic.inner'] = '
-<legend>{CURRENT_ROOM}</legend>
+<legend>{PATH}{CURRENT_ROOM}</legend>
+<div id="subroom_icon_c">{SUBROOM_ICON}</div>
 <div id="wc_topic_box">{TOPIC}</div>';
+
+$templates['wcchat.topic.inner.subroom_icon'] = '
+<div style="float: right; margin: 0 0 0 10px" title="{TITLE}">
+	<a href="#" onclick="wc_toggle_msg_cont(\'wc_subrooms\'); return false"><img src="{INCLUDE_DIR_THEME}images/sroom{ICON}.png" style="width: 18px; height: auto" id="subroom_icon"></a><span style="font-size: 10px; vertical-align: top">{N}</span>
+</div>';
 
 $templates['wcchat.topic.box'] = '
 <div id="wc_topic_con">

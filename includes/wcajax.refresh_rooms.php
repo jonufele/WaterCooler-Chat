@@ -4,6 +4,6 @@
 
     if(!isset($this)) { die(); }
 
-    echo $this->room->getListChanges();
+    echo $this->room->getListChanges(WcPgc::myGet('forced'));
 
 ?>

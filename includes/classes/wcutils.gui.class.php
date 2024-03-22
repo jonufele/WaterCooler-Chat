@@ -82,8 +82,9 @@ class WcGui {
         $array = array(
             'global_sett', 'index', 'info', 'join',
             'login', 'main', 'posts', 'profile_sett',
-            'rooms', 'static_msg', 'text_input', 'themes',
-            'toolbar', 'topic', 'users'
+            'rooms', 'search', 'subrooms', 'static_msg', 
+            'text_input', 'themes', 'toolbar', 'topic', 
+            'users'
         );
         
         foreach($array as $value) {
@@ -195,9 +196,11 @@ class WcGui {
      * @return string Parsed Msg
      */
     public static function parseBbcode($data, $down_perm, $user_name, $msg_id = NULL) {
-    
+
         $search =
             array(
+                '/\[color\=([#0-9a-zA-Z]+)\](.*?)\[\/color\]/i',
+                '/\[quote\](.*?)\[\/quote\]([<br>]*)/i',
                 '/\[b\](.*?)\[\/b\]/i',
                 '/\[i\](.*?)\[\/i\]/i',
                 '/\[u\](.*?)\[\/u\]/i',
@@ -225,6 +228,8 @@ class WcGui {
 
         $replace =
             array(
+                '<span style="color: \\1">\\2</span>',
+                '<div style="max-height: 100px; overflow: auto; margin: 10px; padding: 10px; background-color: #e3e3ea; border: 1px dashed #ccccdd; color: #3a3a66;"><i>\\1</i></div>',
                 '<b>\\1</b>',
                 '<i>\\1</i>',
                 '<u>\\1</u>',
@@ -337,10 +342,10 @@ class WcGui {
      * @param string $data
      * @return string Parsed Data
      */
-    public static function parseLongMsg($data, $id) {
+    public static function parseLongMsg($data, $id, $no_crop = FALSE) {
         
         $string_len = strlen($data);
-        if($string_len > MAX_DATA_LEN && MAX_DATA_LEN > 0) {
+        if($string_len > MAX_DATA_LEN && MAX_DATA_LEN > 0 && !$no_crop) {
             $cropped = substr($data, 0, MAX_DATA_LEN);
             return WcGui::popTemplate(
                 'wcchat.posts.partial_content',

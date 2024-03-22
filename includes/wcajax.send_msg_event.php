@@ -7,7 +7,7 @@
     $msg = '';
     $target = NULL;
 
-    switch(WcPgc::myGet('t')) {
+    switch(WcPgc::myPost('t')) {
         case 'join':
             $msg = ' has joined the chat.';
         break;
@@ -34,7 +34,7 @@
         break;    
     }
 
-    if(WcPgc::myGet('t') && $msg) {
+    if(WcPgc::myPost('t') && $msg) {
         $towrite = WcFile::writeEvent(
             $this->user->name,
             $msg,

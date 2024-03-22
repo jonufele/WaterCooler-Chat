@@ -23,7 +23,7 @@ $templates['wcchat'] = '
         <div class="left_col">
             {TOPIC}
             {STATIC_MSG}
-            {POSTS}{GSETTINGS}{INFO}
+            {POSTS}{GSETTINGS}{INFO}{SEARCH}{SUBROOMS}
             {TOOLBAR}
             {TEXT_INPUT}
             {SETTINGS}

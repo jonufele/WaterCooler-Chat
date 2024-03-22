@@ -8,7 +8,7 @@
     if(!$this->user->hasPermission('ROOM_D')) { die(); }
     $changes = 0;
     $room_move = '';
-    $oname = WcPgc::myGet('oname');
+    $oname = WcPgc::myPost('oname');
     $enc = base64_encode($oname);
     
     // Room Name exists?
@@ -33,6 +33,23 @@
             $room_move = 'RMV';
         }
         $changes++;
+        
+        if(file_exists(WcChat::$roomDir . 'subrooms.txt')) {
+			$lines = $lines2 = explode("\n", trim(file_get_contents(WcChat::$roomDir . 'subrooms.txt')));
+			foreach($lines as $k => $v) {
+				if(
+					strpos($v, '[' . base64_encode($oname) . '|') !== FALSE || 
+					strpos($v, '|' . base64_encode($oname) . ']') !== FALSE
+				) {
+					unset($lines2[$k]);
+				}
+			}
+			WcFile::writeFile(
+				WcChat::$roomDir . 'subrooms.txt',
+				implode("\n", $lines2) . "\n",
+				'w'
+			);
+		}
     }
     
     if($changes) {

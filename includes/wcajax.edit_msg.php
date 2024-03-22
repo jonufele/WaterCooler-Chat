@@ -3,16 +3,16 @@
     if(!isset($this)) { die(); }
     
     if(
-        WcUtils::hasData(WcPgc::myGet('new_data')) && 
-        WcUtils::hasData(WcPgc::myGet('id'))
+        WcUtils::hasData(WcPgc::myPost('new_data')) && 
+        WcUtils::hasData(WcPgc::myPost('id'))
     ) {
 
         $new_id = base64_encode(time() . '-' . 
             $this->user->name) . '-' . 
-            WcPgc::myGet('id');
+            WcPgc::myPost('id');
 
         $post_owner = '';
-        $par = explode('|', str_replace('*', '', WcPgc::myGet('id')));
+        $par = explode('|', str_replace('*', '', WcPgc::myPost('id')));
         if(strpos($par[1], '-') !== FALSE) {
             $par2 = explode('-', $par[1]);
             $post_owner = base64_decode($par2[1]);
@@ -29,7 +29,7 @@
         $edit_permission = 
             (
                 $this->user->hasPermission('POST_E', 'skip_msg') && 
-                strpos($this->room->rawMsgList, WcPgc::myGet('id')) !== FALSE && 
+                strpos($this->room->rawMsgList, WcPgc::myPost('id')) !== FALSE && 
                 (
                     (
                         (time() < ($time + POST_EDIT_TIMEOUT) || POST_EDIT_TIMEOUT == 0) && 
@@ -42,13 +42,13 @@
             echo "ERROR: Cannot Edit post! Possible causes:\n- Access denied\n- Invalid Message Id\n- Expired Edit Timeout\n- The message was archived/discarded";
             die();
         }
-        
+ 
         $parsed_data =
             $new_id . '|' . str_replace(
-                "\n", 
-                '<br>', 
-                strip_tags(
-                    WcGui::parseBbcodeThumb(WcPgc::myGet('new_data'))    
+                array("\n", '$', '{', '}'), 
+                array('<br>', '&dollar;', '&#123;', '&#125;'), 
+                htmlentities(
+                    WcGui::parseBbcodeThumb(WcPgc::myPost('new_data'))    
                 )
             );
    
@@ -56,16 +56,16 @@
             MESSAGES_LOC,
             preg_replace(
                 '/^('.preg_quote(
-                    (WcUtils::hasData(WcPgc::myGet('tag')) ? WcPgc::myGet('tag') . '-' : '').
-                    WcPgc::myGet('id')
+                    (WcUtils::hasData(WcPgc::myPost('tag')) ? WcPgc::myPost('tag') . '-' : '').
+                    WcPgc::myPost('id')
                 ).')\|(.*)$/im', 
-                str_replace(array('$0', '$1'), array('\$0', '\$1'), $parsed_data), 
+                $parsed_data, 
                 $this->room->rawMsgList
             ),
             'w'
         );
         
-        $id_updated_msg = $this->user->name . '$' . str_replace('|', '$', WcPgc::myGet('id'));
+        $id_updated_msg = $this->user->name . '$' . str_replace('|', '$', WcPgc::myPost('id'));
         WcFile::writeFile(
             MESSAGES_UPDATED,
             str_replace(' ' . $id_updated_msg, '', $this->room->rawUpdatedMsgList) . 

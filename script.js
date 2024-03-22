@@ -104,7 +104,9 @@ function wc_upd_topic(c)
 {
     var http = getHTTPObject();
     var t = document.getElementById('wc_topic_txt').value;
-    http.open("GET", c+"mode=upd_topic&t="+encodeURIComponent(t), true);
+    var formData = new FormData();
+    formData.append('t', t);
+    http.open("POST", c+"mode=upd_topic", true);
     http.onreadystatechange=function(){if(http.readyState==4){
         if(http.responseText.length > 0) {
             document.getElementById('wc_topic').innerHTML = http.responseText;
@@ -114,7 +116,7 @@ function wc_upd_topic(c)
             alert('Nothing To Update!');
         }
     }}
-     http.send(null);
+     http.send(formData);
 }
 
 function wc_refresh_topic(c)
@@ -220,13 +222,24 @@ function wc_create_room(c)
 {
     var n = document.getElementById('wc_room_name').value;
     var http = getHTTPObject();
-    http.open("GET", c+"mode=create_room&n="+encodeURIComponent(n), true);
+    var formData = new FormData();
+    var subroom = document.getElementById('is_subroom');
+    formData.append('n', n);
+    if(subroom.checked) {
+		formData.append('subroom', 1);
+	} else {
+		formData.append('subroom', 0);
+	}
+    http.open("POST", c+"mode=create_room", true);
     http.onreadystatechange=function(){if(http.readyState==4){
         if(http.responseText.search("ERROR") != -1) { alert(wc_parse_error(http.responseText)); } else {
             document.getElementById('wc_room_list').innerHTML = http.responseText;
+            if(subroom.checked) {
+				wc_refresh_subrooms(c);
+			}
         }
     }}
-     http.send(null);
+     http.send(formData);
 }
 
 function wc_change_room(c, n, new_conv)
@@ -239,18 +252,23 @@ function wc_change_room(c, n, new_conv)
 
     if(conf) {
         var http = getHTTPObject();
-        http.open("GET", c+"mode=change_room&n="+encodeURIComponent(n), true);
+        var formData = new FormData();
+        formData.append('n', n);
+        http.open("POST", c+"mode=change_room", true);
         http.onreadystatechange=function(){if(http.readyState==4){
             if(http.responseText.indexOf('ERROR') == 0) {
                 alert(wc_parse_error(http.responseText));
             } else {
+				wc_close_open_cont();
+				wc_toggle('wc_msg_container');
                 document.getElementById('wc_room_list').innerHTML = http.responseText;
                 wc_refresh_msg_once(c, 'ALL', 0);
                 wc_refresh_topic(c);
                 wc_refresh_users(0, c, 0, 0, 'ignore_lastmod');
+                wc_refresh_subrooms(c);
             }
         }}
-        http.send(null);
+        http.send(formData);
     }
 }
 
@@ -268,10 +286,24 @@ function wc_refresh_rooms(c, forced)
         }
     }
      var http = getHTTPObject();
-    http.open("GET", c+"mode=refresh_rooms", true);
+    http.open("GET", c+"mode=refresh_rooms&forced=" + forced, true);
     http.onreadystatechange=function(){if(http.readyState==4){
         if(http.responseText.length > 0 && open == 0) {
             document.getElementById('wc_room_list').innerHTML = http.responseText;
+        }
+    }}
+    http.send(null);
+}
+
+function wc_refresh_subrooms(c)
+{
+    var http = getHTTPObject();
+    http.open("GET", c+"mode=refresh_subrooms", true);
+    http.onreadystatechange=function(){if(http.readyState==4){
+        if(http.responseText.length > 0) {
+			var p = http.responseText.split('____');
+			document.getElementById('wc_subrooms_inner').innerHTML = p[0];
+			document.getElementById('subroom_icon_c').innerHTML = p[1];
         }
     }}
     http.send(null);
@@ -284,11 +316,17 @@ function wc_upd_room(c, par) {
     formData.append('nname', document.getElementById('wc_nname_'+par).value);
     formData.append('perm', document.getElementById('wc_perm_'+par).value);
     formData.append('rperm', document.getElementById('wc_rperm_'+par).value);
+    if(document.getElementById('wc_sticky_'+par).checked) {
+        formData.append('sticky', 1);
+    } else {
+        formData.append('sticky', 0);
+    }
     var http = getHTTPObject();
     http.open("POST", c+"mode=upd_room", true);
     http.onreadystatechange=function(){if(http.readyState==4){
         if(http.responseText.length > 0) { alert(http.responseText); }
         wc_refresh_rooms(c, 'forced');
+        wc_refresh_subrooms(c);
     }}
      http.send(formData);
 }
@@ -298,7 +336,9 @@ function wc_del_room(c, par) {
     if(confirm('Are you sure you want to delete this room and all its messages?')) {
         var oname = document.getElementById('wc_oname_'+par).value;
         var http = getHTTPObject();
-        http.open("GET", c+"mode=del_room&oname="+encodeURIComponent(oname), true);
+        var formData = new FormData();
+        formData.append('oname', oname);
+        http.open("POST", c+"mode=del_room", true);
         http.onreadystatechange=function(){if(http.readyState==4){
             if(http.responseText.length > 0) {
                 if(http.responseText.search('RMV') != -1) {
@@ -306,6 +346,7 @@ function wc_del_room(c, par) {
                 } else {
                     alert(http.responseText);
                 }
+                wc_refresh_subrooms(c);
             }
             wc_refresh_rooms(c, 'forced');
             if(http.responseText.search('RMV') != -1) {
@@ -313,7 +354,7 @@ function wc_del_room(c, par) {
                 wc_refresh_msg_once(c, 'ALL', 0);
             }
         }}
-         http.send(null);
+         http.send(formData);
     }
 }
 
@@ -331,7 +372,9 @@ function wc_send_msg(c, refresh_delay, lim)
     var t = obj.value;
     obj.disabled = true;
     var isScrolledToBottom = objDiv.scrollHeight - objDiv.clientHeight <= objDiv.scrollTop + 1;
-    http.open("GET", c+"mode=send_msg&t="+encodeURIComponent(t), true);
+    var formData = new FormData();
+    formData.append('t', t);
+    http.open("POST", c+"mode=send_msg", true);
     http.onreadystatechange=function(){if(http.readyState==4){
         if(http.responseText.length > 0 && http.responseText.search("<div") != -1) {
             var cont = document.createElement("div");
@@ -348,7 +391,7 @@ function wc_send_msg(c, refresh_delay, lim)
         if(http.responseText.length > 0 && http.responseText.search("<div") == -1) { alert(http.responseText); }
         obj.focus();
     }}
-    http.send(null);
+    http.send(formData);
 }
 
 function wc_send_msg_event(c, t, refresh_delay)
@@ -356,7 +399,9 @@ function wc_send_msg_event(c, t, refresh_delay)
     var http = getHTTPObject();
     var objDiv = document.getElementById('wc_msg_container');
     var isScrolledToBottom = objDiv.scrollHeight - objDiv.clientHeight <= objDiv.scrollTop + 1;
-    http.open("GET", c+"mode=send_msg_event&t="+encodeURIComponent(t), true);
+    var formData = new FormData();
+    formData.append('t', t);
+    http.open("POST", c+"mode=send_msg_event", true);
     http.onreadystatechange=function(){if(http.readyState==4){
         if(http.responseText.length > 0) {
             var cont = document.createElement("div");
@@ -365,7 +410,7 @@ function wc_send_msg_event(c, t, refresh_delay)
         }
         if(isScrolledToBottom) { objDiv.scrollTop = objDiv.scrollHeight; }
     }}
-     http.send(null);
+     http.send(formData);
 }
 
 function wc_post(e, c, r, lim)
@@ -377,7 +422,9 @@ function wc_post(e, c, r, lim)
         e.preventDefault();
         var text_input = document.getElementById('wc_text_input_field');
         var http = getHTTPObject();
-        http.open("GET", c+"mode=name_autocomplete&hint="+encodeURIComponent(text_input.value), true);
+        var formData = new FormData();
+        formData.append('hint', text_input.value);
+        http.open("POST", c+"mode=name_autocomplete", true);
         http.onreadystatechange=function(){if(http.readyState==4){
             if(http.responseText.length > 0) {
                 text_input.value = text_input.value + http.responseText;
@@ -385,7 +432,7 @@ function wc_post(e, c, r, lim)
             }
             text_input.focus();
         }}
-         http.send(null);
+         http.send(formData);
     }
 }
 
@@ -397,9 +444,12 @@ function wc_poste(e, c, id, tag)
             var text_input = document.getElementById('editbox_cont_' + id);
             var loader = document.getElementById('edit_loader_' + id);
             loader.innerHTML = document.getElementById('wc_loader_img_c').innerHTML; 
-
+            var formData = new FormData();
+            formData.append('new_data', text_input.value);
+            formData.append('id', id);
+            formData.append('tag', tag);
             var http = getHTTPObject();
-            http.open("GET", c+"mode=edit_msg&new_data="+encodeURIComponent(text_input.value)+"&id=" + id + "&tag=" + tag, true);
+            http.open("POST", c+"mode=edit_msg", true);
             http.onreadystatechange=function(){if(http.readyState==4){
                 if(http.responseText.length > 0) {
                     if(http.responseText.search('ERROR') == -1) {
@@ -413,7 +463,7 @@ function wc_poste(e, c, id, tag)
                      loader.innerHTML = '';
                 }
             }}
-            http.send(null);
+            http.send(formData);
         }
     }
 }
@@ -528,7 +578,9 @@ function wc_show_older_msg(c, reset)
         cont = older_container.innerHTML;
         older_container.innerHTML = document.getElementById('wc_loader_img_c').innerHTML + cont;
         var http = getHTTPObject();
-        http.open("GET", c+"mode=refresh_msg&n="+encodeURIComponent(first_msg_id), true);
+        var formData = new FormData();
+        formData.append('n', first_msg_id);
+        http.open("POST", c+"mode=refresh_msg", true);
         http.onreadystatechange=function(){if(http.readyState==4){ 
             if(http.responseText.length > 0) {
                 older_container.innerHTML = http.responseText + cont;
@@ -536,7 +588,7 @@ function wc_show_older_msg(c, reset)
                 older_container.innerHTML = cont;
             }
         }}
-         http.send(null);
+         http.send(formData);
     }
 }
 
@@ -691,8 +743,10 @@ function wc_del_user(c, id, event)
     var conf = confirm('Are you sure you want to remove this user?\nThis action cannot be un-done!');
 
     if(conf) {
-         var http = getHTTPObject();
-        http.open("GET", c+"mode=del_user&id=" + encodeURIComponent(id), true);
+        var http = getHTTPObject();
+        var formData = new FormData();
+        formData.append('id', id);
+        http.open("POST", c+"mode=del_user", true);
         http.onreadystatechange=function(){if(http.readyState==4){
             if(http.responseText.length > 0) {
                 var s = http.responseText;
@@ -708,7 +762,7 @@ function wc_del_user(c, id, event)
                 alert(s);
             }
         }}
-        http.send(null);
+        http.send(formData);
     }
 }
 
@@ -912,7 +966,9 @@ function wc_join_chat(c, t, refresh_delay)
     var sett_input = document.getElementById('wc_settings_input');
     if(pass !== null) { 
         var http = getHTTPObject();
-        http.open("GET", c+"mode=cmp_pass&pass="+encodeURIComponent(pass.value), true);
+        var formData = new FormData();
+        formData.append('pass', pass.value);
+        http.open("POST", c+"mode=cmp_pass", true);
         http.onreadystatechange=function(){if(http.readyState==4){
             passok = http.responseText;
             if(passok == 1) {
@@ -921,7 +977,7 @@ function wc_join_chat(c, t, refresh_delay)
                 document.getElementById('wc_pass_err').innerHTML = 'Invalid Password!';
             }
         }}
-         http.send(null);
+         http.send(formData);
     } else {
         wc_refresh_users(1, c, 1, 0, 'ignore_lastmod');
         wc_send_msg_event(c, t, refresh_delay);
@@ -957,6 +1013,15 @@ function wc_parse_error(msg) {
 function wc_apply_theme(v, prefix, expire_days) {
     wc_setCookie('wc_theme', v, expire_days, prefix);
     location.reload();
+}
+
+function wc_toggle_drooms(c, prefix) {
+    var http = getHTTPObject();
+    http.open("GET", c+"mode=toggle_dead_rooms", true);
+    http.onreadystatechange=function(){if(http.readyState==4){
+        wc_refresh_rooms(c, 'forced');
+    }}
+    http.send(null);
 }
 
 function wc_clear_screen(c) {
@@ -1060,7 +1125,11 @@ function wc_toggle_msg(c, id, id_source, priv, prefix) {
     }
  
     if(conf || icon.src.search('arrow_r') != -1) {
-        http.open("GET", c+"mode=toggle_msg&id="+encodeURIComponent(id) + "&id_source=" + id_source + "&private=" + priv, true);
+        var formData = new FormData();
+        formData.append('id', id);
+        formData.append('id_source', id_source);
+        formData.append('private', priv);
+        http.open("POST", c+"mode=toggle_msg", true);
         http.onreadystatechange=function(){if(http.readyState==4){
             if(http.responseText.length > 0) {
                 if(http.responseText.indexOf('ERROR') == 0) {
@@ -1076,7 +1145,7 @@ function wc_toggle_msg(c, id, id_source, priv, prefix) {
             }
             wc_refresh_rooms(c, 'forced');
         }}
-         http.send(null);
+         http.send(formData);
      }
 }
 
@@ -1192,39 +1261,75 @@ function wc_toggle_input_line_mode() {
     wc_toggle('wc_multi_line_submit');
 }
 
+function wc_close_open_cont() {
+	info = document.getElementById('wc_info');
+    gsett = document.getElementById('wc_global_settings');
+    msg_cont = document.getElementById('wc_msg_container');
+    search = document.getElementById('wc_search');
+    subrooms = document.getElementById('wc_subrooms');
+    
+    if(gsett != null && gsett != undefined) {
+		if(gsett.className.search('closed') == -1) {
+			wc_toggle('wc_global_settings');
+		}
+	}
+	if(search.className.search('closed') == -1) {
+		wc_toggle('wc_search');
+	}
+	if(msg_cont.className.search('closed') == -1) {
+		wc_toggle('wc_msg_container');
+	}
+	if(info.className.search('closed') == -1) {
+		wc_toggle('wc_info');
+	}
+	if(subrooms.className.search('closed') == -1) {
+		wc_toggle('wc_subrooms');
+	}
+}
+
 function wc_toggle_msg_cont(target) {
     info = document.getElementById('wc_info');
     gsett = document.getElementById('wc_global_settings');
     msg_cont = document.getElementById('wc_msg_container');
+    search = document.getElementById('wc_search');
+    subrooms = document.getElementById('wc_subrooms');
     
     if(target == 'wc_info') {
         if(info.className.search('closed') != -1) {
-            if(gsett !== null) {
-                if(gsett.className.search('closed') == -1) {
-                    wc_toggle('wc_global_settings');
-                } else {
-                    wc_toggle('wc_msg_container');
-                }
-            } else {
-                wc_toggle('wc_msg_container');
-            }
+			wc_close_open_cont();
             wc_toggle('wc_info');    
         } else {
-            wc_toggle('wc_info');
+			wc_close_open_cont();
             wc_toggle('wc_msg_container');
         }
     }
     
-    if(target == 'wc_global_settings') {
+    if(target == 'wc_global_settings' && gsett != null && gsett != undefined) {
         if(gsett.className.search('closed') != -1) {
-            if(info.className.search('closed') == -1) {
-                wc_toggle('wc_info');
-            } else {
-                wc_toggle('wc_msg_container');
-            }
-            wc_toggle('wc_global_settings');    
-        } else {
+			wc_close_open_cont();
             wc_toggle('wc_global_settings');
+        } else {
+			wc_close_open_cont();
+            wc_toggle('wc_msg_container');
+        }
+    }
+    
+    if(target == 'wc_search') {
+        if(search.className.search('closed') != -1) {
+			wc_close_open_cont();
+            wc_toggle('wc_search');    
+        } else {
+			wc_close_open_cont();
+            wc_toggle('wc_msg_container');
+        }
+    }
+    
+    if(target == 'wc_subrooms') {
+        if(subrooms.className.search('closed') != -1) {
+			wc_close_open_cont();
+            wc_toggle('wc_subrooms');    
+        } else {
+			wc_close_open_cont();
             wc_toggle('wc_msg_container');
         }
     }
@@ -1245,4 +1350,28 @@ function wc_pop_vid(id, vid, w, h) {
     document.getElementById('wc_video_'+id).innerHTML = '<iframe width="'+w+'" height="'+h+'" src="https://www.youtube.com/embed/'+vid+'" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>';
     wc_toggle('im_'+id);
     wc_toggle('wc_video_'+id);
+}
+
+/*=================================
+ #           SEARCH               #
+ =================================*/
+
+function wc_search(c, event)
+{
+	event.preventDefault();
+    var formData = new FormData();
+    var http = getHTTPObject();
+    obj = document.getElementById('wc_search_res');
+    obj.innerHTML = '<div style="padding: 100px 0; text-align: center">' + document.getElementById('wc_loader_img_c').innerHTML + '</div>';
+    formData.append('key', document.getElementById('search_key').value);
+    http.open("POST", c+"mode=search", true);
+    http.onreadystatechange=function(){
+		if(http.readyState==4){
+        if(http.responseText.length > 0) {
+            obj.innerHTML = http.responseText;
+        } else {
+			obj.innerHTML = '<div style="padding: 100px 0; text-align: center">No results found!</div>';
+		}
+    }}
+    http.send(formData);
 }

@@ -18,8 +18,8 @@
             $_FILES['attach']['name']
         );
         
-        if(strlen($dest_name) > 13) {
-            $dest_name = substr($dest_name, strlen($dest_name) - 13, 13);
+        if(strlen($dest_name) > 30) {
+            //$dest_name = substr($dest_name, strlen($dest_name) - 30, 30);
         }
         
         // Destination path

@@ -7,7 +7,8 @@
     // Halt if no permission to create rooms
     if(!$this->user->hasPermission('ROOM_C')) { die(); }
 
-    $room_name = urldecode(WcPgc::myGet('n'));
+    $room_name = urldecode(WcPgc::myPost('n'));
+    $subroom = WcPgc::myPost('subroom');
     
     // Halt if name contains "pm_" (reserved for user pm rooms)
     if(strpos($room_name, 'pm_') !== FALSE) {
@@ -33,6 +34,13 @@
             self::$roomDir . 'topic_' . base64_encode($room_name) . '.txt', 
             ''
         );
+        if($subroom == '1') {
+			WcFile::writeFile(
+				self::$roomDir . 'subrooms.txt', 
+				'[' . base64_encode($room_name) . '|' . base64_encode(WcPgc::mySession('current_room')) . ']' . "\n",
+				'a'
+			);
+		}
         touch(ROOMS_LASTMOD);
         echo $this->room->parseList();
 

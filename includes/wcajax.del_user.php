@@ -3,7 +3,7 @@
     if(!isset($this)) { die(); }
 
     $output = '';
-    $oname = base64_decode(WcPgc::myGet('id'));
+    $oname = base64_decode(WcPgc::myPost('id'));
     
     // Halt if target is a Moderator and user is not current nor Master Moderator
     if(

@@ -10,6 +10,7 @@
     $nname = WcPgc::myPost('nname');
     $wperm = WcPgc::myPost('perm');
     $rperm = WcPgc::myPost('rperm');
+    $sticky = WcPgc::myPost('sticky');
     $enc = base64_encode($oname);
     
     // Get room definitions
@@ -17,13 +18,14 @@
     $changes = 0;
     
     // Update permissions if changed
-    if($room_def['wPerm'] != $wperm || $room_def['rPerm'] != $rperm) {
+    if($room_def['wPerm'] != $wperm || $room_def['rPerm'] != $rperm || $room_def['sticky'] != intval($sticky)) {
         WcFile::writeFile(
             self::$roomDir . 'def_' . $enc . '.txt',
             $this->room->parseDefString(
                 array(
                     'wPerm' => $wperm,
-                    'rPerm' => $rperm
+                    'rPerm' => $rperm,
+                    'sticky' => ((intval($sticky) > 0) ? 1 : 0)
                 ),
                 $room_def
             ),
@@ -90,6 +92,17 @@
             WcPgc::wcSetCookie('current_room', $nname);
         }
         $changes++;
+        
+        if(file_exists(WcChat::$roomDir . 'subrooms.txt')) {
+	        WcFile::writeFile(
+				WcChat::$roomDir . 'subrooms.txt',
+				str_replace(
+					array('[' . base64_encode($oname) . '|', '|' . base64_encode($oname) . ']'),
+					array('[' . base64_encode($nname) . '|', '|' . base64_encode($nname) . ']'),
+					WcFile::readFile(WcChat::$roomDir . 'subrooms.txt')
+				), 'w'
+	        );
+		}
     }
     if($changes) {
         echo 'Room ' . $oname . ' Successfully updated!';

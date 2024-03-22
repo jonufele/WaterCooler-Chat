@@ -4,9 +4,9 @@
 
     if(!isset($this)) { die(); }
 
-    $id = WcPgc::myGet('id');
+    $id = WcPgc::myPost('id');
     $id_hidden = str_replace('|', '*|', $id);
-    $id_source = WcPgc::myGet('id_source');
+    $id_source = WcPgc::myPost('id_source');
     $id_source_hidden = str_replace('|', '*|', $id_source);
     
     $action = $output = '';
@@ -57,7 +57,7 @@
                 );
             } else {
                 // If message is private, it's not necessary to hide to all users
-                if(WcPgc::myGet('private') == '1') {
+                if(WcPgc::myPost('private') == '1') {
                     echo 'ERROR: This message can only be seen by 1 user, not necessary to hide to all users.'; die();
                 }
                 WcFile::writeFile(

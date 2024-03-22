@@ -12,38 +12,53 @@ $templates['wcchat.rooms'] = '
     </div>
 </div>';
 
-$templates['wcchat.rooms.inner'] = '{ROOMS}{CREATE}';
+$templates['wcchat.rooms.inner'] = '{ROOMS}<div style="margin-top: 10px">{CREATE}{TOGGLE_DEAD}{SEARCH}</div>';
+
+$templates['wcchat.rooms.toggle_dead'] = '
+<a href="#" onclick="wc_toggle_drooms(\'{CALLER}\', \'{PREFIX}\'); return false" ><img src="{INCLUDE_DIR_THEME}images/room.png" style="width: 18px; margin-left: 5px" title="Toggle inactive rooms"></a>';
+
+$templates['wcchat.rooms.search'] = '
+<a href="#" onclick="wc_toggle_msg_cont(\'wc_search\'); return false"><img src="{INCLUDE_DIR_THEME}images/search.gif" style="vertical-align: top; position: relative; top: 2px; margin-left: 3px" title="Search"></a>';
 
 $templates['wcchat.rooms.create'] = '
-<div id="wc_room_create">
-    <a href="#" onclick="wc_toggle(\'wc_croom_box\'); return false;" class="create_link{OFF}" id="wc_create_link">Create New Room</a>
+<div id="wc_room_create" style="position: absolute">
     <div id="wc_croom_box" class="closed">
         <div class="form_box">
+			<div style="float:right; font-size: 10px"><a href="#" onclick="wc_toggle(\'wc_croom_box\'); return false">Close</a></div>
             Room Name: <input type="text" id="wc_room_name" value=""> <input type="submit" value="create" onclick="wc_create_room(\'{CALLER}\')">
+			<div style="float:right; font-size: 10px"><input type="checkbox" value="1" id="is_subroom"> Sub-room</div>
         </div>
     </div>
-</div>';
+</div>
+<a href="#" onclick="wc_toggle(\'wc_croom_box\'); return false;" class="create_link{OFF}" id="wc_create_link"><img src="{INCLUDE_DIR_THEME}images/nroom.png" style="width: 18px" title="Create new room"></a>';
 
 $templates['wcchat.rooms.current_room'] = '
-<div class="current room_item">
-    {NEW_MSG} {TITLE}{EDIT_BT}
+<div class="current room_item" style="{STYLE}">
+    {ARROW}{NEW_MSG} {TITLE}{STICKY}{EDIT_BT}
 </div>
 {FORM}';
 
 $templates['wcchat.rooms.room'] = '
-<div class="room_item">
-    {NEW_MSG} <a href="#" onclick="wc_change_room(\'{CALLER}\', this.innerHTML, 0); return false;">{TITLE}</a>
+<div class="room_item" style="{STYLE}">
+    {ARROW}{NEW_MSG} <a href="#" onclick="wc_change_room(\'{CALLER}\', this.innerHTML, 0); return false;">{TITLE}</a>{STICKY}
     {EDIT_BT}
 </div>
 {FORM}';
+
+$templates['wcchat.rooms.sticky'] = '<img src="{INCLUDE_DIR_THEME}images/sticky.png" title="Room has new messages" style="width: 12px; height: auto; margin: 0 0 0 2px">';
 
 $templates['wcchat.rooms.new_msg.on'] = '<img src="{INCLUDE_DIR_THEME}images/nmsg.png" title="Room has new messages">';
 
 $templates['wcchat.rooms.new_msg.off'] = '<img src="{INCLUDE_DIR_THEME}images/nmsg_off.png" title="No new messages">';
 
+$templates['wcchat.rooms.new_msg.ons'] = '<img src="{INCLUDE_DIR_THEME}images/nmsgs.png" title="Room has new messages">';
+
+$templates['wcchat.rooms.new_msg.offs'] = '<img src="{INCLUDE_DIR_THEME}images/nmsg_offs.png" title="No new messages">';
+
 $templates['wcchat.rooms.edit_form'] = '
 <div id="wc_edt_{ID}" class="closed">
     <div class="form_box">
+		<a href="#" style="float: right; font-size: 10px" onclick="wc_toggle(\'wc_edt_{ID}\'); return false;">Close</a>
         <div>
             Name:<br>
             <input type="text" id="wc_nname_{ID}" value="{ROOM_NAME}">
@@ -68,6 +83,7 @@ $templates['wcchat.rooms.edit_form'] = '
                 <option value="4"{SEL24}>User</option>
             </select>
         </div>
+        <div><input type="checkbox" id="wc_sticky_{ID}" value="1" {CKD}> Sticky</div>
         <input type="submit" value="Update" onclick="wc_upd_room(\'{CALLER}\', \'{ID}\')"> {DELETE_BT}
     </div>
 </div>';

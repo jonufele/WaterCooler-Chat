@@ -128,12 +128,27 @@ $templates['wcchat.global_settings'] = '
             </div>
         </fieldset>
         <fieldset>
+			<legend>SEARCH</legend>
+			<div>
+                Limit per room: <input type="text" id="gs_search_room_limit" value="{GS_SEARCH_ROOM_LIMIT}" class="gsett"><br>
+                <span>Maximum numer of results per room.</span>
+            </div>
+            <div>
+                Display Limit: <input type="text" id="gs_search_limit" value="{GS_SEARCH_LIMIT}" class="gsett"><br>
+                <span>Maximum number of results to display.</span>
+            </div>
+        </fieldset>
+        <fieldset>
             <legend>DEFAULT ROOM AND THEME</legend>
             <div>
                 Default Room: <input type="text" id="gs_default_room" value="{GS_DEFAULT_ROOM}" class="gsett">
             </div>
             <div>
                 Default Theme: <input type="text" id="gs_default_theme" value="{GS_DEFAULT_THEME}" class="gsett">
+            </div>
+            <div>
+                Room inactive period: <input type="text" id="gs_inactive_room_min" value="{GS_INACTIVE_ROOM_MIN}" class="gsett">s<br>
+                <span>Min. number of time to consider a room inactive.</span>
             </div>
         </fieldset>
         <fieldset>
@@ -378,6 +393,14 @@ $templates['wcchat.global_settings'] = '
                         Guest<br>
                         <span>(Not Logged-in)</span>
                     </td>
+                </tr>
+                <tr>
+                    <td><img src="{INCLUDE_DIR_THEME}images/arrow.png"> Search</td>
+                    <td class="check"><input type="checkbox" value="1" id="mmod_search"{GS_MMOD_SEARCH} class="gsett"></td>
+                    <td class="check"><input type="checkbox" value="1" id="mod_search"{GS_MOD_SEARCH} class="gsett"></td>
+                    <td class="check"><input type="checkbox" value="1" id="cuser_search"{GS_CUSER_SEARCH} class="gsett"></td>
+                    <td class="check"><input type="checkbox" value="1" id="user_search"{GS_USER_SEARCH} class="gsett"></td>
+                    <td class="check"><input type="checkbox" value="1" id="guest_search"{GS_GUEST_SEARCH} class="gsett"></td>
                 </tr>
                 <tr>
                     <td><img src="{INCLUDE_DIR_THEME}images/arrow.png"> Login</td>
