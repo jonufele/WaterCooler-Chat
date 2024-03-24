@@ -35,7 +35,7 @@
                         );
                         echo 'Successfully ignored ' . $par[1];
                     } else {
-                        echo 'User ' . $par1 . ' does not exist.';
+                        echo 'User ' . $par[1] . ' does not exist.';
                     }
                 break;
                 
@@ -69,7 +69,7 @@
                 $muted_msg = 'You have been set as mute'.
                     (
                         $this->user->isMuted ? 
-                        ' (' . WcTime::parseIdle($this->user->isMuted, 1) . ' remaining)' : 
+                        ' (' . WcTime::parseIdle($this->user->isMuted, '1') . ' remaining)' : 
                         ''
                     ) . ', you cannot talk for the time being!'
                 ;
@@ -181,8 +181,8 @@
                         $archive = str_replace(
                             '.txt', 
                             '.' . $this->room->def['lArchVol'], 
-                            str_replace(basename(
-                                MESSAGES_LOC), 
+                            str_replace(
+								basename(MESSAGES_LOC), 
                                 'archived/' . basename(MESSAGES_LOC),
                                 MESSAGES_LOC
                             )
@@ -195,8 +195,8 @@
                             $archive = str_replace(
                                 '.txt', 
                                 '.' . $this->room->def['lArchVol'], 
-                                str_replace(basename(
-                                    MESSAGES_LOC), 
+                                str_replace(
+									basename(MESSAGES_LOC), 
                                     'archived/' . basename(MESSAGES_LOC),
                                     MESSAGES_LOC
                                 )
@@ -233,10 +233,10 @@
                     0, 
                     'SEND'
                 );
-                WcPgc::wcSetSession('lastpost', time());
+                WcPgc::wcSetSession('lastpost', (string)time());
                 echo $output;
             } else {
-                echo ($banned_msg ? $banned_msg : $muted_msg);
+                echo ($banned_msg ?: $muted_msg);
             }
         }
     }

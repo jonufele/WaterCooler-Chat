@@ -11,7 +11,7 @@
             0,
             'RETRIEVE',
             NULL,
-            'RELOAD_MSG'
+            TRUE
         );
         
         sleep(1);

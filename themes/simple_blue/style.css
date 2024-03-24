@@ -76,12 +76,33 @@ H1 {
     float: right;
 }
 
-#wcchat .right_col .separator {
+#mobscreen_icon {
+	display: none;
+}
+
+@media screen and (max-width: 890px){
+	#wcchat .left_col {
+		margin-left: 10px;
+		margin-right: 10px;
+	}
+	#wcchat .right_col {
+		display: none;
+	}
+	#mobscreen_icon {
+		display: inline-block;
+	}
+}
+
+#wcchat .right_col .separator, #wcchat #wc_mobrooms .separator {
     border-bottom: 1px dotted #718099;
     margin-top: 10px;
     margin-bottom: 10px;
     font-size: 9px;
     text-align: right;
+}
+
+#wc_mobrooms {
+	padding: 0 100px;
 }
 
 #wcchat .critical_error {
@@ -739,7 +760,7 @@ H1 {
 #wcchat #wc_ulist {
     padding: 5px;
     margin-bottom: 10px;
-    height: 400px;
+    height: 200px;
     overflow: auto;
 }
 
@@ -898,7 +919,7 @@ H1 {
 /*--------------------------------------*/
 
 #wcchat #wc_rooms {
-    padding: 5px;
+    padding: 5px 15px;
 }
 
 #wc_rooms .current {

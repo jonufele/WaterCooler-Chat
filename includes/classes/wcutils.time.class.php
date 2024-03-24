@@ -13,10 +13,8 @@ class WcTime {
      * Retrieves default catchWindow (window of time to catch events/pings)
      * 
      * @since 1.1
-     * @param string $forced_idle
-     * @return int
      */
-    public static function getCatchWindow() {         
+    public static function getCatchWindow() : int {         
     
         return 
         (
@@ -31,13 +29,12 @@ class WcTime {
      * Gets microtime (If not available uses time() instead)
      * 
      * @since 1.4
-     * @return int
      */
-    public static function parseMicroTime() {
+    public static function parseMicroTime() : int|float {
 
         if (function_exists('microtime')) {
             list($ms, $s) = explode(' ', microtime());
-            return ($s+$ms);
+            return ((int)$s + (float)$ms);
         } else {
             return time();
         }
@@ -47,9 +44,8 @@ class WcTime {
      * Gets filemtime with clean cache
      * 
      * @since 1.4
-     * @return int
      */
-    public static function parseFileMTime($file) {
+    public static function parseFileMTime(string $file) : int {
         // Be sure to call "clearstatcache()" before calling this function
         // in case the file's modification time is modfified more than once
         // during a single page execution
@@ -60,16 +56,15 @@ class WcTime {
      * Parses the difference between two timestamps into a user-friendly string
      * 
      * @since 1.1
-     * @param string $date
-     * @param string|null $mode
-     * @return string
      */
-    public static function parseIdle($date, $mode = NULL) {
+    public static function parseIdle(
+        int $date, string $mode = NULL
+    ) : string {
     
         if($mode == NULL) {
-            $it = $timesec = time()-$date;
+            $it = $timesec = (time()-$date);
         } else {
-            $it = $timesec = $date-time();
+            $it = $timesec = ($date-time());
         }
 
         $str = '';
@@ -77,27 +72,27 @@ class WcTime {
 
         $year = intval($timesec/$ys);
         if($year >= 1) {
-            $timesec = $timesec%$ys;
+            $timesec %= $ys;
         }
 
         $month = intval($timesec/2628000);
         if($month >= 1) {
-            $timesec = $timesec%2628000;
+            $timesec %= 2628000;
         }
     
         $days = intval($timesec/86400);
         if($days >= 1) {
-            $timesec = $timesec%86400;
+            $timesec %= 86400;
         }
 
         $hours = intval($timesec/3600);
         if($hours >= 1) {
-            $timesec = $timesec%3600;
+            $timesec %= 3600;
         }
 
         $minutes = intval($timesec/60);
         if($minutes >= 1) {
-            $timesec = $timesec%60;
+            $timesec %= 60;
         }
 
         $par_count = 0;
@@ -126,18 +121,17 @@ class WcTime {
             $str = $it . 's';
         }
 
-        return(trim($str));
+        return trim($str);
     }
     
     /**
      * Stores/Retrieves a Last Read point
      * 
      * @since 1.1
-     * @param string $mode
-     * @param string|null $sufix Tied to the current room if not specified
-     * @return void|int
      */
-    public static function handleLastRead($mode, $sufix = NULL) {
+    public static function handleLastRead(
+        string $mode, string $sufix = NULL
+    ) : int|bool {
 
         $id = 'lastread' . 
             (
@@ -148,16 +142,17 @@ class WcTime {
             
         switch($mode) {
             case 'store':
-                WcPgc::wcSetSession($id, self::parseMicroTime());
-                WcPgc::wcSetCookie($id, self::parseMicroTime());
+                WcPgc::wcSetSession($id, (string)self::parseMicroTime());
+                WcPgc::wcSetCookie($id, (string)self::parseMicroTime());
             break;
             case 'read':
                 if(WcPgc::myCookie($id) && !WcPgc::mySession($id)) {
                     WcPgc::wcSetSession($id, WcPgc::myCookie($id));
                 }
-                return WcPgc::mySession($id);
+                return (int)WcPgc::mySession($id);
             break;
         }
+        return false;
     }
 
 }

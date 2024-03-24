@@ -74,6 +74,18 @@
             );
         }
         
+        // Rename all archives
+        foreach(glob(self::$roomDir . 'archived/' . $enc . '.*') as $file) {
+            rename(
+                $file, 
+                str_replace(
+                    '/' . $enc . '.', 
+                    '/' . base64_encode($nname) . '.',
+                    $file
+                )
+            );
+        }
+        
         // If the renamed room is the default, rename in settings as well
         if(trim($oname) == trim(DEFAULT_ROOM)) {
             file_put_contents(
@@ -94,15 +106,15 @@
         $changes++;
         
         if(file_exists(WcChat::$roomDir . 'subrooms.txt')) {
-	        WcFile::writeFile(
-				WcChat::$roomDir . 'subrooms.txt',
-				str_replace(
-					array('[' . base64_encode($oname) . '|', '|' . base64_encode($oname) . ']'),
-					array('[' . base64_encode($nname) . '|', '|' . base64_encode($nname) . ']'),
-					WcFile::readFile(WcChat::$roomDir . 'subrooms.txt')
-				), 'w'
-	        );
-		}
+            WcFile::writeFile(
+                WcChat::$roomDir . 'subrooms.txt',
+                str_replace(
+                    array('[' . base64_encode($oname) . '|', '|' . base64_encode($oname) . ']'),
+                    array('[' . base64_encode($nname) . '|', '|' . base64_encode($nname) . ']'),
+                    WcFile::readFile(WcChat::$roomDir . 'subrooms.txt')
+                ), 'w'
+            );
+        }
     }
     if($changes) {
         echo 'Room ' . $oname . ' Successfully updated!';

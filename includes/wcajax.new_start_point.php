@@ -6,7 +6,7 @@
 
     WcPgc::wcSetCookie(
         'start_point_' . WcPgc::mySession('current_room'), 
-        time()
+        (string)time()
     );
 
 ?>

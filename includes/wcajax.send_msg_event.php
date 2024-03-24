@@ -39,7 +39,7 @@
             $this->user->name,
             $msg,
             $target, 
-            'RETURN_RAW_LINE'
+            TRUE
         );
         $output = $this->room->parseMsgE(
             array(trim($towrite)), 

@@ -11,6 +11,7 @@ if(!$this->user->hasPermission('SEARCH', 'skip_msg')) {
 }
 
 foreach(glob(WcChat::$roomDir .'*.txt') as $file) {
+	
 	if($i >= SEARCH_LIMIT) {
 		break;
 	}
@@ -19,11 +20,19 @@ foreach(glob(WcChat::$roomDir .'*.txt') as $file) {
 	$raw_name = base64_decode(str_replace(
 			array(WcChat::$roomDir, '.txt'), '', $file
 		));
+		
 	if(
+		stripos($file,'subrooms.txt') !== FALSE || 
 		stripos($raw_name, 'pm_') !== FALSE || 
 		stripos($file, 'def_') !== FALSE || 
 		stripos($file, 'topic_') !== FALSE || 
-		stripos($file, 'updated_') !== FALSE || 
+		stripos($file, 'updated_') !== FALSE
+	) {
+		continue;
+	}
+	
+	// Keep this line after the the above verification or it'll generate errors
+	if(
 		!$this->room->hasPermission($raw_name, 'R')
 	) { continue; }
     $str = trim(file_get_contents($file));
@@ -46,13 +55,14 @@ foreach(glob(WcChat::$roomDir .'*.txt') as $file) {
         }
         if(count($a) > 0) {
 			list($output, $index, $first_elem) =
-				$this->room->parseMsg($a, 0, 'ALL', 'beginning', NULL, TRUE);
+				$this->room->parseMsg($a, 0, 'ALL', 'beginning', FALSE, TRUE);
 			$all[$raw_name] = 
 			'<div style="text-align: center; border-bottom: 1px solid #888888; padding-bottom: 2px"><b>'.$raw_name.'</b> ('.substr_count(strtolower($str), strtolower(WcPgc::myPost('key'))).')</div>' . 
 			$output;
 		}
     }
 }
+
 foreach(glob(WcChat::$roomDir . 'archived/*.*') as $file) {
 	if($i >= SEARCH_LIMIT) {
 		break;
@@ -90,7 +100,7 @@ foreach(glob(WcChat::$roomDir . 'archived/*.*') as $file) {
         }
         if(count($a)) {
 			list($output, $index, $first_elem) =
-				$this->room->parseMsg($a, 0, 'ALL', 'beginning', NULL, TRUE);
+				$this->room->parseMsg($a, 0, 'ALL', 'beginning', FALSE, TRUE);
 			$all[$raw_name_full] = 
 			'<div style="text-align: center; border-bottom: 1px solid #888888; padding-bottom: 2px"><b>'.$raw_name_full.'</b> ('.substr_count(strtolower($str), strtolower(WcPgc::myPost('key'))).')</div>' . 
 			$output;

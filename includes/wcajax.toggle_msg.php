@@ -24,7 +24,7 @@
         if(!$this->user->hasPermission('MSG_HIDE', 'skip_msg') || 
             WcPgc::myCookie('hide_edit') == 1
         ) {
-            if(WcPgc::myCookie($cookie_name, 'BOOL')) {
+            if(WcPgc::myCookie($cookie_name, TRUE)) {
                 WcPgc::wcUnsetCookie($cookie_name);
                 preg_match_all(
                     '/^' . preg_quote($id_source) . '\|(.*)$/im', 
@@ -37,13 +37,13 @@
                     $this->user->name
                 );
             } else { 
-                WcPgc::wcSetCookie($cookie_name, 1);
+                WcPgc::wcSetCookie($cookie_name, '1');
                 echo WcGui::popTemplate('wcchat.posts.hidden', array('ID' => $id));
             }
             $soft_mode = TRUE;
         } else {
             // If cookie exists, ignore hard mode, undo soft mode first
-            if(WcPgc::myCookie($cookie_name, 'BOOL')) {
+            if(WcPgc::myCookie($cookie_name, TRUE)) {
                 WcPgc::wcUnsetCookie($cookie_name);
                 preg_match_all(
                     '/^' . preg_quote($id_source) . '\|(.*)$/im', 
@@ -117,7 +117,7 @@
                 MESSAGES_UPDATED, 
                 str_replace(' ' . $id, '', $this->room->rawUpdatedMsgList), 
                 'w', 
-                'allow_empty'
+                TRUE
             );
         }
     }

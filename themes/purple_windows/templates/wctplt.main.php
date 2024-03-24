@@ -24,6 +24,11 @@ $templates['wcchat'] = '
             {TOPIC}
             {STATIC_MSG}
             {POSTS}{GSETTINGS}{INFO}{SEARCH}{SUBROOMS}
+            <div id="wc_mobrooms" class="closed">
+				{ROOM_LIST_M}
+				{USER_LIST_M}
+				{THEMES}
+			</div>
             {TOOLBAR}
             {TEXT_INPUT}
             {SETTINGS}

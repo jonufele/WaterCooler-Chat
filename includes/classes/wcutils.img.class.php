@@ -13,34 +13,34 @@ class WcImg {
      * Initializes an image resource
      * 
      * @since 1.4
-     * @param string $original_image Image URL Address
-     * @return resource|bool
      */
-    public static function initImg($original_image) {
+    public static function initImg(
+        string $original_image
+    ) : GdImage|bool {
 
         $source_image = '';
         if(!function_exists('gd_info')) { return FALSE; }
 
-		// Try to use the faster exif_imagetype function if it exists
-		if (function_exists('exif_imagetype')) {
-			$type = exif_imagetype($original_image);
+        // Try to use the faster exif_imagetype function if it exists
+        if (function_exists('exif_imagetype')) {
+            $type = exif_imagetype($original_image);
 
-			if ($type === false) {
-				// Handle the case where exif_imagetype couldn't determine the image type
-				// You can set a default image type or handle the error as needed
-				$type = IMAGETYPE_UNKNOWN; // Replace with the appropriate default type
-			}
-		} else {
-			$tmp = @getimagesize($original_image);
+            if ($type === false) {
+                // Handle the case where exif_imagetype couldn't determine the image type
+                // You can set a default image type or handle the error as needed
+                $type = IMAGETYPE_UNKNOWN; // Replace with the appropriate default type
+            }
+        } else {
+            $tmp = @getimagesize($original_image);
 
-			if ($tmp !== false) {
-				$type = $tmp[2];
-			} else {
-				// Handle the case where getimagesize couldn't retrieve image information
-				// You can set a default image type or handle the error as needed
-				$type = IMAGETYPE_UNKNOWN; // Replace with the appropriate default type
-			}
-		}
+            if ($tmp !== false) {
+                $type = $tmp[2];
+            } else {
+                // Handle the case where getimagesize couldn't retrieve image information
+                // You can set a default image type or handle the error as needed
+                $type = IMAGETYPE_UNKNOWN; // Replace with the appropriate default type
+            }
+        }
 
         // Create the image resource
         if($type == 1) {
@@ -63,18 +63,18 @@ class WcImg {
     }
 
     /**
-     * Corverts simple BBCODE image tags to enhanced tags with the image details, generates thumbnails if necessary/possible
+     * Corverts simple BBCODE image tags to enhanced tags with the image details, 
+     * generates thumbnails if necessary/possible
      * 
      * @since 1.1
-     * @param string $s User Post
-     * @param string|null $attach Specifies If It Must Be Treated As An Attachment
-     * @return string
      */
-    public static function parseImg($s, $attach = NULL) {
+    public static function parseImg(
+        array|string $s, bool $attach = FALSE
+    ) : string {
 
         $source = (is_array($s) ? $s[1] : $s);
         $source_tag = (
-            ($attach === NULL) ? 
+            ($attach === FALSE) ? 
             $source : 
             str_replace(WcChat::$includeDirServer . 'files/attachments/', '', $source)
         );
@@ -117,7 +117,7 @@ class WcImg {
                     ) {
                         return 
                             '[IMG' . 
-                                ($attach !== NULL ? 'A' : '') . '|' . 
+                                ($attach !== FALSE ? 'A' : '') . '|' . 
                                 $w . 'x' . $h . '|' . $nw . 'x' . $nh . 
                                 '|tn_' . strtoupper(dechex(crc32($iname))) . 
                             '|]' . 
@@ -127,7 +127,7 @@ class WcImg {
                     } else {
                         return 
                             '[IMG' . 
-                                ($attach !== NULL ? 'A' : '') . '|' . 
+                                ($attach !== FALSE ? 'A' : '') . '|' . 
                                 $w . 'x' . $h . '|' . $nw . 'x' . $nh . 
                             '|]' . 
                                 $source_tag . 
@@ -136,7 +136,7 @@ class WcImg {
                 } else {
                     return 
                         '[IMG' . 
-                            ($attach !== NULL ? 'A' : '') . '|' . 
+                            ($attach !== FALSE ? 'A' : '') . '|' . 
                             $w . 'x' . $h . '|' . $nw . 'x' . $nh . 
                         '|]' . 
                             $source_tag . 
@@ -144,7 +144,7 @@ class WcImg {
                 }
             } else {
                 return '[IMG' . 
-                        ($attach !== NULL ? 'A' : '') . '|' . 
+                        ($attach !== FALSE ? 'A' : '') . '|' . 
                         $w . 'x' . $h . '|' . $w . 'x' . $h . 
                         '|]' . 
                         $source_tag . 
@@ -159,17 +159,15 @@ class WcImg {
      * Generates thumbnails for youtube videos
      * 
      * @since 1.4
-     * @param string $s Video url parameters
-     * @return string
      */
-    public static function parseVideoImg($s) {
-        $image = self::initImg('https://img.youtube.com/vi/'.$s[1].'/0.jpg');
+    public static function parseVideoImg(array $s) : string {
+        $image = self::initImg('https://img.youtube.com/vi/'.$s[3].'/0.jpg');
         
         if($image) {
             $w = imagesx($image);
             $h = imagesy($image);
             
-            $target = 'files/thumb/tn_youtube_' . $s[1] . '.jpg';
+            $target = 'files/thumb/tn_youtube_' . $s[3] . '.jpg';
             
             if(
                 $w > 0 && $h > 0
@@ -183,7 +181,7 @@ class WcImg {
                         IMAGE_MAX_DSP_DIM
                     )
                 ) {
-                    return '[YOUTUBE]'.$s[1].'[/YOUTUBE]';
+                    return '[YOUTUBE]'.$s[3].'[/YOUTUBE]';
                 }
             }
         }
@@ -194,19 +192,11 @@ class WcImg {
      * Generates a normal thumbnail
      * 
      * @since 1.3
-     * @param string $original_image Path
-     * @param resource $source_image
-     * @param int $w Image Width
-     * @param int $h Image Height
-     * @param string $target_image
-     * @param int $thumbsize
-     * @return bool
      */
     public static function thumbnailCreateMed (
-        $source_image, $w, $h, $target_image,
-        $thumbsize
-    )
-    {
+        GdImage $source_image, int $w, int $h, string $target_image,
+        int $thumbsize
+    ) : bool {
         if(!$source_image || !function_exists('gd_info')) { return FALSE; }
 
         // If at least one dimension is bigger than thumbnail, calculate resized dimensions
@@ -245,12 +235,10 @@ class WcImg {
      * Generates a cropped square thumbnail
      * 
      * @since 1.1
-     * @param string $original_image Path
-     * @param string $target_image
-     * @param int $thumbsize
-     * @return bool
      */
-    public static function thumbnailCreateCr ($original_image, $target_image, $thumbsize) {
+    public static function thumbnailCreateCr (
+        string $original_image, string $target_image, int $thumbsize
+    ) : bool {
 
         $source_image = self::initImg($original_image);
 

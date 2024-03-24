@@ -218,12 +218,12 @@ function wc_attach_upl(c, event)
  #             ROOMS              #
  =================================*/
 
-function wc_create_room(c)
+function wc_create_room(c, mob)
 {
-    var n = document.getElementById('wc_room_name').value;
+    var n = document.getElementById('wc_room_name' + mob).value;
     var http = getHTTPObject();
     var formData = new FormData();
-    var subroom = document.getElementById('is_subroom');
+    var subroom = document.getElementById('is_subroom' + mob);
     formData.append('n', n);
     if(subroom.checked) {
 		formData.append('subroom', 1);
@@ -233,7 +233,8 @@ function wc_create_room(c)
     http.open("POST", c+"mode=create_room", true);
     http.onreadystatechange=function(){if(http.readyState==4){
         if(http.responseText.search("ERROR") != -1) { alert(wc_parse_error(http.responseText)); } else {
-            document.getElementById('wc_room_list').innerHTML = http.responseText;
+            document.getElementById('wc_room_list' + mob).innerHTML = 
+				http.responseText.replace(/{MOB}/g, mob);
             if(subroom.checked) {
 				wc_refresh_subrooms(c);
 			}
@@ -261,7 +262,8 @@ function wc_change_room(c, n, new_conv)
             } else {
 				wc_close_open_cont();
 				wc_toggle('wc_msg_container');
-                document.getElementById('wc_room_list').innerHTML = http.responseText;
+                document.getElementById('wc_room_list').innerHTML = 
+					http.responseText.replace(/{MOB}/g, '');
                 wc_refresh_msg_once(c, 'ALL', 0);
                 wc_refresh_topic(c);
                 wc_refresh_users(0, c, 0, 0, 'ignore_lastmod');
@@ -289,7 +291,10 @@ function wc_refresh_rooms(c, forced)
     http.open("GET", c+"mode=refresh_rooms&forced=" + forced, true);
     http.onreadystatechange=function(){if(http.readyState==4){
         if(http.responseText.length > 0 && open == 0) {
-            document.getElementById('wc_room_list').innerHTML = http.responseText;
+            document.getElementById('wc_room_list').innerHTML = 
+				http.responseText.replace(/{MOB}/g, '');
+            document.getElementById('wc_room_list_m').innerHTML = 
+				http.responseText.replace(/{MOB}/g, '_m');
         }
     }}
     http.send(null);
@@ -302,7 +307,7 @@ function wc_refresh_subrooms(c)
     http.onreadystatechange=function(){if(http.readyState==4){
         if(http.responseText.length > 0) {
 			var p = http.responseText.split('____');
-			document.getElementById('wc_subrooms_inner').innerHTML = p[0];
+			document.getElementById('wc_subrooms_inner').innerHTML = p[0].replace(/{MOB}/g, '');
 			document.getElementById('subroom_icon_c').innerHTML = p[1];
         }
     }}
@@ -608,7 +613,7 @@ function wc_refresh_components(c, incdir, lim) {
             }
     
             if(arr[0].length > 0 && open == 0) {
-                    document.getElementById('wc_ulist').innerHTML = arr[0];
+                    document.getElementById('wc_ulist').innerHTML = arr[0].replace(/{MOB}/g, '');
             }
     
             if(arr[1].length > 0 && document.getElementById('wc_topic_editbox').className == 'closed') {
@@ -712,10 +717,12 @@ function wc_refresh_users(n, c, j, visit, ilmod)
     http.open("GET", c+"mode=refresh_users&new="+n+"&join="+j+"&ilmod="+ilmod+"&visit="+visit, true);
     http.onreadystatechange=function(){if(http.readyState==4){
         if(ilmod == 'ignore_lastmod') {
-            document.getElementById('wc_ulist').innerHTML = http.responseText;
+            document.getElementById('wc_ulist').innerHTML = 
+				http.responseText.replace(/{MOB}/g, '');
         } else {
             if(http.responseText.length > 0) { 
-                document.getElementById('wc_ulist').innerHTML = http.responseText;
+                document.getElementById('wc_ulist').innerHTML = 
+					http.responseText.replace(/{MOB}/g, '');
             }
         }
     }}
@@ -1267,6 +1274,7 @@ function wc_close_open_cont() {
     msg_cont = document.getElementById('wc_msg_container');
     search = document.getElementById('wc_search');
     subrooms = document.getElementById('wc_subrooms');
+    mobrooms = document.getElementById('wc_mobrooms');
     
     if(gsett != null && gsett != undefined) {
 		if(gsett.className.search('closed') == -1) {
@@ -1285,6 +1293,9 @@ function wc_close_open_cont() {
 	if(subrooms.className.search('closed') == -1) {
 		wc_toggle('wc_subrooms');
 	}
+	if(mobrooms.className.search('closed') == -1) {
+		wc_toggle('wc_mobrooms');
+	}
 }
 
 function wc_toggle_msg_cont(target) {
@@ -1293,6 +1304,7 @@ function wc_toggle_msg_cont(target) {
     msg_cont = document.getElementById('wc_msg_container');
     search = document.getElementById('wc_search');
     subrooms = document.getElementById('wc_subrooms');
+    mobrooms = document.getElementById('wc_mobrooms');
     
     if(target == 'wc_info') {
         if(info.className.search('closed') != -1) {
@@ -1328,6 +1340,16 @@ function wc_toggle_msg_cont(target) {
         if(subrooms.className.search('closed') != -1) {
 			wc_close_open_cont();
             wc_toggle('wc_subrooms');    
+        } else {
+			wc_close_open_cont();
+            wc_toggle('wc_msg_container');
+        }
+    }
+    
+    if(target == 'wc_mobrooms') {
+        if(mobrooms.className.search('closed') != -1) {
+			wc_close_open_cont();
+            wc_toggle('wc_mobrooms');    
         } else {
 			wc_close_open_cont();
             wc_toggle('wc_msg_container');

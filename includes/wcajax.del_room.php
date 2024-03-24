@@ -26,6 +26,12 @@
         if(file_exists(self::$roomDir . 'updated_' . $enc . '.txt')) {
             unlink(self::$roomDir . 'updated_' . $enc . '.txt');
         }
+        
+        // Delete archives
+        foreach(glob(self::$roomDir . 'archived/' . $enc . '.*') as $file) {
+            unlink($file);
+        }
+        
         // If deleted room is current room, move user to the default room
         if(WcPgc::mySession('current_room') == $oname) {
             WcPgc::wcSetSession('current_room', DEFAULT_ROOM);
@@ -34,22 +40,37 @@
         }
         $changes++;
         
+        // Unassign and delete subrooms if any
         if(file_exists(WcChat::$roomDir . 'subrooms.txt')) {
-			$lines = $lines2 = explode("\n", trim(file_get_contents(WcChat::$roomDir . 'subrooms.txt')));
-			foreach($lines as $k => $v) {
-				if(
-					strpos($v, '[' . base64_encode($oname) . '|') !== FALSE || 
-					strpos($v, '|' . base64_encode($oname) . ']') !== FALSE
-				) {
-					unset($lines2[$k]);
-				}
-			}
-			WcFile::writeFile(
-				WcChat::$roomDir . 'subrooms.txt',
-				implode("\n", $lines2) . "\n",
-				'w'
-			);
-		}
+            $lines = $lines2 = explode("\n", trim(file_get_contents(WcChat::$roomDir . 'subrooms.txt')));
+            foreach($lines as $k => $v) {
+                if(
+                    strpos($v, '[' . base64_encode($oname) . '|') !== FALSE || 
+                    strpos($v, '|' . base64_encode($oname) . ']') !== FALSE
+                ) {
+                    unset($lines2[$k]);
+                    if(strpos($v, '|' . base64_encode($oname) . ']') !== FALSE) {
+                        $par = explode('|', trim($v, '[]'));
+                        $enc = $par[0];
+                        unlink(self::$roomDir . $enc . '.txt');
+                        unlink(self::$roomDir . 'def_' . $enc.'.txt');
+                        unlink(self::$roomDir . 'topic_' . $enc.'.txt');
+                        if(file_exists(self::$roomDir . 'updated_' . $enc . '.txt')) {
+                            unlink(self::$roomDir . 'updated_' . $enc . '.txt');
+                }
+                        foreach(glob(self::$roomDir . 'archived/' . $enc . '.*') as $file) {
+                            unlink($file);
+            }
+                    }
+                }
+            }
+            
+            WcFile::writeFile(
+                WcChat::$roomDir . 'subrooms.txt',
+                implode("\n", $lines2) . "\n",
+                'w', TRUE
+            );
+        }
     }
     
     if($changes) {

@@ -5,12 +5,15 @@
 # ============================================================================
 
 $templates['wcchat.topic'] = '
+<span style="position: relative"><a href="#" onclick="wc_toggle_msg_cont(\'wc_mobrooms\'); return false" style="float: right; margin-right: 20px;" id="mobscreen_icon">
+	<img src="{INCLUDE_DIR_THEME}images/croom.png" style="width: 18px; height: auto; position: absolute; top: 10px" alt="Get Room List" title="Get Room List">
+</a></span>
 <fieldset id="wc_topic">
     {TOPIC}
 </fieldset>';
 
 $templates['wcchat.topic.inner'] = '
-<legend>{PATH}{CURRENT_ROOM}</legend>
+<legend>{PATH}{CURRENT_ROOM} </legend>
 <div id="subroom_icon_c">{SUBROOM_ICON}</div>
 <div id="wc_topic_box">{TOPIC}</div>';
 

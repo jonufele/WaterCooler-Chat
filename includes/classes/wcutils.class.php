@@ -13,9 +13,8 @@ class WcUtils {
      * Checks if settings errors exist
      * 
      * @since 1.4
-     * @return bool|string error list
      */    
-    public static function settingsHasErrors() {
+    public static function settingsHasErrors() : bool|string {
     
         // Halt if errors exist
         $errors = '';
@@ -89,9 +88,13 @@ class WcUtils {
             }
         }
         
+        // Check if current room is valid, but only if the user lists exists
+        // (to avoid the error on the very first run)
         if(
             !file_exists(WcChat::$roomDir . base64_encode(DEFAULT_ROOM) . '.txt') && 
-            self::hasData(WcChat::$roomDir)
+            self::hasData((string)WcChat::$roomDir) && 
+            file_exists(WcChat::$dataDir . 'users.txt')
+            
         ) {
             $errors .= '- DEFAULT_ROOM is invalid' . "\n";
         }
@@ -107,9 +110,8 @@ class WcUtils {
      * Checks bot access / Prevents bot login
      * 
      * @since 1.4
-     * @return void
      */
-    public static function botAccess() {
+    public static function botAccess() : void {
     
         if(BOT_MAIN_PAGE_ACCESS === FALSE || WcPgc::myPost('cname')) {
             require_once WcChat::$includeDirServer . "includes/bots.php";
@@ -127,10 +129,8 @@ class WcUtils {
      * Strips a name/var of troublesome characters
      * 
      * @since 1.4
-     * @param string $name
-     * @return string
      */
-    public static function parseName($name) {
+    public static function parseName(string $name) : string {
     
         return
             str_replace(
@@ -149,10 +149,8 @@ class WcUtils {
      * Parses an error message if it exists
      * 
      * @since 1.1
-     * @param string|void $error
-     * @return string|void Html Template
      */
-    public static function parseError($error) {
+    public static function parseError(string $error) : string {
     
         if(self::hasData($error)) {
             return WcGui::popTemplate('wcchat.error_msg', array('ERR' => $error));
@@ -165,14 +163,10 @@ class WcUtils {
      * Generates Mail Headers
      * 
      * @since 1.3
-     * @param string $from
-     * @param string $fname
-     * @param string $to
-     * @param string $toname
-     * @return string
      */
-    public static function mailHeaders($from, $fname, $to, $toname) {
-    
+    public static function mailHeaders(
+        string $from, string $fname, string $to, string $toname
+    ) {
         $headers = "MIME-Version: 1.0\n";
         $headers.= "From: ".$fname." <".$from.">\n";
         $headers .= "To: ".$toname."  <".$to.">\n";
@@ -189,19 +183,17 @@ class WcUtils {
      * Generates A Random Number
      * 
      * @since 1.2
-     * @param string $n Length
-     * @return string
      */
-    public static function randNumb($n) {
+    public static function randNumb(int $n) : string {
     
         $output = '';
           $salt = '0123456789AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz';
-          srand((double)microtime()*1000000);
+          srand((int)((float)microtime()*1000000));
           $i = 0;
           while ($i < $n) {
             $num = rand() % 33;
             $tmp = substr($salt, $num, 1);
-            $output = $output . $tmp;
+            $output .= $tmp;
             $i++;
         }
         return $output;
@@ -211,10 +203,8 @@ class WcUtils {
      * Checks if a variable contains data
      * 
      * @since 1.1
-     * @param string $var
-     * @return bool
      */
-    public static function hasData($var) {
+    public static function hasData(string $var) : bool {
 
         if (strlen($var) > 0) {
             return TRUE;

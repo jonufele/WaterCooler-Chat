@@ -10,10 +10,10 @@
 class WcUser {
 
     /**
-     * Logged In State, only specifies the user has chosen a name to use in chat, may or may not have access to the profile
+     * Logged In State, only specifies the user has chosen a name to use in chat, 
+     * may or may not have access to the profile
      *
      * @since 1.4
-     * @var bool
      */
     public $isLoggedIn = FALSE;
 
@@ -125,9 +125,8 @@ class WcUser {
      * Initializes User's variables
      * 
      * @since 1.4
-     * @return void
      */
-    public function init() {
+    public function init() : void {
 
         if(!WcPgc::mySession('cname')) {
             // Try use cookie value to resume session
@@ -232,15 +231,14 @@ class WcUser {
     }
 
     /**
-     * Checks if a user exists in the user list, if requested, returns match as array
+     * Checks if a user exists in the user list, 
+     * if requested, returns match as array
      * 
      * @since 1.1
-     * @param string $name
-     * @param string|null $v Supplied Data Row
-     * @param string|null $return_match
-     * @return bool|array
      */
-    public function match($name, $v = NULL, $return_match = NULL) {
+    public function match(
+        string $name, string $v = NULL, bool $return_match = FALSE
+    ) : bool|array {
     
          // Check if the row has been supplied
         if($v !== NULL) {
@@ -259,7 +257,7 @@ class WcUser {
                 ) !== FALSE && 
                 WcUtils::hasData(trim($name, ' '))
             ) {
-                if($return_match !== NULL) {
+                if($return_match !== FALSE) {
                     list($tmp, $v2) = explode(
                         "\n" . base64_encode($name) . '|', "\n" . trim($this->rawList), 
                         2
@@ -282,7 +280,7 @@ class WcUser {
                     return TRUE;
                 }
             } else {
-                if($return_match === NULL) {
+                if($return_match === FALSE) {
                     return FALSE;
                 } else {
                     return array(
@@ -301,10 +299,8 @@ class WcUser {
      * Retrieves all data for a user (With the exception of the name)
      * 
      * @since 1.1
-     * @param string $forced_name
-     * @return array
      */
-    public function getData($forced_name = NULL) {
+    public function getData(string $forced_name = NULL) : array {
     
         $name = (isset($forced_name) ? $forced_name : $this->name);
 
@@ -321,16 +317,16 @@ class WcUser {
                     explode('|', base64_decode($arr['data']));
                     
                 return array(
-                    'avatar' => base64_decode($avatar), 
-                    'email' => base64_decode($email), 
-                    'web' => base64_decode($web), 
-                    'timeZone' =>  $timeZone, 
-                    'hourMode' => $hourMode, 
-                    'pass' => $pass, 
-                    'firstJoin' => $arr['firstJoin'], 
-                    'lastAct' => $arr['lastAct'], 
-                    'status' => $arr['status'],
-                    'raw' => $arr['data']
+                    'avatar' => (string)base64_decode($avatar), 
+                    'email' => (string)base64_decode($email), 
+                    'web' => (string)base64_decode($web), 
+                    'timeZone' =>  (float)$timeZone, 
+                    'hourMode' => (string)$hourMode, 
+                    'pass' => (string)$pass, 
+                    'firstJoin' => (int)$arr['firstJoin'], 
+                    'lastAct' => (int)$arr['lastAct'], 
+                    'status' => (int)$arr['status'],
+                    'raw' => (string)$arr['data']
                 );
             }
         }
@@ -353,11 +349,8 @@ class WcUser {
      * Checks if current user has permission to perform/access the $id action
      * 
      * @since 1.2
-     * @param string $id
-     * @param string|null $skip_msg
-     * @return bool
      */
-    public function hasPermission($id, $skip_msg = NULL) {
+    public function hasPermission(string $id, string $skip_msg = NULL) : bool {
     
         $level = '';
         $tags = array();
@@ -396,10 +389,8 @@ class WcUser {
      * Gets User Last Known Ping
      * 
      * @since 1.3
-     * @param string $name
-     * @return int
      */
-    public function getPing($name) {
+    public function getPing(string $name) : int|float {
     
         $src = WcChat::$dataDir . 'tmp/' . base64_encode($name);
         if(file_exists($src)) {
@@ -413,9 +404,8 @@ class WcUser {
      * Sets User Ping
      * 
      * @since 1.4
-     * @return void
      */
-    public function setPing() {
+    public function setPing() : void {
     
         if($this->hasProfileAccess) {
             touch(WcChat::$dataDir . 'tmp/' . base64_encode($this->name));
@@ -426,10 +416,8 @@ class WcUser {
      * Checks if a user is muted, retrieves mute period if exists
      * 
      * @since 1.1
-     * @param string $name
-     * @return bool|int
      */
-    public function getMuted($name) {
+    public function getMuted(string $name) : bool|int {
     
         preg_match_all(
             '/^' . base64_encode($name) . ' ([0-9]+)$/im', 
@@ -438,8 +426,8 @@ class WcUser {
         );
         
         if(isset($matches[1][0]) && WcUtils::hasData(trim($name, ' '))) {
-            if(time() < $matches[1][0] || $matches[1][0] == 0) {
-                return $matches[1][0];
+            if(time() < (int)$matches[1][0] || (int)$matches[1][0] === 0) {
+                return (int)$matches[1][0];
             } else {
                 return FALSE;
             }
@@ -453,10 +441,8 @@ class WcUser {
      * Checks if a user is banned, retrieves ban period if exists
      * 
      * @since 1.1
-     * @param string $name
-     * @return bool|int
      */
-    public function getBanned($name) {
+    public function getBanned(string $name) : bool|int {
            
         preg_match_all(
             '/^' . base64_encode($name) . ' ([0-9]+)$/im', 
@@ -465,8 +451,8 @@ class WcUser {
         );
         
         if(isset($matches[1][0]) && WcUtils::hasData(trim($name, ' '))) {
-            if(time() < $matches[1][0] || $matches[1][0] == 0) {
-                return $matches[1][0];
+            if(time() < (int)$matches[1][0] || (int)$matches[1][0] === 0) {
+                return (int)$matches[1][0];
             } else {
                 return FALSE;
             }
@@ -480,10 +466,8 @@ class WcUser {
      * Checks if a user is a moderator
      * 
      * @since 1.2
-     * @param string $name
-     * @return bool
      */    
-    public function getMod($name) {
+    public function getMod(string $name) : bool {
     
         preg_match_all(
             '/^(' . base64_encode($name) . ')$/im', 
@@ -500,12 +484,10 @@ class WcUser {
      * Updates user's last activity/status tags
      * 
      * @since 1.1
-     * @param array $user_row User data
-     * @param string $mode
-     * @param string|null $value Only Applies To "update_status" Mode
-     * @return string
      */
-    public function update($user_row, $mode, $value = NULL) {
+    public function update(
+        array $user_row, string $mode, string $value = NULL
+    ) : string|array {
     
         // If user row not provided, get row from users list
         $list_replace = FALSE;
@@ -563,16 +545,11 @@ class WcUser {
      * Generates the user list (Ajax Component)
      * 
      * @since 1.2
-     * @param array $contents pre-processed user data
-     * @param bool mod_perm
-     * @param bool edit_perm
-     * @param bool del_perm                    
-     * @param int|null $visit Specifies a new user visit
-     * @return string Html Template
      */
     public function parseRawList(
-        $contents, $mod_perm, $edit_perm, $del_perm, $visit = NULL
-    ) {
+        string $contents, bool $mod_perm, bool $edit_perm, 
+        bool $del_perm, bool $visit = FALSE
+    ) : string {
        
         $_on = $_off = $_on_new = $_off_new = $_lurker = array();
         $uid = $this->name;
@@ -597,7 +574,7 @@ class WcUser {
                     // Generate status icons
                     $mod_icon = WcGui::popTemplate(
                         'wcchat.users.item.icon_moderator', 
-                        '',
+                        [],
                         ($this->getMod($usr) !== FALSE && strlen(trim($usr)) > 0)
                     );
 
@@ -736,8 +713,7 @@ class WcUser {
                                                 )
                                             ),
                                             'PM_E' => WcGui::popTemplate(
-                                                'wcchat.users.item.pm_e',
-                                                ''
+                                                'wcchat.users.item.pm_e'
                                             )
                                         ),
                                         !WcPgc::myCookie('ign_' . base64_encode($usr)) && 
@@ -786,7 +762,7 @@ class WcUser {
                                 ),
                                 'PM_E' => WcGui::popTemplate(
                                     'wcchat.users.item.pm_e',
-                                    '',
+                                    [],
                                     $this->name != $usr && 
                                     $this->isLoggedIn && 
                                     WcPgc::mySession('current_room') != $pm_room && 
@@ -808,8 +784,8 @@ class WcUser {
                                     array(
                                         'IDLE' => (
                                             ($target_array == '_off' && $last_ping) ?
-                                            WcTime::parseIdle($last_ping) : 
-                                            WcTime::parseIdle($l)
+                                            WcTime::parseIdle((int)$last_ping) : 
+                                            WcTime::parseIdle((int)$l)
                                         )
                                     ), 
                                     ((time()-$l) >= IDLE_START && $s != 2) || 
@@ -904,7 +880,7 @@ class WcUser {
                             'wcchat.users.guests.item', 
                             array(
                                 'USER' => $usr, 
-                                'IDLE' => WcTime::parseIdle($l)
+                                'IDLE' => WcTime::parseIdle((int)$l)
                             )
                         );
                     }
@@ -955,11 +931,10 @@ class WcUser {
      * Parses/replaces parts of the user data string
      * 
      * @since 1.4
-     * @param array|null $array replacements
-     * @param array|null $udata 3rd party user data    
-     * @return string
      */
-    public function parseDataString($array = NULL, $udata = NULL) {
+    public function parseDataString(
+        array $array = NULL, array $udata = NULL
+    ) : string {
         // Return empty data string if no replacement requests exist
         if($array == NULL && $udata == NULL) {
             return base64_encode('|||0|0|');
@@ -1001,12 +976,10 @@ class WcUser {
 
     /**
      * Updates/Refreshes Screen User List (Ajax Component)
-     * 
-     * @param string|null $visit New user visit tag provided by ajax caller     
+     *    
      * @since 1.4
-     * @return string|void Html Template
      */
-    public function getListChanges($visit = NULL) {
+    public function getListChanges(bool $visit = FALSE) : string {
 
         // Store user ping
         $this->setPing();
@@ -1142,6 +1115,7 @@ class WcUser {
             WcPgc::wcSetSession('user_list_sfv', $sfv);
             return $output;
         }
+        return '';
     }
 
 }

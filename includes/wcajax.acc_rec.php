@@ -20,7 +20,7 @@
                 urlencode(base64_encode($this->user->name)) . 
                 "\n\nIf you did not request this, please ignore it.",
             WcUtils::mailHeaders(
-                (trim(ACC_REC_EMAIL) ? trim(ACC_REC_EMAIL) : 'no-reply@' . WcPgc::myServer('SERVER_NAME')),
+                (trim(ACC_REC_EMAIL) ?: 'no-reply@' . WcPgc::myServer('SERVER_NAME')),
                 TITLE,
                 $this->user->data['email'],
                 $this->user->name

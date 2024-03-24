@@ -20,10 +20,10 @@
             $post_owner = base64_decode($par[1]);
         }
 
-        $time = $par[0];
+        $time = (int)$par[0];
         if(strpos($par[0], '-') !== FALSE) {
             $par3 = explode('-', $par[0]);
-            $time = $par3[1];
+            $time = (int)$par3[1];
         }
         
         $edit_permission = 
@@ -78,7 +78,7 @@
             0,
             'RETRIEVE',
             NULL,
-            'RELOAD_MSG'
+            TRUE
         );
         
         sleep(1);

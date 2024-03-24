@@ -33,66 +33,66 @@ $templates['wcchat.users.item.pm_s'] = '<a href="#" onclick="wc_change_room(\'{C
 
 $templates['wcchat.users.item.pm_e'] = '</a>';
 
-$templates['wcchat.users.item.edit_bt'] = ' <a href="#wc_user_{ID}" onclick="wc_toggle(\'wc_uedt_{ID}\');"><img src="{INCLUDE_DIR_THEME}images/edit.gif" class="edit_bt{OFF}"></a>';
+$templates['wcchat.users.item.edit_bt'] = ' <a href="#wc_user_{ID}" onclick="wc_toggle(\'wc_uedt_{ID}{MOB}\');"><img src="{INCLUDE_DIR_THEME}images/edit.gif" class="edit_bt{OFF}"></a>';
 
 $templates['wcchat.users.item.edit_form'] = '
-<div id="wc_uedt_{ID}" class="closed">
+<div id="wc_uedt_{ID}{MOB}" class="closed">
     <div class="form_box">
-    <form action="?mode=upd_user" method="POST" onsubmit="wc_upd_user(\'{CALLER}\', \'{ID}\', event)">
-        <div id="wc_box1_{ID}">
-            <div class="menu"><b>Moderation</b> | <a href="#" onclick="wc_toggle(\'wc_box1_{ID}\'); wc_toggle(\'wc_box2_{ID}\'); return false">Profile Data</a></div>
+    <form action="?mode=upd_user" method="POST" onsubmit="wc_upd_user(\'{CALLER}\', \'{ID}{MOB}\', event)">
+        <div id="wc_box1_{ID}{MOB}">
+            <div class="menu"><b>Moderation</b> | <a href="#" onclick="wc_toggle(\'wc_box1_{ID}{MOB}\'); wc_toggle(\'wc_box2_{ID}{MOB}\'); return false">Profile Data</a></div>
             {MODERATOR}
             {BANNED}
             {MUTED}
             {MOD_NOPERM}
         </div>
-        <div id="wc_box2_{ID}" class="closed">
-            <div class="menu"><a href="#" onclick="wc_toggle(\'wc_box1_{ID}\'); wc_toggle(\'wc_box2_{ID}\'); return false">Moderation</a> | Profile Data</div>
+        <div id="wc_box2_{ID}{MOB}" class="closed">
+            <div class="menu"><a href="#" onclick="wc_toggle(\'wc_box1_{ID}{MOB}\'); wc_toggle(\'wc_box2_{ID}{MOB}\'); return false">Moderation</a> | Profile Data</div>
             {PROFILE_DATA}
         </div>
         <div>
             <input type="submit" value="Update"> {DELETE_BT}
         </div>
-        <input type="hidden" name="oname" value="{NAME}" class="usett_{ID}">
+        <input type="hidden" name="oname" value="{NAME}" class="usett_{ID}{MOB}">
     </form>
     </div>
 </div>';
 
-$templates['wcchat.users.item.edit_form.delete_bt'] = '<input type="submit" name="delete" value="Delete" onclick="wc_del_user(\'{CALLER}\', \'{ID}\', event)">';
+$templates['wcchat.users.item.edit_form.delete_bt'] = '<input type="submit" name="delete" value="Delete" onclick="wc_del_user(\'{CALLER}\', \'{ID}{MOB}\', event)">';
 
 $templates['wcchat.users.item.edit_form.moderator'] = '
 <div>
-    <input type="checkbox" value="1" name="moderator" id="wc_mod_{ID}" class="usett_{ID}" {MOD_CHECKED}> Moderator
+    <input type="checkbox" value="1" name="moderator" id="wc_mod_{ID}" class="usett_{ID}{MOB}" {MOD_CHECKED}> Moderator
 </div>';
 
 $templates['wcchat.users.item.edit_form.banned'] = '
 <div>
-    <input type="checkbox" value="1" name="banned" class="usett_{ID}" {BANNED_CHECKED}> Banned for <input type="text" value="{BANNED_TIME}" name="banned_time" class="usett_{ID}"> m<br>
+    <input type="checkbox" value="1" name="banned" class="usett_{ID}{MOB}" {BANNED_CHECKED}> Banned for <input type="text" value="{BANNED_TIME}" name="banned_time" class="usett_{ID}{MOB}"> m<br>
     <span>(empty = forever)</span>
 </div>';
 
 $templates['wcchat.users.item.edit_form.muted'] = '
 <div>
-    <input type="checkbox" value="1" name="muted" class="usett_{ID}" {MUTED_CHECKED}> Muted for <input type="text" value="{MUTED_TIME}" name="muted_time" class="usett_{ID}"> m<br><span>(empty = forever)</span>
+    <input type="checkbox" value="1" name="muted" class="usett_{ID}{MOB}" {MUTED_CHECKED}> Muted for <input type="text" value="{MUTED_TIME}" name="muted_time" class="usett_{ID}{MOB}"> m<br><span>(empty = forever)</span>
 </div>';
 
 $templates['wcchat.users.item.edit_form.profile_data'] = '
 <div>
     Name:<br>
-    <input type="text" name="name" value="{NAME}" class="usett_{ID}">
+    <input type="text" name="name" value="{NAME}" class="usett_{ID}{MOB}">
 </div>
 <div>
     Recovery E-Mail:<br>
-    <input type="text" name="email" value="{EMAIL}" class="usett_{ID}">
+    <input type="text" name="email" value="{EMAIL}" class="usett_{ID}{MOB}">
 </div>
 <div>
     Web:<br>
-    <input type="text" name="web" value="{WEB}" class="usett_{ID}">
+    <input type="text" name="web" value="{WEB}" class="usett_{ID}{MOB}">
 </div>
 <div>
-    <input type="checkbox" value="1" name="reset_avatar" class="usett_{ID}" {DIS_AV}> Reset Avatar</li><br>
-    <input type="checkbox" value="1" name="reset_pass" class="usett_{ID}" {DIS_PASS}> Reset Password</li><br>
-    <input type="checkbox" value="1" name="regen_pass" class="usett_{ID}"> Re-generate password</li>
+    <input type="checkbox" value="1" name="reset_avatar" class="usett_{ID}{MOB}" {DIS_AV}> Reset Avatar</li><br>
+    <input type="checkbox" value="1" name="reset_pass" class="usett_{ID}{MOB}" {DIS_PASS}> Reset Password</li><br>
+    <input type="checkbox" value="1" name="regen_pass" class="usett_{ID}{MOB}"> Re-generate password</li>
 </div>';
 
 $templates['wcchat.users.item.icon_moderator'] = ' <img src="{INCLUDE_DIR_THEME}images/mod.png" class="moderator_icon" title="Certified Moderator">';

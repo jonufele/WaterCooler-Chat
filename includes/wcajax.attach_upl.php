@@ -19,7 +19,7 @@
         );
         
         if(strlen($dest_name) > 30) {
-            //$dest_name = substr($dest_name, strlen($dest_name) - 30, 30);
+            $dest_name = substr($dest_name, strlen($dest_name) - 30, 30);
         }
         
         // Destination path
@@ -47,7 +47,7 @@
             unlink($_FILES['attach']['tmp_name']);
             
             if(in_array($type, $allowed_types_img)) {
-                echo WcImg::parseImg($dest, 'ATTACH');
+                echo WcImg::parseImg($dest, TRUE);
             } else {
                 echo '[attach_' . 
                     base64_encode($this->user->name) . '_' . 

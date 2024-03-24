@@ -46,7 +46,7 @@
                     MODL, 
                     str_replace("\n" . base64_encode($oname), '', $this->user->modList), 
                     'w', 
-                    'allow_empty'
+                    TRUE
                 );
                 $output .= '- Successfully removed ' . $oname . ' moderator status.' . "\n";
             } else {
@@ -100,7 +100,7 @@
                     $this->user->mutedList
                 ),
                 'w', 
-                'allow_empty'
+                TRUE
             );
 
             $output .= '- Successfully unmuted ' . $oname . "\n";
@@ -149,7 +149,7 @@
                     $this->user->bannedList
                 ), 
                 'w', 
-                'allow_empty'
+                TRUE
             );
             $output .= '- Successfully unbanned '.$oname."\n";
         }
@@ -242,7 +242,7 @@
             } elseif(trim(WcPgc::myPost('name'), ' ')) {
                 $towrite = preg_replace(
                     '/^(' . base64_encode($oname) . ')\|(.*?)\|/m', 
-                    base64_encode(WcPgc::myPost('name')) . '|' . base64_encode($nstring) . '|', 
+                    base64_encode(WcPgc::myPost('name')) . '|' . $nstring . '|', 
                     $this->user->rawList
                 );
                 
@@ -342,7 +342,7 @@
                 touch(ROOMS_LASTMOD);
             }
 
-            WcFile::writeFile(USERL, $towrite, 'w');
+            WcFile::writeFile(USERL, (string)$towrite, 'w');
         }
     }
     echo trim($output);

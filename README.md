@@ -26,6 +26,9 @@ WaterCooler chat is a simple/easy to use, flat file database php/ajax chat syste
 - *Smart archive system*
 - *Shared Chat Across the websites hosted on the same server*
 - *Private Conversation Rooms*
+- *Search Feature*
+- *Sub-Rooms*
+- *Mobile responsive layout*
 
 ## Installation
 
@@ -75,12 +78,13 @@ WaterCooler chat is a simple/easy to use, flat file database php/ajax chat syste
 - In case microtime function is not available, disabling the anti spam restriction may generate non unique message ids which can trouble the hide/unhide feature.
 - To remove the copyright note, you must make a donation to the project (See below).
 - It is recommended to rename the data directory (or move it outside the web root) to ensure user's privacy. (don't forget to rename on settings.php as well).
+- Search does not display private conversations
 
 
 ## Donations
 
 If you like this project, consider making a donation:
 
-https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=9ZHN6EUXWLAQG
+https://www.paypal.com/donate/?hosted_button_id=EMSBXSD7EWDN4
 
 Thank you for choosing WaterCooler Chat.

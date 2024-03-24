@@ -13,17 +13,17 @@ class WcPgc {
      * Handles POST requests
      * 
      * @since 1.1
-     * @param string $index
-     * @return string|void Returns void if unset/empty, otherwise string
      */
-    public static function myPost($index, $bool = NULL) {
+    public static function myPost(
+        string $index, bool $bool = FALSE
+    ) : string|bool {
 
         if (isset($_POST[$index])) {
-            if($bool !== NULL) { return TRUE; }
+            if($bool !== FALSE) { return TRUE; }
             if (WcUtils::hasData($_POST[$index])) {
                 return WcUtils::parseName($_POST[$index]);
             }
-        } elseif($bool !== NULL) {
+        } elseif($bool !== FALSE) {
             return FALSE;
         }
         
@@ -34,17 +34,17 @@ class WcPgc {
      * Handles GET requests
      * 
      * @since 1.1
-     * @param string $index
-     * @return string|void Returns void if unset/empty, otherwise string
      */
-    public static function myGet($index, $bool = NULL) {
+    public static function myGet(
+        string $index, bool $bool = FALSE
+    ) : string|bool {
 
         if (isset($_GET[$index])) {
-            if($bool !== NULL) { return TRUE; }
+            if($bool !== FALSE) { return TRUE; }
             if (WcUtils::hasData($_GET[$index])) {
                 return WcUtils::parseName($_GET[$index]);
             }
-        } elseif($bool !== NULL) {
+        } elseif($bool !== FALSE) {
             return FALSE;
         }
         
@@ -55,19 +55,19 @@ class WcPgc {
      * Handles COOKIE requests
      * 
      * @since 1.1
-     * @param string $index
-     * @return string|void Returns void if unset/empty, otherwise string
      */
-    public static function myCookie($index, $bool = NULL) {
+    public static function myCookie(
+        string $index, bool $bool = FALSE
+    ) : string|bool {
 
         $index = WcChat::$wcPrefix . '_' . self::parseCookieName($index);
         
         if (isset($_COOKIE[$index])) {
-            if($bool !== NULL) { return TRUE; }
+            if($bool !== FALSE) { return TRUE; }
             if (WcUtils::hasData($_COOKIE[$index])) {
                 return WcUtils::parseName($_COOKIE[$index]);
             }
-        } elseif($bool !== NULL) {
+        } elseif($bool !== FALSE) {
             return FALSE;
         }
         
@@ -78,19 +78,19 @@ class WcPgc {
      * Handles SESSION requests
      * 
      * @since 1.1
-     * @param string $index
-     * @return string|void Returns void if unset/empty, otherwise string
      */
-    public static function mySession($index, $bool = NULL) {
+    public static function mySession(
+        string $index, bool $bool = FALSE
+    ) : bool|string {
     
         $index = WcChat::$wcPrefix . '_' . $index;
 
         if (isset($_SESSION[$index])) {
-            if($bool !== NULL) { return TRUE; }
+            if($bool !== FALSE) { return TRUE; }
             if (WcUtils::hasData($_SESSION[$index])) {
                 return WcUtils::parseName($_SESSION[$index]);
             }
-        } elseif($bool !== NULL) {
+        } elseif($bool !== FALSE) {
             return FALSE;
         }
         
@@ -101,17 +101,17 @@ class WcPgc {
      * Handles SERVER requests
      * 
      * @since 1.1
-     * @param string $index
-     * @return string|void Returns void if unset/empty, otherwise string
      */
-    public static function myServer($index, $bool = NULL) {
+    public static function myServer(
+        string $index, bool $bool = FALSE
+    ) : bool|string {
 
         if (isset($_SERVER[$index])) {
-            if($bool !== NULL) { return TRUE; }
+            if($bool !== FALSE) { return TRUE; }
             if (WcUtils::hasData($_SERVER[$index])) {
                 return WcUtils::parseName($_SERVER[$index]);
             }
-        } elseif($bool !== NULL) {
+        } elseif($bool !== FALSE) {
             return FALSE;
         }
         
@@ -122,11 +122,10 @@ class WcPgc {
      * Sets a Cookie
      * 
      * @since 1.4
-     * @param string $name
-     * @param string $value     
-     * @return void
      */
-    public static function wcSetCookie($name, $value) {
+    public static function wcSetCookie(
+        string $name, string $value
+    ) : void {
     
         setcookie(
             self::parseCookieName(WcChat::$wcPrefix . '_' . $name), 
@@ -140,10 +139,8 @@ class WcPgc {
      * Unsets a Cookie
      * 
      * @since 1.4
-     * @param string $name   
-     * @return void
      */
-    public static function wcUnsetCookie($name) {
+    public static function wcUnsetCookie(string $name) : void {
     
         setcookie(
             self::parseCookieName(WcChat::$wcPrefix . '_' . $name), 
@@ -157,11 +154,10 @@ class WcPgc {
      * Sets a Session variable
      * 
      * @since 1.4
-     * @param string $name
-     * @param string $value        
-     * @return void
      */
-    public static function wcSetSession($name, $value) {
+    public static function wcSetSession(
+        string $name, string $value
+    ) : void {
     
         $_SESSION[WcChat::$wcPrefix . '_' . $name] = $value;
     
@@ -171,11 +167,8 @@ class WcPgc {
      * Unsets a Cookie
      * 
      * @since 1.4
-     * @param string $name   
-     * @return void
      */
-    public static function wcUnsetSession($name) {
-    
+    public static function wcUnsetSession(string $name) : void {
         unset($_SESSION[WcChat::$wcPrefix . '_' . $name]);
     }
     
@@ -183,10 +176,8 @@ class WcPgc {
      * Parses the cookie name
      * 
      * @since 1.4
-     * @param string $name
-     * @return string
      */
-    public static function parseCookieName($name) {
+    public static function parseCookieName(string $name) : string {
     
         return str_replace(
             array('.', '=', ',', ';', ' ', "\t", "\r", "\013", "\014"), 
