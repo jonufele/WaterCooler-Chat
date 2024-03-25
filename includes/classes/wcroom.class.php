@@ -196,9 +196,9 @@ class WcRoom {
     public function parseLastMod(string $target = NULL) : int {
         if($target === NULL) {
             if($this->def['lastMod']) {
-                return $this->def['lastMod'];
+                return floor($this->def['lastMod']);
             } else {
-               return WcTime::parseFileMTime(MESSAGES_LOC);
+               return floor(WcTime::parseFileMTime(MESSAGES_LOC));
             }
         } else {       
             $room_def = explode(
@@ -209,11 +209,11 @@ class WcRoom {
             );
             
             if($room_def[4]) {
-                return (int)$room_def[4];
+                return floor($room_def[4]);
             } else {
-                return WcTime::parseFileMTime(
+                return floor(WcTime::parseFileMTime(
                     WcChat::$roomDir . base64_encode($target) . '.txt'
-                );
+                ));
             }
         }
     }
