@@ -626,7 +626,9 @@ function wc_refresh_components(c, incdir, lim) {
                 if(croom.className != 'closed') { open = 1; }
             }
     
-            if(arr[2].length > 0 && open == 0) { document.getElementById('wc_room_list').innerHTML = arr[2]; }
+            if(arr[2].length > 0 && open == 0) {
+                document.getElementById('wc_room_list').innerHTML = arr[2].replace(/{MOB}/g, '');
+            }
     
             if(arr[3].length > 0) {
                 var arr2 = arr[3].split(" ");
