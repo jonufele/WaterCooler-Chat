@@ -264,6 +264,8 @@ function wc_change_room(c, n, new_conv)
 				wc_toggle('wc_msg_container');
                 document.getElementById('wc_room_list').innerHTML = 
 					http.responseText.replace(/{MOB}/g, '');
+                document.getElementById('wc_room_list_m').innerHTML = 
+					http.responseText.replace(/{MOB}/g, '_m');
                 wc_refresh_msg_once(c, 'ALL', 0);
                 wc_refresh_topic(c);
                 wc_refresh_users(0, c, 0, 0, 'ignore_lastmod');
