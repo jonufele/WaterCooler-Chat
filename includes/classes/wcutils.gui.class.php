@@ -200,7 +200,7 @@ class WcGui {
                 '/\[img\|([0-9]+)x([0-9]+)\|([0-9]+)x([0-9]+)[|]?\](.*?)\[\/img\]/i',
                 '/\[img\|([0-9]+)x([0-9]+)\|([0-9]+)x([0-9]+)\|tn_([0-9A-Z]+)[|]?\](.*?)\[\/img\]/i',
                 '/\[img\|([0-9]+)[|]?\](.*?)\[\/img\]/i',
-                '/\[url\="(.*?)"\](.*?)\[\/url\]/i',
+                '/\[url\=("|&quot;)(.*?)("|&quot;)\](.*?)\[\/url\]/i',
                 '/\[attach_(.*?)_([0-9a-f]+)_([0-9]+)_([A-Za-z0-9 _\.]+)\]/i',
                 '/https:\/\/(www|m)\.youtube\.com\/(watch\?v=|shorts\/)([0-9a-zA-Z-+_=]*)/i',
                 '/\[YOUTUBE\]([0-9a-zA-Z-+_=]*?)\[\/YOUTUBE\]/i',
@@ -248,7 +248,7 @@ class WcGui {
                     <img src="\\2" style="width: \\1px;" class="thumb" onload="wc_scroll(\''.$all.'\')"><br>
                     <a href="' . ($down_perm ? '\\2' : '#').'" target="_blank" ' . $down_alert . '>Unknown Dimensions</a>
                 </div>',
-                '<a href="\\1" target="_blank">\\2</a>',
+                '<a href="\\2" target="_blank">\\4</a>',
                 '<div style="margin:10px;">
                     <i>
                         <img src="' . WcChat::$includeDirTheme . 'images/attach.png"> 
