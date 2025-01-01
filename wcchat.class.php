@@ -222,6 +222,52 @@ class WcChat {
         // Initializes user variables
         $this->user->init();
     }
+    
+    /**
+     * Checks if the current active theme images are readable
+     * 
+     * @since 1.5
+     */
+    private static function warnIfThemeHasUnReadableImages() : string {
+        $n = 0;
+        $arr = ['images', 'bbcode', 'smilies'];
+        $images = ['archived.png', 'arrow.png', 'arrow_r.png', 'attach.png', 'bgrcol.jpg', 
+            'bt.png', 'clr.png', 'cmd.png', 'croom.png', 'edit.gif', 'edtmode.png', 
+            'gsett.png', 'guest.png', 'ignored.png', 'joined_off.png', 'joined_on.png', 
+            'loader.gif', 'mline.png', 'mod.png', 'muted.png', 'new_msg_separator.png', 
+            'nmsg.png', 'nmsg_off.png', 'nmsg_off_small.png', 'nmsg_off_small_sub.png', 
+            'nmsg_off_sub.png', 'nmsg_offs.png', 'nmsg_offs_sub.png', 'nmsg_sub.png', 
+            'nmsgs.png', 'nmsgs_sub.png', 'noav.gif', 'nroom.png', 'pixel.gif', 'play.png', 
+            'quote.gif', 'reload.png', 'room.png', 'search.gif', 'settings_icon.png', 'sline.png', 
+            'sroom.png', 'sroom_new.png', 'sroom_void.png', 'sticky.png', 'ts.png', 'upl.png', 
+            'video_cover.jpg', 'wc_icon.png', 'web.png'
+        ];
+        $bbcode = ['b.png', 'i.png', 'img.png', 'tube.png', 'u.png', 'url.png', 'urlt.png'];
+        $smilies = ['sm1.gif', 'sm10.gif', 'sm11.gif', 'sm12.gif', 'sm13.gif', 'sm14.gif', 
+            'sm15.gif', 'sm16.gif', 'sm17.gif', 'sm18.gif', 'sm19.gif', 'sm2.gif', 
+            'sm20.gif', 'sm3.gif', 'sm4.gif', 'sm5.gif', 'sm6.gif', 'sm7.gif', 'sm8.gif', 
+            'sm9.gif'
+        ];
+        foreach($arr as $v) {
+            foreach($$v as $value) {
+                $file = self::$includeDirServer . 
+                    'themes/' . THEME . '/images/' . 
+                    ($v !== 'images' ? $v . '/' : '') . $value;
+                if(!is_dir($file)) {
+                    if(!is_readable($file)) {
+                        $n++;
+                    }
+                }
+            }
+        }
+        
+        if($n > 0) {
+            return '<div style="border: 1px dashed #000000; padding: 5px 10px; background-color: #FFD68B; font-size: 12px"><b>WARNING:</b> Current active theme has <b>' . $n . '</b> unreadable image(s).<br>
+            Be sure to set readable permission to all images in the "themes" folder.</div>';
+        } else {
+            return '';
+        }
+    }
 
     /**
      * Initializes Includes / Paths
@@ -705,7 +751,7 @@ class WcChat {
                 'STATIC_MSG' => (!$this->user->isLoggedIn ? 
                     WcGui::popTemplate('wcchat.static_msg') : 
                     ''
-                ),
+                ) . (string)self::warnIfThemeHasUnReadableImages(),
                 'POSTS' => WcGui::popTemplate('wcchat.posts'),
                 'INFO' => WcGui::popTemplate('wcchat.info'),
                 'SEARCH' => WcGui::popTemplate('wcchat.search'),
