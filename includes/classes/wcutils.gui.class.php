@@ -359,12 +359,12 @@ class WcGui {
     public static function parseBBcodeThumb(string $text) : string {
         if(
             !preg_match(
-				'/(?<!=\"|\[IMG\]|[|]\])((http|ftp)+(s)?:\/\/[^<>\s]+)(.jpg|.jpeg|.png|.gif)([^ ]*)/i', 
+				'/\b(?<!=\"|\[IMG\]|[|]\])((http|ftp)+(s)?:\/\/[^<>\s]+)(.jpg|.jpeg|.png|.gif)\b/i', 
 				$text
 			) && 
             !preg_match('/\[IMG\](.*?)\[\/IMG\]/i', $text) && 
             !preg_match(
-				'/https:\/\/(www|m)\.youtube\.com\/(watch\?v=|shorts\/)([0-9a-zA-Z-+_=]*)([^ ]*)/i', 
+				'/\bhttps:\/\/(www|m)\.youtube\.com\/(watch\?v=|shorts\/)([0-9a-zA-Z-+_=]*)\b/i', 
 				$text
 			)
         ) {
@@ -372,7 +372,7 @@ class WcGui {
         } else {
             // Image(s) detected, try parse to more detailed tags with information about the image(s)
             $text = preg_replace_callback(
-                '/(?<!=\"|\[IMG\]|[|]\])((http|ftp)+(s)?:\/\/[^<>\s]+(\.jpg|\.jpeg|\.png|\.gif)([^ ]*))/i',
+                '/\b(?<!=\"|\[IMG\]|[|]\])((http|ftp)+(s)?:\/\/[^<>\s]+(\.jpg|\.jpeg|\.png|\.gif))\b/i',
                 'WcImg::parseImg',
                 trim($text)
             );
@@ -382,7 +382,7 @@ class WcGui {
                 trim($text)
             );
             $text = preg_replace_callback(
-                '/https:\/\/(www|m)\.youtube\.com\/(watch\?v=|shorts\/)([0-9a-zA-Z-+_=]*)/',
+                '/\bhttps:\/\/(www|m)\.youtube\.com\/(watch\?v=|shorts\/)([0-9a-zA-Z-+_=]*)\b/',
                 'WcImg::parseVideoImg',
                 trim($text)
             );
